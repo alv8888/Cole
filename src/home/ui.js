@@ -1,3 +1,5 @@
+import { downloadFile } from '../files.js';
+import { compareExperiments, experimentCSV } from './comparison.js';
 import { CATALOG, selectCatalog } from './catalog.js';
 import { createLineChart } from '../charts/line.js';
 import { EXPERIMENTS, experimentValue, experimentLink } from './experiments.js';
@@ -8,7 +10,8 @@ import { createAnimationLoop } from '../rendering/clock.js';
 
 const $ = id => document.getElementById(id);
 const e = $('home-e'), time = $('home-time'), svg = $('home-orbit');
-const curveCache = new Map();
+const curveCache = new Map(), references = new Map(), initialReferences = new Map();
+let currentCurve = null, currentExperimentValue = null;
 const chart = createLineChart($('home-experiment-chart'), $('home-experiment-readout'));
 let activeExperiment = null, experimentResult = null;
 let current, fraction = Number(time.value) / 100, previous = null, previewRevision = 0, previewTrigger = null;
@@ -94,7 +97,9 @@ document.querySelectorAll('[data-home-filter]').forEach(button => button.addEven
   $('home-catalog-status').textContent = `${visible.length} laboratorios disponibles para este tema. Esquemas ilustrativos; ejemplos calculados al seleccionarlos.`;
 }));
 function clearExample() {
-  experimentResult = null;
+  experimentResult = null; currentCurve = null; currentExperimentValue = null;
+  $('home-experiment-comparison').hidden = true; $('home-comparison-rows').replaceChildren();
+  for (const id of ['home-reference-capture','home-reference-reset','home-comparison-csv']) $(id).disabled = true;
   $('home-preview-inputs').textContent = ''; $('home-preview-metrics').replaceChildren();
   $('home-preview-open').hidden = true; $('home-experiment-figure').hidden = true;
   chart.render([], {}); $('home-experiment-readout').textContent = '';
@@ -115,10 +120,14 @@ async function calculateExample() {
   $('home-preview-note').textContent = 'Calculando con el modelo del laboratorio…';
   try {
     if (!curveCache.has(item.id)) curveCache.set(item.id, experimentCurve(item.id).catch(error => { curveCache.delete(item.id); throw error; }));
-    const [result, curve] = await Promise.all([previewModel(item.id, $('home-experiment-value').valueAsNumber), curveCache.get(item.id)]);
+    const value = $('home-experiment-value').valueAsNumber;
+    const [result, curve, initial] = await Promise.all([previewModel(item.id, value), curveCache.get(item.id), initialReferences.get(item.id) ?? previewModel(item.id)]);
     const link = item.id === 'space' ? '#lab' : await experimentLink(item.id, result, location.href);
     if (revision !== previewRevision) return;
-    experimentResult = result;
+    experimentResult = result; currentCurve = curve; currentExperimentValue = value;
+    initialReferences.set(item.id, initial);
+    if (!references.has(item.id)) references.set(item.id, { value: definition.value, result: initial });
+    renderComparison();
     $('home-preview-inputs').textContent = result.inputs;
     for (const [label, value, unit] of result.metrics) {
       const group = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd');
@@ -156,6 +165,41 @@ $('home-cards').addEventListener('click', event => {
   calculateExample();
   input.focus({ preventScroll: true });
   $('home-preview').scrollIntoView({ block: 'start', behavior: motion.matches ? 'instant' : 'smooth' });
+});
+function renderComparison() {
+  if (!activeExperiment || !experimentResult) return;
+  const d = EXPERIMENTS[activeExperiment.id], reference = references.get(activeExperiment.id);
+  $('home-comparison-reference').textContent = `Referencia: ${d.label} = ${number(reference.value)} ${d.unit}. Actual: ${number(currentExperimentValue)} ${d.unit}.`;
+  $('home-comparison-rows').replaceChildren(...compareExperiments(reference.result, experimentResult).map(row => {
+    const tr = document.createElement('tr');
+    const heading = document.createElement('th'); heading.scope = 'row'; heading.textContent = `${row.label} (${row.unit})`; tr.append(heading);
+    for (const value of [number(row.reference), number(row.current), `${row.delta > 0 ? '+' : ''}${number(row.delta)}`, row.percent === null ? '— (referencia cero)' : `${row.percent > 0 ? '+' : ''}${number(row.percent)} %`]) {
+      const td = document.createElement('td'); td.textContent = value; tr.append(td);
+    }
+    return tr;
+  }));
+  $('home-experiment-comparison').hidden = false;
+  for (const id of ['home-reference-capture','home-reference-reset','home-comparison-csv']) $(id).disabled = false;
+  $('home-reference-reset').disabled = reference.value === d.value;
+  $('home-comparison-status').textContent = '';
+}
+$('home-reference-capture').addEventListener('click', () => {
+  if (!activeExperiment || !experimentResult) return;
+  references.set(activeExperiment.id, { value: currentExperimentValue, result: structuredClone(experimentResult) });
+  renderComparison(); $('home-comparison-status').textContent = 'Caso actual capturado como referencia. Solo se conserva durante esta sesión de página.';
+});
+$('home-reference-reset').addEventListener('click', () => {
+  if (!activeExperiment || !experimentResult) return;
+  references.set(activeExperiment.id, { value: EXPERIMENTS[activeExperiment.id].value, result: initialReferences.get(activeExperiment.id) });
+  renderComparison(); $('home-comparison-status').textContent = 'Referencia inicial recuperada; el caso actual se conserva.';
+});
+$('home-comparison-csv').addEventListener('click', () => {
+  if (!activeExperiment || !experimentResult) return;
+  try {
+    const id = activeExperiment.id, reference = references.get(id);
+    downloadFile(experimentCSV(id, reference.value, currentExperimentValue, reference.result, experimentResult, currentCurve), `aerolab-${id}-experimento.csv`, 'text/csv;charset=utf-8');
+    $('home-comparison-status').textContent = 'CSV generado: comparación y 21 casos independientes, con unidades e hipótesis.';
+  } catch (error) { $('home-comparison-status').textContent = `No se pudo exportar: ${error.message}`; }
 });
 $('home-experiment-value').addEventListener('input', calculateExample);
 $('home-experiment-reset').addEventListener('click', () => {

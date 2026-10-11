@@ -106,3 +106,19 @@
   .home-experiment-controls input { width: 100%; }
   .home-experiment-controls button { margin-left: 0; }
 }
+
+/* Optional comparison: keep the primary experiment readable, expose details on demand. */
+.home-comparison {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 0 0 22px;
+  background: #111f2e;
+}
+.home-comparison summary { cursor: pointer; color: var(--a); font-weight: 650; }
+.home-comparison table { min-width: 620px; font-variant-numeric: tabular-nums; }
+.home-comparison caption { text-align: left; color: var(--muted); font-size: 12px; padding: 12px 0; }
+.home-comparison .table-scroll { margin: 0; }
+.home-comparison-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.home-comparison-actions button { font-size: 12px; }
+@media (max-width: 480px) { .home-comparison { padding: 12px; } }

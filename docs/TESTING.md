@@ -218,3 +218,16 @@ PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run
 Al comprobar persistencia se distinguen los guardados explícitos de las tres instantáneas de intercambio existentes: `aerolab.bridge.snapshot.aircraft.v1`, `.calculator.v1` y `.launch.v1`. Los destinos ya actualizaban estas claves al cambiar el caso activo; esta entrega conserva ese comportamiento. Las demás claves se comparan íntegramente y se verifica además la carga de configuraciones previamente guardadas. No se modificó el puente para ocultar esta actualización.
 
 Capturas finales `/tmp/aerolab-016-experiment-desktop.png` y `/tmp/aerolab-016-experiment-mobile.png` inspeccionadas. Los modelos matemáticos originales no cambiaron; las curvas son casos independientes y no añaden validación experimental ni una simulación de motor fijo. No se afirma comprobación en Firefox/Safari, hardware físico, Lighthouse ni conformidad WCAG completa.
+
+## Entrega 17 · Comparación y exportación (0.17)
+
+112 pruebas unitarias aprobadas, 0 fallos y 0 omitidas: 108 anteriores y 4 nuevas. Se verifican diferencias conocidas (sustentación +6468 N y +44 % entre 50/60 m/s), peso constante, referencia cero/negativa, rechazo de magnitudes/unidades incompatibles o no finitas, CSV rectangular con valores/unidades/configuraciones completas y 21 muestras por laboratorio, escape correcto de comillas/comas/saltos de línea y rechazo de curvas inválidas.
+
+14 suites Chromium aprobadas, 0 fallos; 113 grupos de comprobaciones (109 anteriores y 4 nuevos). Se ejercitan referencias iniciales/personalizadas, restablecimientos independientes, persistencia temporal por módulo y ausencia de escrituras en localStorage, entradas inválidas y limpieza de tablas/descarga, archivo Blob descargado y leído realmente, contenido vigente del CSV, disclosure por teclado, tabla con desplazamiento local a 320–1440 px, zoom CSS 200 % y ausencia de errores JavaScript. Se mantienen todas las regresiones de modelos, visores, exportaciones, enlaces y datos compartidos.
+
+```sh
+node --test --test-isolation=none tests/*.test.js
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser
+```
+
+Capturas `/tmp/aerolab-017-comparison-{desktop,mobile}.png` inspeccionadas. No se cambiaron ecuaciones de los laboratorios ni sus validaciones anteriores. La comparación no demuestra incertidumbre, mejora de diseño ni certificación. Pendientes de evidencia externa: Firefox/Safari, dispositivos físicos, evaluación completa de lectores de pantalla/contraste y rendimiento medido.

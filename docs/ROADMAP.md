@@ -134,3 +134,9 @@ Diagnóstico presentado antes de editar: checkout limpio y cuatro módulos dispo
 Se amplían los ejemplos del catálogo con una variable por módulo, unidades/límites, cálculos vigentes, curva de 21 casos, cursor accesible, restablecimiento y continuidad del caso en el laboratorio completo. Los enlaces reutilizan la validación versionada y las configuraciones guardadas se conservan; Space cambia solo A. Rocket diferencia el experimento ideal del panel radial, que empieza sin trayectoria calculada. Ningún modelo físico anterior se reescribe y no se agrega una dependencia. EXPERIMENTS.md documenta las ecuaciones, condiciones fijas, archivos y pruebas manuales.
 
 Validación: 108 pruebas unitarias y 109 grupos Chromium en 13 suites, sin fallos. Se comprueban guardados reales y las instantáneas de intercambio se distinguen explícitamente de ellos. Pendientes: validación con usuarios, navegadores/dispositivos adicionales, accesibilidad completa y benchmark. Las curvas no predicen incertidumbre, CFD ni FEM 3D.
+
+## Entrega 17 · Comparación y exportación (0.17)
+
+El catálogo permite contrastar un caso con la referencia inicial o una capturada, ver diferencias absolutas/porcentuales y exportar CSV con comparación, barrido, unidades, hipótesis y configuraciones completas. Panel plegable, referencias independientes por módulo y temporales en memoria, invalidación de resultados y descarga durante entradas inválidas. Se conservan modelos, enlaces, guardados y transferencias. COMPARISON.md describe alcance, fórmula, formato y pruebas manuales.
+
+Validación de la entrega 17: 112 pruebas unitarias y 113 grupos Chromium en 14 suites, sin fallos. Capturas móvil/escritorio inspeccionadas y CSV descargado/analizado. Pendientes: auditoría de accesibilidad completa, navegadores/hardware adicionales, pruebas con usuarios y medición de rendimiento.
