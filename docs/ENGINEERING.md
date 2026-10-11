@@ -8,6 +8,8 @@ La arquitectura mantiene modelos puros en `src/engineering/models.js`, campos y 
 
 ## Aircraft Lab
 
+La versión 0.7 incorpora perfil lateral, empuje, control de peso vinculado a masa, CD directo y balance de fuerzas proyectadas. [AIRCRAFT-FORCES.md](AIRCRAFT-FORCES.md) documenta esta extensión y migración de guardados; la polar original y los modelos siguientes se conservan.
+
 Sistema de ejes: x longitudinal hacia delante, y hacia la derecha, z hacia arriba. El vehículo tiene velocidad respecto al suelo (Vsuelo,0,0) y el viento velocidades (wx,wy,wz). Se calcula Vaire=(Vsuelo−wx,−wy,−wz) y su módulo. wx positivo es viento de cola y negativo viento de frente. Una componente longitudinal Vsuelo−wx≤0 se rechaza porque la polar empleada no describe flujo invertido. No se modelan cambios de rumbo ni fuerza lateral.
 
 Ecuaciones: q=½ρVaire², AR=b²/S, CD=CD₀+CL²/(πeAR), L=qSCL, D=qSCD y W=mg₀. g₀=9,80665 m/s² es gravedad estándar, no una gravedad local calculada. q tiene unidades Pa, AR y coeficientes son adimensionales, L/D/W se expresan en N. CL, CLmáx, CD₀ y eficiencia de Oswald son entradas explícitamente hipotéticas; no hay datos de perfil alar, Reynolds, ángulo de ataque, barrido ni compresibilidad para identificarlos experimentalmente.
@@ -60,4 +62,4 @@ Los avisos son reglas de validez del modelo, no normativa de aeronavegabilidad, 
 
 Se intentó consultar las páginas NASA durante esta entrega; el proxy de red respondió HTTP 403. Se preservan las referencias de los modelos clásicos, pero no se afirma haber revisado su última actualización. No hay descarga automática de datos meteorológicos, coeficientes aerodinámicos, factores de emisiones o materiales actuales. Actualizar documentación en GitHub no equivale a disponer de información científica en tiempo real.
 
-Pendiente: datos de perfiles y materiales con trazabilidad, turbulencia/ráfagas, estabilidad y control, CFD, cargas dinámicas, estructuras 3D, evaluación ambiental de ciclo de vida y trayectoria del cohete validada. No se anuncian como funciones implementadas.
+Pendiente: datos de perfiles y materiales con trazabilidad, turbulencia/ráfagas, estabilidad y control, CFD, cargas dinámicas, estructuras 3D, evaluación ambiental de ciclo de vida y contraste experimental de trayectorias de cohete. ROCKET-FLIGHT.md documenta la trayectoria radial educativa incorporada en 0.6. No se anuncian como funciones implementadas.

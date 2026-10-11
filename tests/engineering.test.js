@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { aircraft, rocket, G0 } from '../src/engineering/models.js';
 import { PROFILES } from '../src/engineering/profiles.js';
-const config=kind=>Object.fromEntries(PROFILES[kind].fields.map(field=>[field.key,field.value]));
+const config=kind=>({...Object.fromEntries(PROFILES[kind].fields.map(field=>[field.key,field.value])),...(kind==='aircraft'?{dragMode:'polar'}:{})});
 const close=(a,b)=>assert.ok(Math.abs(a-b)<=1e-10*Math.max(1,Math.abs(b)),`${a} != ${b}`);
 
 test('aeronave: referencia independiente, dimensiones y fuerzas',()=>{

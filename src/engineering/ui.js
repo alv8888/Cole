@@ -1,3 +1,6 @@
+import { G0 } from './models.js';
+import { decodeAircraftRecord } from '../aircraft/configuration.js';
+import { createAircraftForces } from '../aircraft/visualization.js';
 import { PROFILES } from './profiles.js';
 import { createView3D } from './view3d.js';
 import { number } from '../units.js';
@@ -5,15 +8,17 @@ import { downloadFile } from '../files.js';
 
 const kind=document.body.dataset.lab,profile=PROFILES[kind];
 const $=id=>document.getElementById(id);
-const defaults=()=>Object.fromEntries(profile.fields.map(field=>[field.key,field.value]));
+const defaults=()=>({...Object.fromEntries(profile.fields.map(field=>[field.key,field.value])),...(kind==='aircraft'?{dragMode:'polar'}:{})});
 let reference=null,current=null;
 const groups=[...new Set(profile.fields.map(field=>field.group))];
 $('engineering-fields').innerHTML=groups.map(group=>`<fieldset><legend>${group}</legend><div class="engineering-field-grid">${profile.fields.filter(field=>field.group===group).map(field=>`<div class="field"><label for="eng-${field.key}">${field.label}<span>${field.unit}</span></label><input id="eng-${field.key}" type="number" min="${profile.ranges[field.key][0]}" max="${profile.ranges[field.key][1]}" step="any" required aria-describedby="limit-${field.key} error-${field.key}"><p id="limit-${field.key}" class="limits">${profile.ranges[field.key].join(' – ')} ${field.unit}</p><p id="error-${field.key}" class="field-error"></p></div>`).join('')}</div></fieldset>`).join('');
 $('engineering-equations').textContent=profile.equations;
 $('engineering-limits').textContent=profile.limits;
 const view=createView3D($('engineering-canvas'),$('view-yaw'),$('view-pitch'),kind);
-function fill(config){profile.fields.forEach(field=>$(`eng-${field.key}`).value=config[field.key]);}
-function read(){return Object.fromEntries(profile.fields.map(field=>[field.key,$(`eng-${field.key}`).valueAsNumber]));}
+const forces=kind==='aircraft'?createAircraftForces($('aircraft-side'),$('aircraft-forces'),$('aircraft-balance'),$('aircraft-flow-toggle')):null;
+function fill(config){profile.fields.forEach(field=>$(`eng-${field.key}`).value=config[field.key]);if(kind==='aircraft')$('aircraft-drag-mode').value=config.dragMode;}
+
+function read(){return {...Object.fromEntries(profile.fields.map(field=>[field.key,$(`eng-${field.key}`).valueAsNumber])),...(kind==='aircraft'?{dragMode:$('aircraft-drag-mode').value}:{})};}
 function status(message){$('engineering-status').textContent=message;}
 function renderResults(result){
   const baseline=reference?profile.compute(reference):null;
@@ -49,7 +54,7 @@ function drawGraph(config,result){
   svg.setAttribute('aria-label',kind==='aircraft'?'Sustentación en N frente a velocidad respecto al suelo en m/s, con viento y coeficientes fijos.':'Δv ideal acumulado en m/s frente a tiempo en segundos.');
   $('graph-caption').textContent=kind==='aircraft'?'L (N) frente a velocidad respecto al suelo (m/s). Viento y coeficientes fijos; 81 muestras, excluidas las de flujo longitudinal invertido. No calcula pérdida dinámica.':'Δv ideal acumulado (m/s) frente al tiempo (s). 81 estados evaluados por Tsiolkovski, sin integrar una trayectoria.';
 }
-function update(){
+function update(preserveWeight=false){
   const config=read();let valid=true;
   profile.fields.forEach(field=>{
     const [min,max]=profile.ranges[field.key],bad=!Number.isFinite(config[field.key])||config[field.key]<min||config[field.key]>max;
@@ -60,20 +65,31 @@ function update(){
   current=result?config:null;
   for(const id of ['capture-reference','engineering-save','engineering-export'])$(id).disabled=!result;
   $('clear-reference').disabled=!reference;
-  renderResults(result);view.update(config,result);drawGraph(config,result);
+  renderResults(result);view.update(config,result);drawGraph(config,result);forces?.update(result);
+  if(kind==='aircraft'){
+    const weightValid=Number.isFinite(config.mass)&&config.mass>=100&&config.mass<=100000;
+    if(!preserveWeight)$('aircraft-weight').value=Number.isFinite(config.mass)?config.mass*G0:'';
+    $('aircraft-weight').setAttribute('aria-invalid',String(!weightValid));
+    const direct=config.dragMode==='direct';
+    $('eng-cdTotal').disabled=!direct;$('eng-cd0').disabled=direct;$('eng-oswald').disabled=direct;
+    $('aircraft-drag-note').textContent=direct?'CD total impuesto activo. No se añade resistencia inducida; CD₀ y e quedan inactivos.':'Polar activa: CD = CD₀ + CL²/(πeAR). CD total impuesto queda inactivo.';
+  }
   $('engineering-warnings').replaceChildren(...(result?profile.warnings(config,result):['Corrige las entradas. Se ocultan los cálculos afectados.']).map(text=>{const item=document.createElement('li');item.textContent=text;return item;}));
   if(result)status('Cálculos actualizados. Geometría ilustrativa; modelo físico declarado abajo.');else if(!valid)status('Entradas inválidas.');
 }
 fill(defaults());update();
 $('engineering-form').addEventListener('submit',event=>event.preventDefault());
-$('engineering-form').addEventListener('input',update);
+$('engineering-form').addEventListener('input',event=>{
+  if(kind==='aircraft'&&event.target.id==='aircraft-weight')$('eng-mass').value=Number.isFinite(event.target.valueAsNumber)?event.target.valueAsNumber/G0:'';
+  update(kind==='aircraft'&&event.target.id==='aircraft-weight');
+});
 $('capture-reference').addEventListener('click',()=>{reference={...current};update();status('Referencia capturada para comparar; no es un resultado experimental.');});
 $('clear-reference').addEventListener('click',()=>{reference=null;update();});
 $('engineering-reset').addEventListener('click',()=>{fill(defaults());update();status('Parámetros iniciales restaurados. La referencia se conserva.');});
 const storageKey=`aerolab.${kind}.v1`;
-$('engineering-save').addEventListener('click',()=>{try{localStorage.setItem(storageKey,JSON.stringify({version:1,module:kind,configuration:current}));status('Configuración guardada en este navegador.');}catch(error){status(`No se pudo guardar: ${error.message}`);}});
+$('engineering-save').addEventListener('click',()=>{try{localStorage.setItem(storageKey,JSON.stringify({version:kind==='aircraft'?2:1,module:kind,configuration:current}));status('Configuración guardada en este navegador.');}catch(error){status(`No se pudo guardar: ${error.message}`);}});
 $('engineering-load').addEventListener('click',()=>{
-  try{const raw=localStorage.getItem(storageKey);if(!raw)return status('No hay guardado para este módulo.');const saved=JSON.parse(raw);if(saved.version!==1||saved.module!==kind)throw new Error('Formato incompatible.');profile.compute(saved.configuration);fill(saved.configuration);update();status('Configuración cargada.');}
+  try{const raw=localStorage.getItem(storageKey);if(!raw)return status('No hay guardado para este módulo.');const saved=JSON.parse(raw);let loaded=saved.configuration,migrated=false;if(kind==='aircraft'){const decoded=decodeAircraftRecord(saved,profile.compute);loaded=decoded.configuration;migrated=decoded.migrated;}else{if(saved.version!==1||saved.module!==kind)throw new Error('Formato incompatible.');profile.compute(loaded);}fill(loaded);update();status(migrated?'Guardado anterior cargado: empuje hipotético de 1200 N y polar original; se conserva el guardado anterior hasta pulsar Guardar.':'Configuración cargada.');}
   catch(error){status(`No se pudo cargar: ${error.message}`);}
 });
-$('engineering-export').addEventListener('click',()=>{try{downloadFile(JSON.stringify({version:1,module:kind,configuration:current},null,2),`aerolab-${kind}.json`,'application/json');status('JSON generado con parámetros y módulo identificados.');}catch(error){status(error.message);}});
+$('engineering-export').addEventListener('click',()=>{try{downloadFile(JSON.stringify({version:kind==='aircraft'?2:1,module:kind,configuration:current},null,2),`aerolab-${kind}.json`,'application/json');status('JSON generado con parámetros y módulo identificados.');}catch(error){status(error.message);}});

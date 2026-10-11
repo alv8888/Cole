@@ -1,14 +1,14 @@
-# Pruebas y evidencia de la entrega 6 · AEROLAB 0.6
+# Pruebas y evidencia de la entrega 7 · AEROLAB 0.7
 
 ## Resultado observado
 
-- Node.js 24.19.0: **48 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
-- Chromium headless mediante Playwright: **37 comprobaciones de integración aprobadas** (20 Space, 10 Aircraft/Rocket anterior y 7 lanzamiento multietapa), sin errores JavaScript no capturados en las tres páginas.
+- Node.js 24.19.0: **54 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
+- Chromium headless mediante Playwright: **44 comprobaciones de integración aprobadas** (20 Space, 10 Aircraft/Rocket anterior, 7 lanzamiento multietapa y 7 Aircraft lateral), sin errores JavaScript no capturados en las tres páginas.
 - Cálculo independiente con Python 3.12.14: valores terrestres a 400 km y a radio 42164 km concordantes con las referencias de las pruebas.
 - Página y módulos servidos por HTTP con Python; no se requiere instalación de paquetes de aplicación ni compilación.
 - Capturas de escritorio de 1440 px y móvil de 390 px inspeccionadas. Comprobación automática sin desbordamiento global a 1440, 768, 390 y 320 px. La tabla permite desplazamiento horizontal propio en móvil.
 
-Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 37 checks de navegador son grupos de aserciones, no 37 modelos científicos adicionales.
+Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 44 checks de navegador son grupos de aserciones, no 44 modelos científicos adicionales.
 
 ## Qué comprueban las pruebas unitarias
 
@@ -23,6 +23,8 @@ La entrega 4 añade cuatro pruebas: extremos y leyes de escala del barrido de al
 La entrega 5 añade seis pruebas de ingeniería: fuerzas de referencia; viento relativo y escalamiento; geometría/viga/energía; balance y estados de cohete; escalamiento, gravedad cero y dimensiones visuales; rechazo de entradas no finitas y fuera de rango en todos los campos. Los casos y sus dimensiones están en ENGINEERING.md.
 
 La entrega 6 añade ocho pruebas: presupuesto multietapa con masas superiores; despegue tardío y plataforma; caída y escape; reducción de paso y conservación de energía; horizonte incompleto; referencia independiente Python; entradas inválidas y extremos; persistencia versionada exclusiva. Los resultados y el algoritmo se documentan en ROCKET-FLIGHT.md.
+
+La entrega 7 añade seis pruebas: fuerzas/aceleraciones de referencia; equilibrio y banda del 0,5 %; CD directo sin duplicar inducida y arrastre cero; proyección vertical/balance lateral no resuelto; nuevas entradas inválidas; migración v1/v2. El cálculo independiente de referencia en Python se detalla en AIRCRAFT-FORCES.md.
 
 Comando:
 
@@ -59,6 +61,7 @@ cd /workspace/Cole
 AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/browser.mjs
 AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/engineering-browser.mjs
 AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/rocket-flight-browser.mjs
+AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/aircraft-forces-browser.mjs
 ```
 
 Opciones: `CHROMIUM_PATH` para otro ejecutable y `AEROLAB_URL` para otra dirección de prueba. El script lanza Chromium sin sandbox dentro de este contenedor de pruebas; para ejecutar en otro entorno, revisa la política de aislamiento antes de reutilizar esa opción. Las capturas se escriben en `/tmp/aerolab-desktop.png` y `/tmp/aerolab-mobile.png`, fuera del checkout. No se necesita acceso a servicios externos durante las pruebas.
@@ -110,6 +113,15 @@ Aircraft/Rocket añaden 10 grupos: resultados conocidos y cámara; referencias e
 31. Con movimiento reducido, calcular debe dejar la reproducción pausada. Ocultar la pestaña también pausa. Usa Tab, flechas y End sobre el control temporal: End debe alcanzar el desenlace final incluso si el instante tiene decimales.
 
 El navegador multietapa verificó siete grupos: edición de etapas/presupuesto; caída y eventos/gráficas/CSV real; escape y pausa; entradas inválidas; persistencia/corrupción; horizonte y no despegue; etiquetas y anchuras de 320, 390, 768 y 1440 px. Capturas inspeccionadas: `/tmp/aerolab-launch-desktop.png` y `/tmp/aerolab-launch-mobile.png`.
+
+32. Abre Aircraft: perfil lateral con L=14700 N, W=11767,98 N, T=1200 N y D≈1174 N. Las flechas y barras deben coincidir con la tabla; Fx≈26 N y Fz≈2932,02 N. No está en equilibrio.
+33. Edita peso a 19613,3 N: masa debe ser 2000 kg. Edita masa a 1000 kg: peso debe pasar a 9806,65 N. Vacía peso o escribe 1 N: deben ocultarse resultados y deshabilitar guardado/animación; restablece para recuperar.
+34. Selecciona CD total impuesto, ρ=1,2, S=20, Vsuelo=50, viento cero, masa=1000, CL=9806,65/30000≈0,3268883333333333, CD=0,03 y T=900 N. Ambos ejes deben indicar equilibrio aproximado. Duplicar T debe dar fuerza longitudinal positiva. No se calcula estabilidad ni una trayectoria.
+35. En modo directo verifica que CD₀ y e quedan inactivos. Al volver a polar, CD total impuesto queda inactivo. Guarda y recarga: modo/CD/T deben recuperarse con Cargar. Exporta JSON: formato v2, masa y parámetros, sin duplicar peso independiente.
+36. Viento vertical=10 m/s debe inclinar las flechas de L/D. Viento lateral=1 m/s debe retirar direcciones y balance 2D, conservando magnitudes. Vaciar área retira flechas y barras; corregir recupera resultados.
+37. Pulsa Animar aire ilustrativo: los trazos se mueven pero ninguna fuerza cambia. Pausa y confirma que paran; ocultar pestaña pausa. La silueta no representa datos de un perfil real.
+
+La entrega 7 verificó siete grupos de navegador: flechas/barras iniciales; peso/masa bidireccionales y escritura gradual; CD directo/equilibrio; viento y entradas inválidas; animación sin alterar física; migración/persistencia/exportación; etiquetas y anchuras. Capturas inspeccionadas: `/tmp/aerolab-aircraft-forces-desktop.png` y `/tmp/aerolab-aircraft-forces-mobile.png`. Se ejecutaron también los tres scripts anteriores para regresión. Ningún error JavaScript no capturado.
 
 ## No comprobado
 

@@ -1,6 +1,6 @@
-# AEROLAB 0.6 · Space, Aircraft y Rocket Lab
+# AEROLAB 0.7 · Space, Aircraft y Rocket Lab
 
-Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (aerodinámica y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y geometría 3D con proyección en Canvas 2D. Sin dependencias de aplicación, API, base de datos, compilación ni cuentas. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
+Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y geometría 3D con proyección en Canvas 2D. Sin dependencias de aplicación, API, base de datos, compilación ni cuentas. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
 
 ## Ejecutar
 
@@ -15,7 +15,7 @@ Abre `http://localhost:8000` en tu equipo local. En una máquina remota, utiliza
 
 Alternativa con Node y npm presentes: `npm start`. No se necesita `npm install` para usar la aplicación o ejecutar las pruebas unitarias.
 
-Si el puerto 8000 está ocupado, ejecuta `python3 -m http.server 8001 --bind 0.0.0.0` y utiliza el puerto 8001. Las entregas 4, 5 y 6 se validaron en 8001 porque un servidor anterior ocupaba 8000 sin responder correctamente; no se detuvo ese proceso al no poder verificar su propiedad desde el entorno actual.
+Si el puerto 8000 está ocupado, ejecuta `python3 -m http.server 8001 --bind 0.0.0.0` y utiliza el puerto 8001. Las entregas 4, 5, 6 y 7 se validaron en 8001 porque un servidor anterior ocupaba 8000 sin responder correctamente; no se detuvo ese proceso al no poder verificar su propiedad desde el entorno actual.
 
 ## Pruebas
 
@@ -38,6 +38,10 @@ Cole/
 ├── .gitignore
 ├── .github/workflows/tests.yml # Pruebas unitarias en GitHub Actions
 ├── src/
+│   ├── aircraft/
+│   │   ├── forces.js          # Suma vectorial y balance instantáneo, sin DOM
+│   │   ├── visualization.js   # Perfil lateral, cuatro fuerzas y animación
+│   │   └── configuration.js   # Validación de formato y migración v1/v2
 │   ├── rocket/
 │   │   ├── model.js           # Trayectoria radial, RK4 y Tsiolkovski por etapas
 │   │   ├── storage.js         # Persistencia multietapa independiente
@@ -68,6 +72,8 @@ Cole/
 │   ├── exploration.test.js    # Escenarios, archivos, muestreo y predicciones
 │   ├── sensitivity.test.js    # Barridos, conservación de condiciones y leyes de escala
 │   ├── storage.test.js        # Persistencia y errores
+│   ├── aircraft-forces.test.js # Balance, proyecciones, CD y migración
+│   ├── aircraft-forces-browser.mjs # Perfil lateral, controles y guardados
 │   ├── rocket-flight.test.js  # Trayectoria, masa, energía y referencia Python
 │   ├── rocket-flight-browser.mjs # Interacciones del lanzamiento
 │   ├── engineering.test.js    # Referencias, viento, vigas, masas y límites
@@ -75,11 +81,18 @@ Cole/
 │   └── browser.mjs            # Integración opcional con Playwright y Chromium
 └── docs/
     ├── MODEL.md               # Modelo, dimensiones, supuestos y precisión
+    ├── AIRCRAFT-FORCES.md     # Perfil lateral, fuerzas y precisión
     ├── ROCKET-FLIGHT.md        # Lanzamiento radial multietapa, RK4 y validación
     ├── ENGINEERING.md         # Modelos Aircraft/Rocket, dimensiones y casos
     ├── TESTING.md             # Evidencia, reproducción y pruebas manuales
     └── ROADMAP.md             # Fases completadas, problemas y pendientes
 ```
+
+## Aircraft Lab · perfil lateral y cuatro fuerzas (0.7)
+
+Abre `/aircraft.html`. El formulario conserva superficie alar, velocidad, densidad y CL y añade peso en N vinculado a masa en kg, empuje horizontal y selector de resistencia: polar existente o CD total impuesto. En modo directo no se suma otra resistencia inducida. Cambiar parámetros actualiza flechas, barras y fuerzas netas/aceleraciones instantáneas. El balance incorpora proyecciones con viento vertical; con viento lateral se declara no resuelto en 2D.
+
+El perfil lateral es genérico y la animación opcional del aire es ilustrativa. No hay CFD, datos del perfil, integración de trayectoria ni estabilidad calculada. Animar no cambia fuerzas. La tabla y el texto acompañan las visualizaciones. Nuevos guardados/exportaciones Aircraft usan v2; cargar v1 conserva parámetros anteriores y añade controles hipotéticos sin sobrescribir hasta Guardar. Detalles: [AIRCRAFT-FORCES.md](docs/AIRCRAFT-FORCES.md).
 
 ## Lanzamiento multietapa · Rocket Lab 0.6
 
