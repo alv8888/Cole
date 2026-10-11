@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AEROLAB: explora órbitas circulares con un modelo educativo de dos cuerpos, ecuaciones visibles y comparación de configuraciones.">
+  <title>AEROLAB · Space Lab</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="src/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar al laboratorio</a>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="AEROLAB, inicio"><span class="brand-icon" aria-hidden="true">✳</span> AERO<span>LAB</span></a>
+    <span class="header-caption">LABORATORIO DE INGENIERÍA</span>
+    <a class="method-link" href="#model">Modelo y validación <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="main">
+    <section id="home" class="intro" aria-labelledby="title">
+      <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> EXPLORA · CALCULA · COMPARA</p>
+      <h1 id="title">La física, <span>en tus manos.</span></h1>
+      <p>Un espacio para entender la ingeniería a través de modelos transparentes. Cambia una variable. Descubre qué cambia con ella.</p>
+    </section>
+    <nav class="modules" aria-label="Módulos de AEROLAB">
+      <a class="module active" href="#lab" aria-current="page"><span aria-hidden="true">◎</span><span>Space Lab<small>Órbitas circulares</small></span><span class="module-tag">ACTIVO</span></a>
+      <div class="module unavailable"><span aria-hidden="true">⌁</span><span>Aircraft Lab<small>Fase posterior · no disponible</small></span></div>
+      <div class="module unavailable"><span aria-hidden="true">↑</span><span>Rocket Lab<small>Fase posterior · no disponible</small></span></div>
+      <div class="module unavailable"><span aria-hidden="true">▱</span><span>Structure Lab<small>Fase posterior · no disponible</small></span></div>
+    </nav>
+    <section id="lab" aria-labelledby="lab-title">
+      <div class="section-heading"><div><p class="eyebrow">01 / MECÁNICA ORBITAL</p><h2 id="lab-title">Space Lab <span class="badge">MVP 0.1</span></h2></div><p class="model-chip">Modelo educativo · dos cuerpos</p></div>
+      <div class="workspace">
+        <section class="panel visual-panel" aria-labelledby="visual-title">
+          <div class="panel-heading"><h3 id="visual-title">Vista orbital</h3><span class="subtle">PLANO DE LA ÓRBITA</span></div>
+          <div class="visual-meta"><span><i class="swatch a"></i> Configuración A</span><span><i class="swatch b"></i> Configuración B</span></div>
+          <div class="orbit-grid">
+            <figure><svg id="orbit-a" viewBox="0 0 320 320" role="img" aria-label="Órbita circular A"></svg><figcaption id="caption-a">Configuración A</figcaption></figure>
+            <figure><svg id="orbit-b" viewBox="0 0 320 320" role="img" aria-label="Órbita circular B"></svg><figcaption id="caption-b">Configuración B</figcaption></figure>
+          </div>
+          <div class="animation-controls"><button id="play" type="button" aria-pressed="false">Reproducir</button><label for="speed">Tiempo simulado</label><select id="speed"><option value="1">1 s / s real</option><option value="60" selected>60 s / s real</option><option value="600">600 s / s real</option></select><button id="restart-time" class="quiet" type="button">Tiempo a cero</button></div>
+          <p class="visual-note">Misma escala de distancia en ambas vistas. El punto marca el satélite; su tamaño es ilustrativo. Posición analítica, sin integración numérica.</p>
+          <p class="clock">Tiempo simulado: <output id="elapsed">0 s</output></p>
+        </section>
+        <section class="panel controls-panel" aria-labelledby="parameters-title">
+          <div class="panel-heading"><h3 id="parameters-title">Parámetros</h3><span class="subtle">UNIDADES EXPLÍCITAS</span></div>
+          <form id="parameters" novalidate>
+            <div id="configuration-fields"></div>
+          </form>
+          <div class="action-row"><button id="save" type="button">Guardar ambas</button><button id="load" class="quiet" type="button">Cargar</button><button id="reset" class="quiet" type="button">Restablecer</button></div>
+          <p class="helper">Guardado en este navegador. Cargar recupera el último guardado; restablecer no lo borra.</p>
+          <p id="status" role="status" aria-live="polite">Listo para explorar.</p>
+        </section>
+      </div>
+      <section class="panel results-panel" aria-labelledby="results-title">
+        <div class="panel-heading"><h3 id="results-title">Resultados y comparación</h3><span class="subtle">B RESPECTO DE A</span></div>
+        <p id="result-message" class="helper">Resultados calculados al cambiar los parámetros.</p>
+        <p class="helper scroll-hint">En pantallas pequeñas, desliza la tabla horizontalmente para ver todas las columnas.</p>
+        <div class="table-scroll"><table><caption class="sr-only">Valores calculados de ambas órbitas y variación porcentual</caption><thead><tr><th scope="col">Magnitud</th><th scope="col">A <i class="swatch a"></i></th><th scope="col">B <i class="swatch b"></i></th><th scope="col">Variación</th></tr></thead><tbody id="results"></tbody></table></div>
+        <div class="chart-row"><figure><figcaption>Velocidad orbital <span>km/s</span></figcaption><svg id="velocity-chart" viewBox="0 0 480 120" role="img" aria-label="Comparación de velocidad orbital"></svg></figure><figure><figcaption>Periodo orbital <span>min</span></figcaption><svg id="period-chart" viewBox="0 0 480 120" role="img" aria-label="Comparación de periodo orbital"></svg></figure></div>
+        <p id="interpretation" class="interpretation"></p>
+      </section>
+      <details id="model" class="panel model-panel" open>
+        <summary>El modelo, sin caja negra <span>ECUACIONES Y ALCANCE</span></summary>
+        <div class="model-content">
+          <div><h3>Órbita circular de dos cuerpos</h3><p>La gravedad proporciona la aceleración centrípeta. El cuerpo central permanece fijo y el satélite tiene una masa despreciable frente a él. Se usa un radio medio esférico, no un modelo de la superficie.</p><div class="equations"><p>r = R + h</p><p>μ / r² = v² / r</p><p>v = √(μ / r)</p><p>T = 2π √(r³ / μ)</p></div><p><strong>Unidades internas SI:</strong> r, R, h en m; μ en m³/s²; v en m/s; T en s. En pantalla se convierten distancias a km y μ a km³/s².</p><p>También se calcula a = μ/r² y la energía específica ε = −μ/(2r), en J/kg. Los porcentajes son 100 × (B/A − 1), con A como referencia.</p></div>
+          <div><h3>Condiciones iniciales y límites</h3><ul><li>En t = 0: posición (r, 0), velocidad (0, v), movimiento antihorario.</li><li>Órbita circular, sin empuje, arrastre, achatamiento, terceros cuerpos ni relatividad.</li><li>h se mide desde el radio medio. Un resultado matemático no demuestra que la órbita sea viable.</li><li>Una órbita terrestre baja sufre arrastre; a grandes distancias puede fallar la aproximación aislada de dos cuerpos.</li><li>La visualización usa x = r cos(nt), y = r sen(nt), n = v/r. El tiempo acelerado se indica explícitamente.</li></ul><p><strong>Precisión defendible:</strong> solución analítica del modelo ideal con aritmética de doble precisión. Dos decimales son formato de lectura, no una garantía de exactitud física. No es una herramienta certificada ni un propagador de misiones.</p></div>
+          <div class="source-block"><h3>Referencias y validación</h3><p>μ de los presets: <a href="https://ssd.jpl.nasa.gov/astro_par.html" target="_blank" rel="noopener noreferrer">JPL · Astrodynamic Parameters (DE440)</a>. Radios medios: <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" target="_blank" rel="noopener noreferrer">NASA · Planetary Fact Sheets</a>. Son parámetros de referencia, no datos de una aeronave o misión.</p><p>Las pruebas automatizadas comprueban valores de referencia independientes, leyes de escala, conservación de energía, periodicidad, conversiones, límites y guardado. No validan perturbaciones reales. Consulta <a href="docs/MODEL.md">la especificación científica completa</a> y <a href="docs/TESTING.md">el registro de pruebas</a>.</p></div>
+        </div>
+      </details>
+    </section>
+  </main>
+  <footer><span>AEROLAB <span class="subtle">/ APRENDER A TRAVÉS DE MODELOS</span></span><span>Space Lab · modelo educativo</span></footer>
+  <noscript><p class="noscript">Activa JavaScript para calcular y comparar órbitas. Las ecuaciones y sus límites se pueden leer sin él.</p></noscript>
+</body>
+</html>
