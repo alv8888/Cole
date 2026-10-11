@@ -1,7 +1,8 @@
 import { BODIES, DEFAULTS } from './data.js';
 import { LIMITS, validateConfiguration } from './validation.js';
 import { kmToM, km3ToM3, mToKm, secondsToMinutes, number } from './units.js';
-import { circularOrbit, percentageDifference } from './physics.js';
+import { percentageDifference } from './physics.js';
+import { ellipticOrbit } from './elliptic.js';
 import { loadConfigurations, saveConfigurations } from './storage.js';
 import { drawOrbit, moveSatellite, drawBars } from './visualization.js';
 
@@ -29,7 +30,7 @@ function createFields() {
       ${Object.entries(LIMITS).map(([key, limit]) => `
         <div class="field"><label for="${letter}-${key}">${limit.label}<span>${limit.unit}</span></label>
         <input id="${letter}-${key}" name="${key}" type="number" step="any" min="${limit.min}" max="${limit.max}" required aria-describedby="${letter}-${key}-limits ${letter}-${key}-error">
-        <p id="${letter}-${key}-limits" class="limits">${number(limit.min, key === 'mu' ? 3 : 0)} – ${number(limit.max, 0)} ${limit.unit}</p>
+        <p id="${letter}-${key}-limits" class="limits">${number(limit.min, key === 'mu' ? 3 : 0)} – ${number(limit.max, key === 'eccentricity' ? 1 : 0)} ${limit.unit}${key === 'eccentricity' ? ' · 0 = circular' : ''}</p>
         <p id="${letter}-${key}-error" class="field-error"></p></div>`).join('')}
       <p id="${letter}-warning" class="warning"></p>
     </fieldset>`).join('');
@@ -55,8 +56,9 @@ function warning(config) {
   const messages = [];
   if (config.body === 'custom') messages.push('Parámetros propios: no representan un cuerpo real sin una referencia externa.');
   if (config.body === 'earth' && config.altitude < 150) messages.push('Órbita terrestre muy baja: el arrastre atmosférico omitido puede impedir su permanencia.');
-  if (config.altitude > config.radius * 10) messages.push('Gran distancia: terceros cuerpos pueden dominar; no se comprueba la esfera de influencia.');
-  if (Math.sqrt(config.mu / (config.radius + config.altitude)) > 2997.92458) messages.push('Velocidad superior al 1 % de c: la aproximación no relativista requiere revisión.');
+  const apoapsis = (config.radius + config.altitude) * (1 + config.eccentricity) / (1 - config.eccentricity);
+  if (apoapsis - config.radius > config.radius * 10) messages.push('Gran distancia en apoapsis: terceros cuerpos pueden dominar; no se comprueba la esfera de influencia.');
+  if (Math.sqrt(config.mu / (config.radius + config.altitude) * (1 + config.eccentricity)) > 2997.92458) messages.push('Velocidad superior al 1 % de c: la aproximación no relativista requiere revisión.');
   if (messages.length === 0) messages.push('Sin atmósfera ni perturbaciones. No evalúa la viabilidad de una misión.');
   return messages.join(' ');
 }
@@ -73,7 +75,7 @@ function update() {
     $(`#${letters[index]}-warning`).textContent = Object.keys(errors).length ? 'Corrige las entradas para calcular.' : warning(config);
     if (Object.keys(errors).length) return null;
     try {
-      return circularOrbit({ mu: km3ToM3(config.mu), radius: kmToM(config.radius), altitude: kmToM(config.altitude) });
+      return ellipticOrbit({ mu: km3ToM3(config.mu), radius: kmToM(config.radius), altitude: kmToM(config.altitude), eccentricity: config.eccentricity });
     } catch (error) {
       $(`#${letters[index]}-warning`).textContent = error.message;
       return null;
@@ -83,12 +85,15 @@ function update() {
   $('#save').disabled = !allValid;
   $('#play').disabled = !allValid;
   if (!allValid) pause();
-  $('#result-message').textContent = allValid ? 'Solución analítica ideal. Porcentajes calculados con A como referencia.' : 'Hay entradas inválidas. Los resultados afectados se ocultan; no se muestran valores anteriores.';
+  $('#result-message').textContent = allValid ? 'Modelo ideal de dos cuerpos. Velocidades extremas, no velocidad constante de una elipse. Porcentajes con A como referencia.' : 'Hay entradas inválidas. Los resultados afectados se ocultan; no se muestran valores anteriores.';
   const rows = [
-    ['Radio orbital', 'km', orbit => mToKm(orbit.r)],
-    ['Velocidad orbital', 'km/s', orbit => mToKm(orbit.velocity)],
+    ['Radio de periapsis', 'km', orbit => mToKm(orbit.periapsis)],
+    ['Radio de apoapsis', 'km', orbit => mToKm(orbit.apoapsis)],
+    ['Semieje mayor', 'km', orbit => mToKm(orbit.semiMajor)],
+    ['Velocidad en periapsis', 'km/s', orbit => mToKm(orbit.periapsisVelocity)],
+    ['Velocidad en apoapsis', 'km/s', orbit => mToKm(orbit.apoapsisVelocity)],
     ['Periodo orbital', 'min', orbit => secondsToMinutes(orbit.period)],
-    ['Aceleración gravitatoria', 'm/s²', orbit => orbit.acceleration],
+    ['Aceleración en periapsis', 'm/s²', orbit => orbit.periapsisAcceleration],
     ['Energía específica', 'MJ/kg', orbit => orbit.specificEnergy / 1e6],
   ];
   $('#results').replaceChildren(...rows.map(([label, unit, getter]) => {
@@ -109,21 +114,24 @@ function update() {
     row.append(difference);
     return row;
   }));
-  drawBars($('#velocity-chart'), orbits.map(orbit => orbit ? mToKm(orbit.velocity) : null), 'km/s');
+  drawBars($('#velocity-chart'), orbits.map(orbit => orbit ? mToKm(orbit.periapsisVelocity) : null), 'km/s');
   drawBars($('#period-chart'), orbits.map(orbit => orbit ? secondsToMinutes(orbit.period) : null), 'min');
   const sameMu = allValid && configurations[0].mu === configurations[1].mu;
-  $('#interpretation').textContent = !allValid ? 'Corrige las entradas para interpretar la comparación.' : sameMu ? 'Para el mismo μ, al aumentar el radio orbital disminuye la velocidad y aumenta el periodo. La masa del satélite no interviene en esta aproximación. Un porcentaje negativo en energía específica indica un valor menos negativo.' : 'Los cuerpos tienen distinto μ: no atribuyas los cambios solo a la altitud. Compara μ y radio orbital. La energía negativa representa una órbita ligada en el modelo ideal.';
-  const maxRadius = Math.max(...orbits.filter(Boolean).map(orbit => orbit.r), 1);
+  $('#interpretation').textContent = !allValid ? 'Corrige las entradas para interpretar la comparación.' : sameMu ? 'Para el mismo μ y periapsis, aumentar e eleva el apoapsis, el periodo y la velocidad en periapsis. En una elipse el satélite acelera al acercarse al cuerpo y frena al alejarse. Un porcentaje negativo en energía indica un valor menos negativo.' : 'Los cuerpos tienen distinto μ: compara también el periapsis y la excentricidad. La energía negativa representa una órbita ligada en el modelo ideal.';
+  const maxRadius = Math.max(...orbits.filter(Boolean).map(orbit => orbit.apoapsis), 1);
   configurations.forEach((config, index) => {
     const letter = letters[index];
     drawOrbit($(`#orbit-${letter}`), config, orbits[index], index, maxRadius);
-    $(`#caption-${letter}`).textContent = `${letter.toUpperCase()} · ${BODIES[config.body]?.name ?? 'Personalizado'}${orbits[index] ? ` · h = ${number(config.altitude)} km` : ' · sin cálculo'}`;
+    $(`#caption-${letter}`).textContent = `${letter.toUpperCase()} · ${BODIES[config.body]?.name ?? 'Personalizado'}${orbits[index] ? ` · hₚ = ${number(config.altitude)} km` : ' · sin cálculo'}`;
   });
   refreshPositions();
 }
 
 function refreshPositions() {
-  letters.forEach((letter, index) => moveSatellite($(`#orbit-${letter}`), orbits[index], elapsed));
+  letters.forEach((letter, index) => {
+    const state = moveSatellite($(`#orbit-${letter}`), orbits[index], elapsed);
+    $(`#instant-${letter}`).textContent = state ? `r actual = ${number(mToKm(state.r))} km · v actual = ${number(mToKm(state.speed))} km/s` : 'Sin estado orbital: corrige las entradas.';
+  });
   $('#elapsed').textContent = `${number(elapsed, 0)} s`;
 }
 

@@ -1,5 +1,5 @@
 import { number, mToKm } from './units.js';
-import { positionAtPhase } from './physics.js';
+import { orbitalState } from './elliptic.js';
 import { BODIES } from './data.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -19,11 +19,11 @@ export function drawOrbit(svg, config, orbit, index, maxRadius) {
     return;
   }
   const scale = 128 / maxRadius;
-  const pixelRadius = orbit.r * scale;
+  const pixelRadius = orbit.periapsis * scale;
   const bodyRadius = config.radius * 1000 * scale;
   const label = index === 0 ? 'A' : 'B';
-  svg.setAttribute('aria-label', `Órbita ${label}: radio ${number(mToKm(orbit.r))} km, cuerpo ${number(config.radius)} km. Misma escala en ambas vistas.`);
-  svg.append(element('title', {}, `Órbita circular ${label}`));
+  svg.setAttribute('aria-label', `Órbita ${label}: excentricidad ${number(orbit.eccentricity)}, periapsis ${number(mToKm(orbit.periapsis))} km, apoapsis ${number(mToKm(orbit.apoapsis))} km. Cuerpo en el foco. Misma escala en ambas vistas.`);
+  svg.append(element('title', {}, `Órbita ${orbit.eccentricity === 0 ? 'circular' : 'elíptica'} ${label}`));
   for (let offset = 32; offset < 320; offset += 32) {
     svg.append(element('line', { x1: offset, y1: 16, x2: offset, y2: 304, stroke: '#243144', 'stroke-opacity': '.45' }));
     svg.append(element('line', { x1: 16, y1: offset, x2: 304, y2: offset, stroke: '#243144', 'stroke-opacity': '.45' }));
@@ -31,22 +31,22 @@ export function drawOrbit(svg, config, orbit, index, maxRadius) {
   svg.append(element('line', { x1: 160, y1: 16, x2: 160, y2: 304, stroke: '#42516a', 'stroke-dasharray': '3 5' }));
   svg.append(element('line', { x1: 16, y1: 160, x2: 304, y2: 160, stroke: '#42516a', 'stroke-dasharray': '3 5' }));
   svg.append(element('circle', { cx: 160, cy: 160, r: bodyRadius, fill: BODIES[config.body]?.color ?? '#798fba', 'fill-opacity': '.17', stroke: BODIES[config.body]?.color ?? '#798fba', 'stroke-opacity': '.7' }));
-  svg.append(element('circle', { cx: 160, cy: 160, r: pixelRadius, fill: 'none', stroke: COLORS[index], 'stroke-width': 1.5 }));
+  svg.append(element('ellipse', { cx: 160 - orbit.semiMajor * orbit.eccentricity * scale, cy: 160, rx: orbit.semiMajor * scale, ry: orbit.semiMinor * scale, fill: 'none', stroke: COLORS[index], 'stroke-width': 1.5, 'data-orbit-path': '' }));
   svg.append(element('line', { x1: 160, y1: 160, x2: 160 + pixelRadius, y2: 160, stroke: COLORS[index], 'stroke-opacity': '.4', 'stroke-dasharray': '3 4' }));
-  svg.append(element('circle', { cx: 160 + pixelRadius, cy: 160, r: 4, fill: COLORS[index], 'data-satellite': '', 'data-radius': pixelRadius }));
+  svg.append(element('circle', { cx: 160 + pixelRadius, cy: 160, r: 4, fill: COLORS[index], 'data-satellite': '', 'data-scale': scale }));
   svg.append(element('circle', { cx: 160, cy: 160, r: 1.5, fill: '#c4cedc' }));
-  svg.append(element('text', { x: 160, y: 309, 'text-anchor': 'middle', fill: COLORS[index], 'font-size': 10 }, `r = ${number(mToKm(orbit.r))} km`));
+  svg.append(element('text', { x: 160, y: 309, 'text-anchor': 'middle', fill: COLORS[index], 'font-size': 10 }, `a = ${number(mToKm(orbit.semiMajor))} km · e = ${number(orbit.eccentricity)}`));
   if (pixelRadius < 12 || bodyRadius < 1) svg.append(element('text', { x: 160, y: 24, 'text-anchor': 'middle', fill: '#dfc799', 'font-size': 9 }, 'Detalle pequeño a esta escala'));
 }
 
 export function moveSatellite(svg, orbit, time) {
   const point = svg.querySelector('[data-satellite]');
   if (!point || !orbit) return;
-  // Reduce time before evaluating trig to avoid large-angle precision loss.
-  const phase = (time % orbit.period) * orbit.angularVelocity;
-  const pos = positionAtPhase(Number(point.dataset.radius), phase);
-  point.setAttribute('cx', 160 + pos.x);
-  point.setAttribute('cy', 160 - pos.y); // SVG y grows downward; physics y upward.
+  const state = orbitalState(orbit, time);
+  const scale = Number(point.dataset.scale);
+  point.setAttribute('cx', 160 + state.x * scale);
+  point.setAttribute('cy', 160 - state.y * scale); // SVG y grows downward; physics y upward.
+  return state;
 }
 
 export function drawBars(svg, values, unit) {

@@ -3,7 +3,8 @@ import { BODIES } from './data.js';
 export const LIMITS = Object.freeze({
   mu: { min: 0.001, max: 1e12, label: 'μ', unit: 'km³/s²' },
   radius: { min: 1, max: 1e6, label: 'Radio del cuerpo', unit: 'km' },
-  altitude: { min: 1, max: 1e6, label: 'Altitud', unit: 'km' },
+  altitude: { min: 1, max: 1e6, label: 'Altitud de periapsis', unit: 'km' },
+  eccentricity: { min: 0, max: 0.9, label: 'Excentricidad e', unit: 'sin unidad' },
 });
 
 export function validateConfiguration(config) {

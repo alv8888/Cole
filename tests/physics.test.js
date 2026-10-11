@@ -76,7 +76,7 @@ test('límites admitidos por interfaz: resultados finitos; un km es idealizado',
   for (const mu of [LIMITS.mu.min, LIMITS.mu.max]) {
     for (const radius of [LIMITS.radius.min, LIMITS.radius.max]) {
       for (const altitude of [LIMITS.altitude.min, LIMITS.altitude.max]) {
-        const config = { body: 'custom', mu, radius, altitude };
+        const config = { body: 'custom', mu, radius, altitude, eccentricity: 0 };
         assert.ok(isValidConfiguration(config));
         const result = circularOrbit({ mu: km3ToM3(mu), radius: kmToM(radius), altitude: kmToM(altitude) });
         assert.ok(result.velocity > 0 && result.period > 0);
@@ -87,7 +87,7 @@ test('límites admitidos por interfaz: resultados finitos; un km es idealizado',
 test('validación no acepta entradas vacías, límites excedidos o cuerpo desconocido', () => {
   assert.ok(DEFAULTS.every(isValidConfiguration));
   for (const key of Object.keys(LIMITS)) {
-    for (const value of ['', null, NaN, Infinity, LIMITS[key].min / 2, LIMITS[key].max * 2]) {
+    for (const value of ['', null, NaN, Infinity, LIMITS[key].min === 0 ? -1 : LIMITS[key].min / 2, LIMITS[key].max * 2]) {
       assert.ok(validateConfiguration({ ...DEFAULTS[0], [key]: value })[key]);
     }
   }

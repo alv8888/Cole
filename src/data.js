@@ -6,6 +6,6 @@ export const BODIES = Object.freeze({
   mars: Object.freeze({ name: 'Marte', mu: 42828.375816, radius: 3389.5, color: '#dba18b' }),
 });
 export const DEFAULTS = Object.freeze([
-  Object.freeze({ body: 'earth', mu: BODIES.earth.mu, radius: BODIES.earth.radius, altitude: 400 }),
-  Object.freeze({ body: 'earth', mu: BODIES.earth.mu, radius: BODIES.earth.radius, altitude: 1000 }),
+  Object.freeze({ body: 'earth', mu: BODIES.earth.mu, radius: BODIES.earth.radius, altitude: 400, eccentricity: 0 }),
+  Object.freeze({ body: 'earth', mu: BODIES.earth.mu, radius: BODIES.earth.radius, altitude: 1000, eccentricity: 0 }),
 ]);

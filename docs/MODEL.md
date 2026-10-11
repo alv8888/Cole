@@ -1,8 +1,8 @@
-# Modelo circular: especificación científica
+# Modelos circular y elíptico: especificación científica
 
 ## Objetivo y usuarios
 
-Para estudiantes y personas que exploran mecánica orbital. Se busca observar cómo μ y el radio orbital modifican la velocidad y el periodo. Se excluyen diseño de misiones, predicción de satélites concretos, órbitas elípticas, transferencias y otros módulos.
+Para estudiantes y personas que exploran mecánica orbital. Se busca observar cómo μ, el periapsis y la excentricidad modifican la velocidad y el periodo. Se excluyen diseño de misiones, predicción de satélites concretos, transferencias, órbitas abiertas y otros módulos.
 
 ## Fenómeno, ecuaciones y dimensiones
 
@@ -29,9 +29,18 @@ La interfaz recibe km y km³/s²: 1 km = 1000 m y 1 km³/s² = 10⁹ m³/s². La
 | --- | --- | ---: | ---: |
 | μ | km³/s² | 0,001 | 10¹² |
 | R, radio medio del cuerpo | km | 1 | 10⁶ |
-| h, altura sobre R | km | 1 | 10⁶ |
+| hₚ, altura del periapsis sobre R | km | 1 | 10⁶ |
+| e, excentricidad | adimensional | 0 | 0,9 |
 
-Estos límites evitan entradas singulares y permiten exploración; **no delimitan una región físicamente validada**. h = 0 está excluido por el formulario y el modelo; no se admite una órbita sobre o debajo de la superficie. La esfera matemática no describe terreno ni atmósfera. μ determina la gravedad sin asumir un valor universal de masa del cuerpo. No se requiere la masa del satélite.
+Estos límites evitan entradas singulares y permiten exploración; **no delimitan una región físicamente validada**. hₚ = 0 está excluido por el formulario y el modelo; no se admite una órbita sobre o debajo de la superficie. El límite e=0,9 mantiene el solucionador lejos de la singularidad e=1; no es una frontera física para todas las elipses. La esfera matemática no describe terreno ni atmósfera. No se requiere la masa del satélite.
+
+## Extensión elíptica: ecuaciones y condiciones
+
+Sea rₚ=R+hₚ, a=rₚ/(1−e), rₐ=a(1+e) y b=a√(1−e²). El cuerpo central ocupa el foco (0,0). La elipse tiene centro (−ae,0). a y b son semiejes en metros; e es adimensional. Radio y altitud se diferencian explícitamente: la tabla muestra radios al centro, y la entrada es altura sobre R.
+
+Velocidad vis-viva: v²=μ(2/r−1/a), dimensión m²/s². En periapsis vₚ=√[μ(1+e)/rₚ]; en apoapsis vₐ=√[μ(1−e)/rₐ]. Periodo T=2π√(a³/μ) en segundos; energía específica ε=−μ/(2a) en J/kg. El periodo depende del semieje mayor, no del radio instantáneo. En e=0 estos resultados recuperan las fórmulas circulares anteriores.
+
+Se comienza en periapsis: posición (rₚ,0), velocidad (0,vₚ). n=√(μ/a³) es el movimiento medio, en s⁻¹; M=nt es la anomalía media. Se resuelve M=E−e sen E y se evalúa x=a(cos E−e), y=b sen E. La rapidez angular física no es constante en una elipse. Con dE/dt=n/(1−e cos E), se calcula vx=−a sen E dE/dt y vy=b cos E dE/dt, en m/s. r=a(1−e cos E).
 
 ## Presets y procedencia
 
@@ -48,16 +57,18 @@ Los enlaces permiten consultar las fuentes; su descarga desde la máquina de des
 ## Supuestos y condiciones iniciales
 
 - Cuerpo central esférico y fijo; campo exterior equivalente al de una masa puntual. Satélite de masa despreciable: se aproxima G(M+m) por GM.
-- En t=0: posición (r,0), velocidad (0,√(μ/r)); órbita circular antihoraria en un plano. El SVG invierte el eje vertical para representar ese sentido físico.
+- En t=0: posición (rₚ,0), velocidad (0,vₚ); órbita antihoraria en un plano, circular si e=0. El SVG invierte el eje vertical para representar ese sentido físico.
 - Sin inclinación relativa a un ecuador definido, rotación del cuerpo, lanzamiento, maniobras o transferencia.
 - Sin arrastre, achatamiento J2, presión de radiación, terceros cuerpos ni relatividad. No se calcula estabilidad a largo plazo, colisión con terreno, esfera de influencia o vida útil.
 - La masa central y μ son constantes; no hay gasto de propelente.
 
-Se avisa del arrastre terrestre para h < 150 km; no implica que por encima de ese umbral el arrastre sea nulo. Para h > 10R se avisa de perturbaciones externas; ese umbral es una alerta pedagógica, no una frontera física calculada. Para velocidades superiores al 1 % de c se avisa de revisar la aproximación newtoniana; tampoco constituye una validación relativista.
+Se avisa del arrastre terrestre para hₚ < 150 km; no implica que por encima de ese umbral el arrastre sea nulo. Para rₐ−R > 10R se avisa de perturbaciones externas; ese umbral es una alerta pedagógica, no una frontera física calculada. Para velocidades de periapsis superiores al 1 % de c se avisa de revisar la aproximación newtoniana; tampoco constituye una validación relativista.
 
 ## Algoritmo, visualización y precisión
 
-La solución es analítica. No hay integración Euler, Runge–Kutta ni paso temporal que produzca deriva orbital. El reloj de `requestAnimationFrame` determina el tiempo simulado; la posición se obtiene con seno y coseno. Se reduce el tiempo módulo T antes de evaluar el ángulo para limitar pérdida de precisión a ángulos enormes. Cambiar parámetros reinicia t=0; la pestaña oculta pausa el reloj.
+La trayectoria es la solución de Kepler de dos cuerpos. No hay integración Euler, Runge–Kutta ni paso temporal que produzca deriva orbital. El reloj de `requestAnimationFrame` determina el tiempo simulado. Se reduce el tiempo módulo T antes de calcular M para limitar pérdida de precisión a tiempos enormes. Cambiar parámetros reinicia t=0; la pestaña oculta pausa el reloj.
+
+Para M normalizado a [0,2π), la raíz E está en [0,2π]. Se usan 50 bisecciones. La derivada 1−e cos E es al menos 0,1 para e≤0,9: hay una única raíz y el intervalo nunca pierde su acotación. El error angular teórico máximo del punto medio es 2π/2⁵¹ (aproximadamente 2,8×10⁻¹⁵ rad), más redondeo de doble precisión. Las pruebas observan residuos inferiores a 2×10⁻¹⁴ rad en los casos seleccionados, sin convertir ese resultado en una cota universal de exactitud física. Bisección es más lenta que Newton pero evita fallos de convergencia por una mala estimación inicial; para dos vistas y 50 pasos el coste es pequeño. Las pruebas de energía y momento angular cubren 120 fases para e=0, 0,1, 0,5 y 0,9.
 
 Los cálculos usan números IEEE-754 de doble precisión. Las pruebas usan tolerancias relativas de 10⁻¹⁰ para los casos de referencia, no como afirmación sobre el mundo físico. No se propagan incertidumbres de μ, R o h. La presentación a dos decimales pierde resolución en valores muy pequeños; esos valores pueden verse como 0,00 aunque internamente sean positivos.
 
@@ -65,8 +76,10 @@ Las dos vistas comparten escala de distancia; pueden diferir los tamaños de los
 
 ## Qué está y qué no está validado
 
-Validación interna: dimensiones, conversiones, cálculo circular, ley de Kepler, escalamiento con μ y r, balance centrípeto, energía y periodicidad. Un cálculo independiente Python empleó las mismas constantes y ecuaciones: detecta errores de implementación o conversión, pero no demuestra la exactitud del modelo en una misión real.
+Validación interna: dimensiones, conversiones, regresiones circulares, leyes de Kepler, vis-viva, energía, momento angular, geometría, periodicidad y migración del guardado. Un cálculo independiente Python empleó las mismas constantes y ecuaciones; la raíz de Kepler se comparó con Newton implementado por separado. Detecta errores de implementación o conversión, pero no demuestra la exactitud del modelo en una misión real.
 
 Referencia ideal terrestre a h=400 km: r=6 771 000 m; v=7672.598587818517 m/s; T=5544.8551397511565 s. Radio geosíncrono redondeado de 42164 km: T=86163.5712307423 s, aproximadamente el día sidéreo terrestre de 86164.0905 s. No se identifica con una órbita geoestacionaria: el MVP no representa inclinación, rotación ni longitud.
 
-No validado: efemérides observadas, perturbaciones, órbitas elípticas, precisión profesional, modelos relativistas, planetas personalizados reales, trayectorias de vuelo, seguridad de sistemas o certificación.
+Referencia elíptica terrestre a hₚ=400 km y e=0,5: a=13 542 000 m, rₐ=20 313 000 m, vₚ=9396.975770677078 m/s, vₐ=3132.3252568923594 m/s y T=15683.218680060498 s. Para M=π/2 y e=0,5, Newton Python da E=2.0209799380897704 rad.
+
+No validado: efemérides observadas, perturbaciones, e>0,9, órbitas abiertas, precisión profesional, modelos relativistas, planetas personalizados reales, trayectorias de vuelo, seguridad de sistemas o certificación.

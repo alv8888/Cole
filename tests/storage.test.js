@@ -18,10 +18,20 @@ test('guarda y recupera dos configuraciones sin compartir referencias', () => {
 });
 test('rechaza JSON dañado, versiones desconocidas y parámetros inválidos', () => {
   const storage = memoryStorage();
-  for (const payload of ['broken', 'null', '{}', JSON.stringify({ version: 2, configurations: DEFAULTS }), JSON.stringify({ version: 1, configurations: [DEFAULTS[0]] }), JSON.stringify({ version: 1, configurations: [DEFAULTS[0], { ...DEFAULTS[1], altitude: -1 }] })]) {
+  for (const payload of ['broken', 'null', '{}', JSON.stringify({ version: 3, configurations: DEFAULTS }), JSON.stringify({ version: 1, configurations: [DEFAULTS[0]] }), JSON.stringify({ version: 1, configurations: [DEFAULTS[0], { ...DEFAULTS[1], altitude: -1 }] }), JSON.stringify({ version: 2, configurations: [DEFAULTS[0], { ...DEFAULTS[1], eccentricity: 1 }] })]) {
     storage.setItem(STORAGE_KEY, payload);
     assert.throws(() => loadConfigurations(storage));
   }
+});
+test('migra v1 conservando altitudes y añadiendo e=0', () => {
+  const storage = memoryStorage();
+  const legacy = DEFAULTS.map(({ eccentricity, ...config }) => config);
+  storage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, configurations: legacy }));
+  assert.deepEqual(loadConfigurations(storage), DEFAULTS);
+  const elliptic = DEFAULTS.map(config => ({ ...config, eccentricity: 0.5 }));
+  saveConfigurations(storage, elliptic);
+  assert.equal(JSON.parse(storage.getItem(STORAGE_KEY)).version, 2);
+  assert.deepEqual(loadConfigurations(storage), elliptic);
 });
 test('no guarda datos inválidos y propaga indisponibilidad/cuota', () => {
   const storage = memoryStorage();

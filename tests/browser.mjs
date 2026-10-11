@@ -48,16 +48,45 @@ try {
     assert.match(await page.locator('#a-warning').innerText(), /terceros cuerpos/);
     await page.locator('#reset').click();
   });
+  await check('elliptic geometry, results and invalid eccentricity', async () => {
+    await page.locator('#a-eccentricity').fill('0.5');
+    assert.match(await page.locator('#results').innerText(), /20\.313,00/);
+    assert.match(await page.locator('#results').innerText(), /9,40/);
+    assert.match(await page.locator('#results').innerText(), /3,13/);
+    const geometry = await page.locator('#orbit-a [data-orbit-path]').evaluate(node => ({ cx: +node.getAttribute('cx'), rx: +node.getAttribute('rx'), ry: +node.getAttribute('ry') }));
+    assert.ok(geometry.cx < 160 && geometry.rx > geometry.ry);
+    assert.match(await page.locator('#orbit-a').getAttribute('aria-label'), /el|excentricidad/);
+    await page.locator('#a-eccentricity').fill('1');
+    assert.equal(await page.locator('#a-eccentricity').getAttribute('aria-invalid'), 'true');
+    assert.ok(await page.locator('#play').isDisabled());
+    await page.locator('#reset').click();
+  });
+  await check('legacy circular saves migrate without overwriting the original', async () => {
+    await page.evaluate(() => {
+      localStorage.setItem('aerolab.space.circular.v1', JSON.stringify({ version: 1, configurations: [
+        { body: 'earth', mu: 398600.435507, radius: 6371, altitude: 777 },
+        { body: 'earth', mu: 398600.435507, radius: 6371, altitude: 888 },
+      ] }));
+    });
+    await page.locator('#load').click();
+    assert.equal(await page.locator('#a-altitude').inputValue(), '777');
+    assert.equal(await page.locator('#a-eccentricity').inputValue(), '0');
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('aerolab.space.circular.v1')).version), 1);
+    await page.locator('#reset').click();
+  });
   await check('save/load after reload; reset retains saved configurations', async () => {
     await page.locator('#a-altitude').fill('550');
     await page.locator('#b-altitude').fill('1200');
+    await page.locator('#a-eccentricity').fill('0.5');
     await page.locator('#save').click();
     await page.reload();
     await page.locator('#load').click();
     assert.equal(await page.locator('#a-altitude').inputValue(), '550');
     assert.equal(await page.locator('#b-altitude').inputValue(), '1200');
+    assert.equal(await page.locator('#a-eccentricity').inputValue(), '0.5');
     await page.locator('#reset').click();
     assert.equal(await page.locator('#a-altitude').inputValue(), '400');
+    assert.equal(await page.locator('#a-eccentricity').inputValue(), '0');
     await page.locator('#load').click();
     assert.equal(await page.locator('#a-altitude').inputValue(), '550');
   });
@@ -79,6 +108,15 @@ try {
     await page.locator('#restart-time').click();
     assert.equal(await page.locator('#elapsed').innerText(), '0 s');
     assert.equal(await page.locator('#orbit-a [data-satellite]').getAttribute('cy'), '160');
+  });
+  await check('elliptic animation updates distance and speed instead of constant angular motion', async () => {
+    await page.locator('#a-eccentricity').fill('0.5');
+    const before = await page.locator('#instant-a').innerText();
+    await page.locator('#play').click();
+    await page.waitForFunction(previous => document.querySelector('#instant-a').textContent !== previous, before);
+    await page.locator('#play').click();
+    assert.match(await page.locator('#instant-a').innerText(), /km\/s/);
+    await page.locator('#reset').click();
   });
   await check('desktop and mobile widths, accessible controls, module availability', async () => {
     for (const width of [1440, 768, 390, 320]) {

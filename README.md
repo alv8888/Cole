@@ -1,6 +1,6 @@
-# AEROLAB · Space Lab 0.1
+# AEROLAB · Space Lab 0.2
 
-MVP educativo de órbitas circulares. HTML semántico, CSS, JavaScript modular y SVG. Sin dependencias de aplicación, API, base de datos, compilación ni cuentas. Aircraft, Rocket y Structure Lab están identificados como módulos futuros y no tienen controles ficticios.
+Laboratorio educativo de órbitas circulares y elípticas de dos cuerpos. HTML semántico, CSS, JavaScript modular y SVG. Sin dependencias de aplicación, API, base de datos, compilación ni cuentas. Aircraft, Rocket y Structure Lab están identificados como módulos futuros y no tienen controles ficticios.
 
 ## Ejecutar
 
@@ -36,12 +36,14 @@ Cole/
 │   ├── app.js                 # Eventos, estado, comparación y reloj de animación
 │   ├── data.js                # Presets declarados y valores iniciales
 │   ├── physics.js             # Solución circular pura en SI
+│   ├── elliptic.js            # Elipses, ecuación de Kepler y estado orbital SI
 │   ├── units.js               # Conversiones y formato
 │   ├── validation.js          # Límites de entrada
 │   ├── visualization.js       # SVG orbital y gráficas con eje desde cero
 │   └── storage.js             # Guardado local versionado y validado
 ├── tests/
 │   ├── physics.test.js        # Física, invariantes, conversiones y límites
+│   ├── elliptic.test.js       # Kepler, energía, momento angular y casos de referencia
 │   ├── storage.test.js        # Persistencia y errores
 │   └── browser.mjs            # Integración opcional con Playwright y Chromium
 └── docs/
@@ -53,12 +55,14 @@ Cole/
 ## Uso
 
 1. Elige el cuerpo central de A y B o introduce parámetros propios. Editar μ o R cambia el selector a Personalizado.
-2. Introduce la altitud. Las unidades y límites aparecen junto a cada entrada; todos los campos deben ser válidos.
+2. Introduce la altitud del periapsis y la excentricidad (0 = círculo; máximo 0,9). Las unidades y límites aparecen junto a cada entrada; todos los campos deben ser válidos. El cuerpo ocupa un foco, no el centro de la elipse.
 3. Compara los resultados, barras y órbitas. Ambas vistas comparten escala de distancia. Los cuerpos pueden tener distinto radio y μ.
-4. Reproduce o pausa la posición analítica. La velocidad del reloj indica segundos simulados por segundo real. La animación empieza pausada, también para usuarios con movimiento reducido.
+4. Reproduce o pausa la posición calculada mediante Kepler. Las lecturas bajo cada vista muestran distancia y velocidad actuales; la tabla muestra extremos y periodo. La velocidad del reloj indica segundos simulados por segundo real. La animación empieza pausada, también para usuarios con movimiento reducido.
 5. Guardar conserva ambas configuraciones en el navegador. Cargar recupera el guardado, incluso después de recargar. No se carga automáticamente. Restablecer devuelve los presets iniciales sin borrar el guardado.
 
 Los cambios de parámetros pausan y reinician el tiempo. Ocultar la pestaña pausa la reproducción para evitar saltos al volver. No hay adquisición de telemetría ni cálculo de trayectorias reales.
+
+Los guardados v1 se cargan con e=0 y no se sobrescriben hasta pulsar Guardar. Los nuevos guardados usan el formato v2 y conservan el mismo identificador de almacenamiento para recuperar datos anteriores.
 
 ## Publicación inicial
 

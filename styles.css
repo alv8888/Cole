@@ -766,6 +766,13 @@ footer>span:first-child {
 }
 
 .scroll-hint { display: none; }
+.instant-state {
+  margin: 6px 8px 0;
+  color: var(--muted);
+  text-align: center;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
 @media (max-width: 760px) {
   .scroll-hint { display: block; }
 }

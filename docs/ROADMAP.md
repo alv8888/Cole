@@ -1,4 +1,6 @@
-# Entrega 1 · MVP Space Lab
+# AEROLAB · registro de fases y entregas
+
+Entrega 1: MVP circular. Entrega 2 (0.2): extensión elíptica de dos cuerpos, sin añadir otros módulos.
 
 ## Fase 1 · concepto y alcance — completada
 
@@ -28,9 +30,15 @@ Problemas tratados antes de cerrar la fase: resultados anteriores ocultos al inv
 
 Pruebas científicas, persistencia y navegador; comprobaciones de anchura en móvil y escritorio. No se ha realizado una auditoría completa con lectores de pantalla, navegadores alternativos ni dispositivos físicos. Esas limitaciones no se presentan como pruebas completadas.
 
-## Fase 5 · ampliaciones — pendiente
+## Fase 5 · ampliaciones — órbitas elípticas completadas
 
-Antes de ampliar: preservar las pruebas circulares; definir y probar elementos orbitales, ecuación de Kepler, condiciones iniciales y referencias independientes. Después, considerar órbitas elípticas de dos cuerpos. Aircraft, Rocket y Structure Lab permanecen fuera de esta entrega.
+Objetivo de la entrega 2: añadir excentricidad entre 0 y 0,9, periapsis, apoapsis, semieje mayor, velocidades extremas y estado orbital dependiente del tiempo. Arquitectura: módulo puro elliptic.js sobre la base circular, con solucionador Kepler por bisección y pruebas independientes. No se requieren bibliotecas.
+
+Completado: modelo, representación con foco correcto, comparación, estado instantáneo, guardado v2 con migración de v1 y regresiones. Pasaron 23 pruebas unitarias y 11 checks de navegador. Se documentan algoritmo, dimensiones y error numérico en MODEL.md.
+
+Problemas identificados y tratados antes de avanzar: una elipse no tiene velocidad angular uniforme; se resuelve Kepler. La altitud ahora se define en periapsis para evitar ambigüedad. Las advertencias de perturbaciones consideran el apoapsis. Los guardados anteriores se migran sin sobrescribirlos automáticamente.
+
+Pendiente: accesibilidad completa, otros navegadores, incertidumbre de parámetros, exportación de configuraciones y eventual modelo de perturbaciones con referencias nuevas. Aircraft, Rocket y Structure Lab permanecen fuera de esta entrega.
 
 ## Fase 6 · publicación y mantenimiento — preparación inicial, publicación pendiente
 
