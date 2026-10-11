@@ -1,14 +1,14 @@
-# Pruebas y evidencia de la entrega 5 · AEROLAB 0.5
+# Pruebas y evidencia de la entrega 6 · AEROLAB 0.6
 
 ## Resultado observado
 
-- Node.js 24.19.0: **40 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
-- Chromium headless mediante Playwright: **30 comprobaciones de integración aprobadas** (20 Space y 10 Aircraft/Rocket), sin errores JavaScript no capturados en las tres páginas.
+- Node.js 24.19.0: **48 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
+- Chromium headless mediante Playwright: **37 comprobaciones de integración aprobadas** (20 Space, 10 Aircraft/Rocket anterior y 7 lanzamiento multietapa), sin errores JavaScript no capturados en las tres páginas.
 - Cálculo independiente con Python 3.12.14: valores terrestres a 400 km y a radio 42164 km concordantes con las referencias de las pruebas.
 - Página y módulos servidos por HTTP con Python; no se requiere instalación de paquetes de aplicación ni compilación.
 - Capturas de escritorio de 1440 px y móvil de 390 px inspeccionadas. Comprobación automática sin desbordamiento global a 1440, 768, 390 y 320 px. La tabla permite desplazamiento horizontal propio en móvil.
 
-Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 30 checks de navegador son grupos de aserciones, no 30 modelos científicos adicionales.
+Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 37 checks de navegador son grupos de aserciones, no 37 modelos científicos adicionales.
 
 ## Qué comprueban las pruebas unitarias
 
@@ -21,6 +21,8 @@ La entrega 3 añade comprobaciones de formato JSON portable, límite de bytes y 
 La entrega 4 añade cuatro pruebas: extremos y leyes de escala del barrido de altura, condiciones fijas y relaciones analíticas del barrido de e, rechazo de intervalos/tamaños inválidos y contenido/unidades del CSV. En navegador se comprueban gráfica y tabla, selección de muestras, borrado de datos obsoletos, configuración inválida, exportación real y aplicación exclusiva a B.
 
 La entrega 5 añade seis pruebas de ingeniería: fuerzas de referencia; viento relativo y escalamiento; geometría/viga/energía; balance y estados de cohete; escalamiento, gravedad cero y dimensiones visuales; rechazo de entradas no finitas y fuera de rango en todos los campos. Los casos y sus dimensiones están en ENGINEERING.md.
+
+La entrega 6 añade ocho pruebas: presupuesto multietapa con masas superiores; despegue tardío y plataforma; caída y escape; reducción de paso y conservación de energía; horizonte incompleto; referencia independiente Python; entradas inválidas y extremos; persistencia versionada exclusiva. Los resultados y el algoritmo se documentan en ROCKET-FLIGHT.md.
 
 Comando:
 
@@ -56,6 +58,7 @@ Con el servidor de README funcionando en otra terminal:
 cd /workspace/Cole
 AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/browser.mjs
 AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/engineering-browser.mjs
+AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/rocket-flight-browser.mjs
 ```
 
 Opciones: `CHROMIUM_PATH` para otro ejecutable y `AEROLAB_URL` para otra dirección de prueba. El script lanza Chromium sin sandbox dentro de este contenedor de pruebas; para ejecutar en otro entorno, revisa la política de aislamiento antes de reutilizar esa opción. Las capturas se escriben en `/tmp/aerolab-desktop.png` y `/tmp/aerolab-mobile.png`, fuera del checkout. No se necesita acceso a servicios externos durante las pruebas.
@@ -99,6 +102,15 @@ Aircraft/Rocket añaden 10 grupos: resultados conocidos y cámara; referencias e
 24. Guarda parámetros distintos en cada módulo, recarga y carga. Deben recuperarse de manera independiente. Exporta JSON y verifica módulo/versión/parámetros. Capturar referencia no debe guardar automáticamente; restablecer no debe borrar el guardado.
 25. Vacía campos y supera sus límites: los cálculos se ocultan y guardar/exportar/capturar quedan deshabilitados. Corrige y confirma recuperación. Prueba con teclado y pantalla estrecha.
 
+26. En Rocket, comprueba la nueva sección Lanzamiento multietapa: dos etapas iniciales, masa inicial 3100 kg, masa final 200 kg, Δv ideal≈6574,01 m/s. Cambia el número de etapas de 1 a 4 y verifica que aparecen sus controles y cambia el presupuesto.
+27. Con valores iniciales y Tierra, calcula; pausa o acelera. Explora hasta 100 %: debe informar impacto alrededor de 1685,29 s, altitud final cero y velocidad descendente. Las gráficas deben mostrar ascenso, altura máxima y caída; los eventos incluyen separación a 100 s.
+28. Cambia solo el cuerpo a Luna y calcula nuevamente. Al 100 % debe indicar escape energético tras terminar los motores a 200 s. La velocidad radial final≈6299,52 m/s supera el escape local≈2072,97 m/s. No equivale a una misión real.
+29. Reduce el horizonte a 60 s: debe informar desenlace no resuelto con motores pendientes, no inventar caída o escape. Con Tierra, una etapa, empuje 100 N y horizonte 300 s debe indicar que no despega.
+30. Guarda un diseño multietapa, recarga y carga: verifica que permanece independiente del guardado anterior. Exporta CSV y revisa encabezado SI y estados reales. Vacía un campo: trayectoria, CSV y reproducción deben quedar invalidados. Restablece y vuelve a calcular.
+31. Con movimiento reducido, calcular debe dejar la reproducción pausada. Ocultar la pestaña también pausa. Usa Tab, flechas y End sobre el control temporal: End debe alcanzar el desenlace final incluso si el instante tiene decimales.
+
+El navegador multietapa verificó siete grupos: edición de etapas/presupuesto; caída y eventos/gráficas/CSV real; escape y pausa; entradas inválidas; persistencia/corrupción; horizonte y no despegue; etiquetas y anchuras de 320, 390, 768 y 1440 px. Capturas inspeccionadas: `/tmp/aerolab-launch-desktop.png` y `/tmp/aerolab-launch-mobile.png`.
+
 ## No comprobado
 
-Safari, Firefox, dispositivos físicos, lectores de pantalla, una auditoría WCAG completa, hosting real, incertidumbre de constantes, efemérides reales, perturbaciones orbitales, conservación durante integración numérica (no hay integrador), e>0,9, órbitas abiertas ni fidelidad experimental de Aircraft/Rocket, CFD, estabilidad, resistencia última de materiales, ciclo de vida ambiental ni trayectoria de lanzamiento. Ninguno de estos resultados se anuncia como validado.
+Safari, Firefox, dispositivos físicos, lectores de pantalla, una auditoría WCAG completa, hosting real, incertidumbre de constantes, efemérides reales, perturbaciones orbitales, conservación durante integración numérica (no hay integrador), e>0,9, órbitas abiertas ni fidelidad experimental de Aircraft/Rocket, CFD, estabilidad, resistencia última de materiales, ciclo de vida ambiental ni fidelidad experimental de la trayectoria radial multietapa. Ninguno de estos resultados se anuncia como validado.

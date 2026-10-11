@@ -1,6 +1,6 @@
-# AEROLAB 0.5 · Space, Aircraft y Rocket Lab
+# AEROLAB 0.6 · Space, Aircraft y Rocket Lab
 
-Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (aerodinámica y viga alar simplificada) y Rocket Lab (balance de masa y Δv ideal). HTML semántico, CSS, JavaScript modular, SVG y geometría 3D con proyección en Canvas 2D. Sin dependencias de aplicación, API, base de datos, compilación ni cuentas. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
+Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (aerodinámica y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y geometría 3D con proyección en Canvas 2D. Sin dependencias de aplicación, API, base de datos, compilación ni cuentas. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
 
 ## Ejecutar
 
@@ -15,7 +15,7 @@ Abre `http://localhost:8000` en tu equipo local. En una máquina remota, utiliza
 
 Alternativa con Node y npm presentes: `npm start`. No se necesita `npm install` para usar la aplicación o ejecutar las pruebas unitarias.
 
-Si el puerto 8000 está ocupado, ejecuta `python3 -m http.server 8001 --bind 0.0.0.0` y utiliza el puerto 8001. Las entregas 4 y 5 se validaron en 8001 porque un servidor anterior ocupaba 8000 sin responder correctamente; no se detuvo ese proceso al no poder verificar su propiedad desde el entorno actual.
+Si el puerto 8000 está ocupado, ejecuta `python3 -m http.server 8001 --bind 0.0.0.0` y utiliza el puerto 8001. Las entregas 4, 5 y 6 se validaron en 8001 porque un servidor anterior ocupaba 8000 sin responder correctamente; no se detuvo ese proceso al no poder verificar su propiedad desde el entorno actual.
 
 ## Pruebas
 
@@ -38,6 +38,11 @@ Cole/
 ├── .gitignore
 ├── .github/workflows/tests.yml # Pruebas unitarias en GitHub Actions
 ├── src/
+│   ├── rocket/
+│   │   ├── model.js           # Trayectoria radial, RK4 y Tsiolkovski por etapas
+│   │   ├── storage.js         # Persistencia multietapa independiente
+│   │   ├── visualization.js   # Gráficas y esquema de separaciones
+│   │   └── ui.js              # Editor, reproducción y CSV
 │   ├── engineering/
 │   │   ├── models.js          # Modelos puros Aircraft/Rocket y validación SI
 │   │   ├── profiles.js        # Parámetros, unidades, supuestos y advertencias
@@ -63,17 +68,28 @@ Cole/
 │   ├── exploration.test.js    # Escenarios, archivos, muestreo y predicciones
 │   ├── sensitivity.test.js    # Barridos, conservación de condiciones y leyes de escala
 │   ├── storage.test.js        # Persistencia y errores
+│   ├── rocket-flight.test.js  # Trayectoria, masa, energía y referencia Python
+│   ├── rocket-flight-browser.mjs # Interacciones del lanzamiento
 │   ├── engineering.test.js    # Referencias, viento, vigas, masas y límites
 │   ├── engineering-browser.mjs # Interacciones Aircraft/Rocket opcionales
 │   └── browser.mjs            # Integración opcional con Playwright y Chromium
 └── docs/
     ├── MODEL.md               # Modelo, dimensiones, supuestos y precisión
+    ├── ROCKET-FLIGHT.md        # Lanzamiento radial multietapa, RK4 y validación
     ├── ENGINEERING.md         # Modelos Aircraft/Rocket, dimensiones y casos
     ├── TESTING.md             # Evidencia, reproducción y pruebas manuales
     └── ROADMAP.md             # Fases completadas, problemas y pendientes
 ```
 
-## Aircraft y Rocket
+## Lanzamiento multietapa · Rocket Lab 0.6
+
+En `/rocket.html`, la primera sección permite diseñar de 1 a 4 etapas. Indica masa seca, propelente, empuje y duración por etapa, carga útil, Tierra/Luna y tiempo máximo. **Calcular y lanzar** obtiene una trayectoria vertical en vacío con gravedad variable. Las gráficas de altitud/velocidad se actualizan al reproducir estados calculados; el control permite pausar, cambiar velocidad y explorar tiempo. La interfaz informa escape energético, caída/impacto, ausencia de despegue o desenlace todavía sin resolver. No equivale a simular un lanzamiento terrestre real.
+
+Guardar/Cargar diseño usan una clave independiente. Exportar trayectoria CSV descarga todos los estados. Cambiar entradas invalida la trayectoria anterior. El presupuesto por etapas usa Tsiolkovski incluyendo la masa de las superiores; no se confunde con velocidad final. Consulta [ROCKET-FLIGHT.md](docs/ROCKET-FLIGHT.md) para ecuaciones, algoritmo, casos independientes y limitaciones.
+
+Arquitectura añadida: `src/rocket/{model,storage,visualization,ui}.js`, `tests/rocket-flight.test.js`, `tests/rocket-flight-browser.mjs` y `docs/ROCKET-FLIGHT.md`. La calculadora anterior y su visualización 3D permanecen independientes debajo: sus controles no cambian el lanzamiento multietapa.
+
+## Aircraft y calculadora anterior de Rocket
 
 Abre Aircraft Lab o Rocket Lab desde el selector, o visita `/aircraft.html` y `/rocket.html`. Modifica los parámetros: cada campo muestra unidades y límites. Gira la geometría arrastrando el Canvas o con los controles de cámara, accesibles por teclado. La visualización usa vértices 3D con proyección ortográfica; no hace CFD ni certifica un diseño.
 

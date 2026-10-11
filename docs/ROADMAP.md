@@ -65,3 +65,11 @@ Pendiente de fases siguientes: datos trazables y modelos aerodinámicos identifi
 ## Fase 6 · publicación y mantenimiento — preparación inicial, publicación pendiente
 
 Aplicación estática, sin claves ni dependencias en runtime. README documenta ejecución y publicación. Falta elegir y probar hosting HTTPS, revisar políticas de seguridad, comprobar navegadores objetivos y realizar revisión de accesibilidad. No hay despliegue efectuado. Las configuraciones se pueden transportar manualmente mediante JSON; no hay sincronización remota ni cuentas.
+
+## Entrega 6 · lanzamiento multietapa (0.6)
+
+Fases 1/2: alcance radial en vacío, estudiantes/docentes, riesgo de confundir Δv con velocidad, escape con altura y geometría con física. Modelo definido antes de implementar: Tsiolkovski por etapas; gravedad central variable; consumo y descarte; soporte de plataforma; RK4 y eventos. Arquitectura independiente en src/rocket, sin dependencias nuevas. Los modelos previos se conservan.
+
+Fase 3: editor 1–4 etapas, carga útil, cuerpo central, presupuesto, trayectoria, gráficas en reproducción, pausa y exploración temporal, eventos, guardado exclusivo y CSV. Fase 4: casos independientes Python, invariantes, reducción de paso, despegue tardío, caída, escape y entradas inválidas; controles y diseño responsive comprobados en Chromium. Problemas tratados: evento de separación sin salto de velocidad; no declarar escape con motores activos; no inventar impacto fuera del horizonte; control temporal capaz de alcanzar el instante final fraccionario.
+
+Problemas actuales antes de ampliar: vacío sin arrastre; solo radial; paso fijo sin cota adaptativa de error; banda marginal sin validación exhaustiva; ninguna telemetría ni precisión física certificada. Pendiente de fase 5: arrastre con datos identificables y método adaptativo validado, sin mezclar con una trayectoria orbital. Fase 6: código publicado en GitHub; hosting y auditoría de accesibilidad pendientes. ROCKET-FLIGHT.md define casos y límites.

@@ -32,7 +32,9 @@ Valores iniciales: masa=1200 kg, S=16 m², b=10 m, Vsuelo=50 m/s, viento=0, ρ=1
 
 Con B=0,15 m, H=0,25 m y E=70 GPa: I=0,0001953125 m⁴, Mraíz=18375 N·m, σ=11,76 MPa y δ=0,0084 m. Duplicar E divide δ por dos; duplicar H divide δ por ocho y σ por cuatro. Se comprueba área trapezoidal, escalas de densidad/velocidad, CL=0, unidades y operación energética. D se contrastó por un cálculo separado en Python, no con ensayos de túnel de viento.
 
-## Rocket Lab
+## Rocket Lab · calculadora original de una etapa
+
+La entrega 0.6 añade una sección independiente de lanzamiento multietapa y trayectoria radial. Véase [ROCKET-FLIGHT.md](ROCKET-FLIGHT.md); los supuestos siguientes corresponden únicamente a la calculadora de una etapa.
 
 Vehículo espacial ideal de una etapa. Masa seca incluye estructura y carga útil; masa inicial m₀=mseca+mprop, final=mseca. Se asume consumo uniforme, ṁ=mprop/tfunc. El empuje T y ese flujo determinan velocidad efectiva de escape ve=T/ṁ; Isp=ve/g₀. No se permite introducir tres magnitudes independientes contradictorias. ve es efectivo e incluye el significado del empuje neto impuesto; no se resuelve una tobera ni se especifica propelente.
 
