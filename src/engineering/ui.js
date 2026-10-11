@@ -1,4 +1,5 @@
 import { groupInspector } from '../navigation/inspector.js';
+import { createCalculationState } from '../navigation/calculation-state.js';
 import { publishSnapshot, attachMassInbox } from '../integration/bridge.js';
 import { registerSharePart } from '../navigation/ui.js';
 import { numberIn, choice } from '../navigation/share.js';
@@ -12,6 +13,7 @@ import { downloadFile } from '../files.js';
 
 const kind=document.body.dataset.lab,profile=PROFILES[kind];
 const $=id=>document.getElementById(id);
+const calculationState=createCalculationState($('engineering-form'),'engineering-calculation-state');
 const defaults=()=>({...Object.fromEntries(profile.fields.map(field=>[field.key,field.value])),...(kind==='aircraft'?{dragMode:'polar'}:{})});
 let reference=null,current=null;
 const groups=[...new Set(profile.fields.map(field=>field.group))];
@@ -65,8 +67,8 @@ function update(preserveWeight=false){
     const [min,max]=profile.ranges[field.key],bad=!Number.isFinite(config[field.key])||config[field.key]<min||config[field.key]>max;
     $(`eng-${field.key}`).setAttribute('aria-invalid',String(bad));$(`error-${field.key}`).textContent=bad?'Introduce un número dentro de los límites.':'';if(bad)valid=false;
   });
-  let result=null;
-  try{if(valid)result=profile.compute(config);}catch(error){status(error.message);}
+  let result=null,modelError=null;
+  try{if(valid)result=profile.compute(config);}catch(error){modelError=error.message;status(error.message);}
   current=result?config:null; if(result)publishSnapshot(kind==='aircraft'?'aircraft':'calculator',config);
   for(const id of ['capture-reference','engineering-save','engineering-export'])$(id).disabled=!result;
   $('clear-reference').disabled=!reference;
@@ -81,6 +83,9 @@ function update(preserveWeight=false){
   }
   $('engineering-warnings').replaceChildren(...(result?profile.warnings(config,result):['Corrige las entradas. Se ocultan los cálculos afectados.']).map(text=>{const item=document.createElement('li');item.textContent=text;return item;}));
   if(result)status('Cálculos actualizados. Geometría ilustrativa; modelo físico declarado abajo.');else if(!valid)status('Entradas inválidas.');
+  calculationState.update(result?'ready':'invalid',result
+    ? (kind==='aircraft'?'Fuerzas recalculadas con las entradas actuales. No integra una trayectoria de vuelo.':'Δv ideal recalculado. Esta calculadora no integra el lanzamiento multietapa.')
+    : modelError??'Hay valores vacíos o fuera de rango. Los resultados afectados se han retirado.');
 }
 fill(defaults());update();
 $('engineering-form').addEventListener('submit',event=>event.preventDefault());

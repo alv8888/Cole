@@ -15,7 +15,7 @@ const base = process.env.AEROLAB_URL ?? `http://127.0.0.1:${port}`;
 const server = process.env.AEROLAB_URL ? null : spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1'], {cwd: root, stdio: 'ignore'});
 let serverError;
 server?.on('error', e => serverError = e);
-const suites = ['home-comparison-browser.mjs', 'home-experiments-browser.mjs', 'home-browser.mjs', 'browser.mjs', 'engineering-browser.mjs', 'aircraft-forces-browser.mjs', 'rocket-flight-browser.mjs', 'three-browser.mjs', 'navigation-browser.mjs', 'vehicle-browser.mjs', 'structure-browser.mjs', 'structure-design-browser.mjs', 'audit-regressions-browser.mjs', 'workbench-browser.mjs'];
+const suites = ['calculation-state-browser.mjs', 'home-comparison-browser.mjs', 'home-experiments-browser.mjs', 'home-browser.mjs', 'browser.mjs', 'engineering-browser.mjs', 'aircraft-forces-browser.mjs', 'rocket-flight-browser.mjs', 'three-browser.mjs', 'navigation-browser.mjs', 'vehicle-browser.mjs', 'structure-browser.mjs', 'structure-design-browser.mjs', 'audit-regressions-browser.mjs', 'workbench-browser.mjs'];
 const requested = process.argv.slice(2);
 if (requested.some(file => !suites.includes(file))) {
   server?.kill('SIGTERM');

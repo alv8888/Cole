@@ -1,4 +1,10 @@
 /* Simulation workbench: shared layout, independent from scientific calculations. */
+.calculation-state { margin-bottom: 16px; padding: 12px 14px; border-inline-start: 3px solid #8edfcc; background: #142333; border-radius: 4px; }
+.calculation-state strong { font-size: 14px; }
+.calculation-state p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; color: #c1cede; }
+.calculation-state[data-state=pending] { border-color: #c0afff; }
+.calculation-state[data-state=invalid] { border-color: #ffba8a; }
+.calculation-state button { margin-top: 10px; min-height: 44px; }
 .site-header { padding-block: 16px; }
 .intro { padding: 24px 0 20px; }
 .intro h1 { font-size: clamp(28px, 3.3vw, 42px); margin-bottom: 10px; }

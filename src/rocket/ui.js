@@ -1,4 +1,5 @@
 import { groupInspector } from '../navigation/inspector.js';
+import { createCalculationState } from '../navigation/calculation-state.js';
 import { createAnimationLoop } from '../rendering/clock.js';
 import { publishSnapshot, attachMassInbox } from '../integration/bridge.js';
 import { registerSharePart } from '../navigation/ui.js';
@@ -11,6 +12,7 @@ import { saveLaunch, loadLaunch } from './storage.js';
 import { chart, stageDiagram } from './visualization.js';
 import { downloadFile } from '../files.js';
 const $ = id => document.getElementById(id);
+const calculationState=createCalculationState($('launch-form'),'launch-calculation-state');
 const globe=createGlobePanel($('rocket-globe'));
 let result = null, playing = false, clock = 0, previousFrame = null;
 const playback = createAnimationLoop(frame);
@@ -47,9 +49,11 @@ function updateBudget() {
     }));
     stageDiagram($('launch-diagram'), c, null); $('launch-run').disabled = false; $('launch-save').disabled = false;
     $('launch-message').textContent = 'Diseño válido para el modelo educativo.';
+    calculationState.update('pending','Entradas válidas. Pulsa Calcular lanzamiento para generar una trayectoria; no hay resultados temporales vigentes.');
   } catch (e) {
     $('launch-budget').textContent = 'Corrige las entradas para calcular.'; $('launch-stage-budget').replaceChildren(); $('launch-diagram').replaceChildren();
     $('launch-run').disabled = true; $('launch-save').disabled = true; $('launch-message').textContent = e.message;
+    calculationState.update('invalid',e.message);
   }
 }
 const labels = { liftoff: 'Despegue', burnout: 'Fin de funcionamiento', separation: 'Separación', impact: 'Impacto en superficie', apogee: 'Paso por altura máxima' };
@@ -90,8 +94,9 @@ function calculateLaunch(autoPlay = false, restoredClock = 0) {
     clock = restoredClock; $('launch-timeline').max = 100;
     for (const id of ['launch-play','launch-timeline','launch-csv']) $(id).disabled = false;
     $('launch-message').textContent = 'Trayectoria calculada con RK4, paso máximo 0,1 s. Se reproduce el tiempo calculado, acelerado según el control.';
+    calculationState.update('ready','Trayectoria calculada para este diseño. Reproducir y mover el cursor recorren estados ya calculados; cambiar parámetros exige recalcular.');
     display(); if (autoPlay && !matchMedia('(prefers-reduced-motion: reduce)').matches) { playing = true; $('launch-play').textContent = 'Pausar'; playback.start(); }
-  } catch (e) { invalidate(); $('launch-message').textContent = e.message; }
+  } catch (e) { invalidate(); $('launch-message').textContent = e.message; calculationState.update('invalid',e.message); }
 }
 $('launch-run').addEventListener('click', () => calculateLaunch(true));
 $('launch-play').addEventListener('click', () => {

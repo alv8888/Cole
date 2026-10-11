@@ -140,3 +140,9 @@ Validación: 108 pruebas unitarias y 109 grupos Chromium en 13 suites, sin fallo
 El catálogo permite contrastar un caso con la referencia inicial o una capturada, ver diferencias absolutas/porcentuales y exportar CSV con comparación, barrido, unidades, hipótesis y configuraciones completas. Panel plegable, referencias independientes por módulo y temporales en memoria, invalidación de resultados y descarga durante entradas inválidas. Se conservan modelos, enlaces, guardados y transferencias. COMPARISON.md describe alcance, fórmula, formato y pruebas manuales.
 
 Validación de la entrega 17: 112 pruebas unitarias y 113 grupos Chromium en 14 suites, sin fallos. Capturas móvil/escritorio inspeccionadas y CSV descargado/analizado. Pendientes: auditoría de accesibilidad completa, navegadores/hardware adicionales, pruebas con usuarios y medición de rendimiento.
+
+## Entrega 18 · Estado explícito del cálculo (0.18)
+
+Aircraft y las dos herramientas Rocket separan estado científico y notificaciones de archivos. El lanzamiento distingue trayectoria pendiente de cálculo vigente; entradas inválidas ofrecen acceso al primer control afectado, abriendo su grupo. Los errores entre parámetros conservan su explicación sin marcar un culpable ficticio. No se modifican modelos, resultados, guardados, conexiones ni rutas. CALCULATION-STATE.md documenta archivos, ejecución, pruebas y límites.
+
+Validación: 112 pruebas unitarias y 116 grupos Chromium agregados en 15 suites aprobados; se documenta la corrección y repetición de la nueva suite. Pendiente: extender el patrón a A/B de Space y a los borradores geométricos inactivos de Structure, sin confundir invalidez del documento con validez del modelo activo.

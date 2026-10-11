@@ -231,3 +231,15 @@ PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run
 ```
 
 Capturas `/tmp/aerolab-017-comparison-{desktop,mobile}.png` inspeccionadas. No se cambiaron ecuaciones de los laboratorios ni sus validaciones anteriores. La comparación no demuestra incertidumbre, mejora de diseño ni certificación. Pendientes de evidencia externa: Firefox/Safari, dispositivos físicos, evaluación completa de lectores de pantalla/contraste y rendimiento medido.
+
+## Entrega 18 · Estado del cálculo (0.18)
+
+112 pruebas unitarias aprobadas, 0 fallos y 0 omitidas; sin cambios en los modelos. Las 14 suites Chromium anteriores pasaron (113 grupos). La nueva suite pasó tras corregir dos supuestos de prueba: el alias peso/masa aparece primero en el formulario, y el viento longitudinal admite −40 a 40 m/s. El error físico entre parámetros se prueba con velocidad 20 y viento 30 m/s, ambos válidos individualmente. Resultado agregado: 15 suites, 116 grupos aprobados. La ejecución completa inicial informó el fallo de la nueva prueba; se volvió a ejecutar únicamente esa suite después de corregirla, sin cambios de implementación adicionales.
+
+```sh
+node --test --test-isolation=none tests/*.test.js
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser -- calculation-state-browser.mjs
+```
+
+La nueva suite comprueba estado vigente independiente del guardado, invalidación/recuperación, explicación del error físico, apertura de campos plegados y foco por teclado, trayectoria pendiente tras edición, independencia de la calculadora ideal, ausencia de errores JavaScript y reflujo 320–1440 px. Las capturas `/tmp/aerolab-018-state-desktop.png` y `/tmp/aerolab-018-state-mobile.png` fueron inspeccionadas. Las regresiones existentes comprueban además zoom CSS 200 %, visores inicialmente visibles y conservación de controles. No se afirma validación con lectores de pantalla, Firefox/Safari o dispositivos reales.
