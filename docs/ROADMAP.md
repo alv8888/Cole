@@ -113,3 +113,7 @@ Fase 5: Structure Lab ampliado con geometría paramétrica, visor Three.js, FEM 
 Problemas tratados: distinguir malla superficial de elementos calculados; carbono sin criterio isotrópico; geometrías ausentes en módulos fuente; masas parciales frente a masa total; cambio exclusivo del campo de masa y propuesta consumida una sola vez. No se modifica la física previa. Banco de pruebas y guardados anteriores conservados.
 
 Pendiente de fase 6: hosting y comprobación allí; auditoría de accesibilidad y navegadores adicionales. FEM de cascarones/volúmenes, laminados, cargas combinadas y validación experimental requieren otro alcance. Modelos y entrega completa en STRUCTURE-DESIGN.md; ejecuciones en TESTING.md.
+
+## Entrega 13 · Correcciones posteriores a auditoría (0.13)
+
+Cinco defectos confirmados corregidos y comprobados: catálogo Rocket, continuidad del caso en transferencia de masa, validación del objeto activo, deformación radial termoelástica y corte de motor. 94 pruebas unitarias y 86 grupos Chromium aprobados. Se conservan módulos y compatibilidad de formatos anteriores, sin dependencias adicionales. CORRECTIONS.md describe entrega y límites. Próxima fase: diseño visual y renderizado según diagnóstico, conservando modelos comprobados.

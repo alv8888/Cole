@@ -252,13 +252,15 @@ try {
       await page.locator("#design-export-link").click();
       assert.equal(await page.locator(".mass-inbox").count(), 1);
       assert.equal(await page.locator("#eng-mass").inputValue(), "1200");
+      await page.locator(".mass-inbox [data-mass-case]").selectOption("current");
       await page.locator("#eng-mass").fill("1600");
       assert.match(
-        await page.locator(".mass-inbox p").innerText(),
+        await page.locator(".mass-inbox [data-mass-status]").innerText(),
         /1600\.000/,
       );
       const before = Number(await page.locator("#eng-mass").inputValue());
       await page.locator(".mass-inbox button").first().click();
+      await page.waitForFunction(() => !document.querySelector(".mass-inbox"));
       assert.ok(Number(await page.locator("#eng-mass").inputValue()) > before);
       assert.equal(await page.locator("#eng-thrust").inputValue(), "1200");
       assert.equal(await page.locator("#eng-area").inputValue(), "16");
@@ -297,6 +299,7 @@ try {
       await page.locator("#design-export-link").click();
       const dry = Number(await page.locator("#stage-1-dry").inputValue());
       await page.locator(".mass-inbox button").first().click();
+      await page.waitForFunction(() => !document.querySelector(".mass-inbox"));
       assert.ok(Number(await page.locator("#stage-1-dry").inputValue()) > dry);
       assert.equal(
         await page.locator("#launch-outcome").innerText(),

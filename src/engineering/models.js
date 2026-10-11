@@ -68,9 +68,12 @@ export function rocket(config) {
   const consumed = c.propellant * c.burnPercent / 100;
   const currentMass = initialMass - consumed;
   const currentDeltaV = exhaustVelocity * Math.log(initialMass / currentMass);
-  return Object.freeze({ appliedThrust, initialMass, finalMass: c.dryMass, massFlow, exhaustVelocity,
+  // At burnout the selected instantaneous state is AFTER engine cutoff.
+  const engineActive = c.burnPercent < 100;
+  const currentThrust = engineActive ? appliedThrust : 0;
+  return Object.freeze({ appliedThrust, currentThrust, engineActive, initialMass, finalMass: c.dryMass, massFlow, exhaustVelocity,
     specificImpulse: exhaustVelocity / G0, deltaV, time, consumed, currentMass, currentDeltaV,
     thrustWeight: c.gravity === 0 ? null : appliedThrust / (initialMass * c.gravity),
-    acceleration: appliedThrust / currentMass - c.gravity,
+    acceleration: currentThrust / currentMass - c.gravity,
     gravityPenalty: c.gravity * time, verticalDeltaV: currentDeltaV - c.gravity * time });
 }

@@ -985,3 +985,4 @@ body[data-lab=aircraft] .engineering-visual { position: static; }
 @media(prefers-reduced-motion:reduce){.design-flight-strip{scroll-behavior:auto}}
 
 .design-workspace>.panel:not(.design-viewport-panel),.design-import-panel,[data-structure-panel="theory"].panel{padding:22px}.design-workspace .action-row label{display:inline-flex;align-items:center;gap:.4rem;color:#c7d3e5;font-size:.8rem}.design-workspace input[type="checkbox"]{width:1rem;height:1rem;min-height:0;padding:0;flex-shrink:0}.design-workspace>.panel h2{margin-top:0}.design-workspace .panel-heading h2{margin:0}.design-workspace [hidden]{display:none!important}
+.mass-inbox [data-mass-case]{display:block;width:100%;max-width:34rem;margin:.5rem 0}.mass-inbox pre{max-height:18rem;overflow:auto;padding:1rem;border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}.mass-inbox>label,.mass-inbox>details{display:block;margin:1rem 22px}.mass-inbox [data-mass-status]{padding:0 22px}

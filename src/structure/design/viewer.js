@@ -1,3 +1,4 @@
+import { sampleField, deformVertex } from "./deformation.js";
 import * as THREE from "three";
 import { OrbitControls } from "../../../vendor/three/OrbitControls.js";
 import { profile } from "./geometry.js";
@@ -34,48 +35,8 @@ export function createDesigner(host) {
     playing = false,
     lost = false;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-  function sample(s) {
-    const p = result.points;
-    if (!p.length) return { displacement: 0, index: 0, axial: 0, hoop: 0 };
-    let i = 0;
-    while (i < p.length - 2 && p[i + 1].position < s) i++;
-    const a = p[i],
-      b = p[i + 1] ?? a,
-      t = Math.max(
-        0,
-        Math.min(1, (s - a.position) / (b.position - a.position || 1)),
-      );
-    return Object.fromEntries(
-      ["displacement", "index", "axial", "hoop"].map((k) => [
-        k,
-        a[k] + (b[k] - a[k]) * t,
-      ]),
-    );
-  }
-  function deform(x, y, z, s, active, amplitude) {
-    if (!active || !result.points.length) return [x, y, z];
-    const c = result.config,
-      p = sample(s),
-      u = p.displacement * amplitude;
-    if (c.object === "aircraft")
-      return c.load === "lift" ? [x, y, z + u] : [x, y + Math.sign(y) * u, z];
-    if (c.object === "sphere") {
-      const scale = 1 + (result.displacement / c.sphere.radius) * amplitude;
-      return [x * scale, y * scale, z * scale];
-    }
-    const hoopStrain =
-      c.load === "pressure"
-        ? p.hoop / result.material.E2 -
-          (result.material.nu * p.axial) / result.material.E
-        : c.load === "thermal"
-          ? result.material.alpha2 * c.deltaT
-          : 0;
-    return [
-      x * (1 + hoopStrain * amplitude),
-      y * (1 + hoopStrain * amplitude),
-      z + u,
-    ];
-  }
+  function sample(s) { return sampleField(result.points,s); }
+  function deform(...args) { return deformVertex(result,...args); }
   function make(vertices, indices, positions, active = true, neutral = false) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));

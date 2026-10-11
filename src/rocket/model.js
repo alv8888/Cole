@@ -12,7 +12,7 @@ function range(value, min, max, label) {
   if (!Number.isFinite(value) || value < min || value > max) throw new RangeError(`${label}: introduce un número entre ${min} y ${max}.`);
 }
 export function validate(c) {
-  if (!c || !BODIES[c.body]) throw new RangeError('Cuerpo central inválido.');
+  if (!c || typeof c.body !== 'string' || !Object.hasOwn(BODIES, c.body)) throw new RangeError('Cuerpo central inválido.');
   range(c.payload, 1, 100000, 'Carga útil (kg)');
   range(c.horizon, 60, 7200, 'Duración máxima (s)');
   if (!Array.isArray(c.stages) || c.stages.length < 1 || c.stages.length > 4) throw new RangeError('Se requieren entre 1 y 4 etapas.');
@@ -54,7 +54,11 @@ export function simulate(config, options = {}) {
   range(step, 0.01, 0.5, 'Paso de integración (s)');
   let t = 0, h = 0, v = 0, mass = summary.initialMass, stage = 0, elapsed = 0, airborne = false;
   const events = [], samples = [];
-  const record = () => samples.push({ t, h, v, mass, stage, energy: v * v / 2 - body.mu / (body.radius + h), escapeSpeed: Math.sqrt(2 * body.mu / (body.radius + h)) });
+  const record = () => {
+    const sample={ t, h, v, mass, stage, energy: v * v / 2 - body.mu / (body.radius + h), escapeSpeed: Math.sqrt(2 * body.mu / (body.radius + h)) };
+    if(!Object.values(sample).every(Number.isFinite)||mass<=0||h<0)throw new RangeError('Estado de lanzamiento inválido o no finito.');
+    samples.push(sample);
+  };
   let outcome = 'horizon';
   record();
   while (t < c.horizon - 1e-9) {

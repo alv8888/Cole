@@ -19,6 +19,7 @@ import {
 const $ = (id) => document.getElementById(id);
 let draft = clone(DEFAULT),
   result = null,
+  documentError = null,
   viewer = null,
   playing = false;
 const definitions = {
@@ -390,12 +391,18 @@ function render() {
   );
   graph();
   ["design-save", "design-json", "design-csv"].forEach(
-    (id) => ($(id).disabled = !result),
+    (id) => ($(id).disabled = !result || (id !== "design-csv" && !!documentError)),
   );
   exportPreview();
 }
 function update() {
   read();
+  documentError = null;
+  try {
+    validate(draft);
+  } catch (e) {
+    documentError = e.message;
+  }
   document
     .querySelectorAll(
       "#design-form input,#design-load-form input,#design-magnification,#design-fraction",
@@ -424,7 +431,7 @@ function update() {
     validateSettings(settings());
     result = analyzeDesign(draft);
     $("design-status").textContent =
-      "Diseño calculado. Modelo lineal educativo; consulta campos, hipótesis y límites.";
+      "Objeto activo calculado. Modelo lineal educativo; consulta campos, hipótesis y límites." + (documentError ? ` Para guardar/compartir el documento completo, corrige el borrador: ${documentError}` : "");
   } catch (e) {
     result = null;
     playing = false;

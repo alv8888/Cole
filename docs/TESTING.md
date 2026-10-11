@@ -167,3 +167,9 @@ node tests/structure-design-browser.mjs
 ```
 
 Las herramientas de navegador solo se instalaron en `/tmp`, fuera de dependencias del producto. Capturas de escritorio y móvil: `/tmp/aerolab-structure-design-desktop.png`, `/tmp/aerolab-structure-design-mobile.png`; captura de visor `/tmp/design-canvas.png`. Se inspecciona la geometría renderizada y la distribución. No se ha validado fidelidad experimental, FEM volumétrico/cascarón, un diseño real, GPU física, Safari/Firefox, lectores de pantalla, WCAG completa ni hosting. Los casos ideales comprobados no certifican estructuras ni materiales. Pruebas manuales detalladas: [STRUCTURE-DESIGN.md](STRUCTURE-DESIGN.md).
+
+## Entrega 13 · Correcciones de auditoría
+
+Node 24.19.0: **94 pruebas individuales aprobadas**, 0 fallos/omisiones, mediante `node --test --test-isolation=none tests/*.test.js`. El runner con aislamiento de este entorno solo reportaba archivos; esos resultados no se contabilizaron como pruebas individuales. Ocho regresiones nuevas cubren catálogo heredado, estados finitos, borradores independientes, termoelasticidad/Poisson, UD, corte, origen y consumo de propuestas.
+
+Chromium local sobre HTTP en puerto 8013: **86 grupos aprobados**, sin omitir suites previas: Space 20, engineering 10, fuerzas 7, vuelo 7, Three 7, navegación 5, vehículos 8, Structure anterior 8, diseñador 11 y audit-regressions-browser 3. El primer intento del diseñador requirió actualizar la espera de su test: la aplicación ahora utiliza Web Locks de manera asíncrona; la suite espera a que termine antes de leer resultados. Casos manuales, fórmulas y límites en CORRECTIONS.md. Sin validación en hosting ni otros navegadores.

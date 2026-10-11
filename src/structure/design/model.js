@@ -22,7 +22,7 @@ export function criterion(material, axialStress, hoop = 0, bending = false) {
   };
 }
 export function analyzeDesign(input) {
-  const c = validate(input),
+  const c = validate(input, { activeOnly: true }),
     material = MATERIALS[c.material],
     massParts = structuralMass(c, material),
     mass = Object.values(massParts).reduce((a, b) => a + b, 0),

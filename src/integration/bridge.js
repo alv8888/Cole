@@ -76,17 +76,18 @@ export function importDesign(name, source, design) {
     note =
       "Empuje inicial multietapa importado. Se conservan todas las dimensiones: el simulador de lanzamiento no define geometría ni espesores. Sus etapas de combustible no son una malla estructural.";
   }
-  return { configuration: validate(c), note };
+  return { configuration: validate(c, { activeOnly: true }), note };
+}
+export function validateMassPacket(name,packet){
+ if(!sources.includes(name)||![1,2].includes(packet?.version)||!['add','replace'].includes(packet.mode)||!Number.isFinite(packet.mass)||packet.mass<=0)throw new Error('Transferencia de masa inválida.');
+ if(packet.version===2){
+  if(packet.target!==name||typeof packet.id!=='string'||!packet.id||packet.id.length>100)throw new Error('Identidad o destino de propuesta inválidos.');
+  validateSource(name,packet.source);
+ }
+ return packet;
 }
 export function applyMass(name, configuration, packet) {
-  if (
-    !sources.includes(name) ||
-    packet?.version !== 1 ||
-    !["add", "replace"].includes(packet.mode) ||
-    !Number.isFinite(packet.mass) ||
-    packet.mass <= 0
-  )
-    throw new Error("Transferencia de masa inválida.");
+ validateMassPacket(name,packet);
   const c = clone(configuration);
   let before;
   if (name === "launch") {
@@ -111,68 +112,54 @@ export function applyMass(name, configuration, packet) {
     after: packet.mode === "add" ? before + packet.mass : packet.mass,
   };
 }
-export function queueMass(name, source, mass, mode, stage) {
+export function queueMass(name, source, mass, mode, stage, storage=localStorage) {
   const packet = {
-    version: 1,
-    mass,
-    mode,
-    stage,
-    description:
-      "Masa de superficies Structure Lab; no masa seca total certificada.",
+    version: 2,
+    id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    target: name,
+    source: clone(source),
+    mass, mode, stage,
+    description: "Masa de superficies Structure Lab; no masa seca total certificada.",
   };
   const preview = applyMass(name, source, packet);
-  localStorage.setItem(transferKey(name), JSON.stringify(packet));
+  storage.setItem(transferKey(name), JSON.stringify(packet));
   return preview;
 }
+/** Reject stale panels without consuming a newer proposal. */
+export function consumeMassProposal(target,expectedRaw,storage=localStorage){
+ if(storage.getItem(transferKey(target))!==expectedRaw)throw new Error('La propuesta fue reemplazada o ya consumida. Recarga para revisar la vigente.');
+ storage.removeItem(transferKey(target));
+}
 export function attachMassInbox({ target, get, apply, root }) {
-  let packet;
+  let packet,raw;
   try {
-    const raw = localStorage.getItem(transferKey(target));
+    raw = localStorage.getItem(transferKey(target));
     if (!raw) return;
     packet = JSON.parse(raw);
-  } catch {
-    return;
-  }
+  } catch { return; }
   const box = document.createElement("section");
   box.className = "panel mass-inbox";
-  box.innerHTML =
-    '<h2>Masa recibida de Structure Lab</h2><p role="status"></p><div class="action-row"><button type="button">Aplicar masa revisada</button><button type="button" class="quiet">Descartar</button></div>';
+  box.innerHTML = '<h2>Masa recibida de Structure Lab</h2><p class="helper">Revisa qué configuración recibirá la masa. El caso de origen recupera sus parámetros completos; el caso abierto conserva tus entradas actuales. Ninguna opción guarda automáticamente.</p><label>Configuración a revisar<select data-mass-case><option value="source">Caso de origen de la propuesta</option><option value="current">Caso abierto · conservar entradas actuales</option></select></label><p data-mass-status role="status" aria-live="polite"></p><details><summary>Parámetros del caso seleccionado</summary><pre data-mass-parameters></pre></details><div class="action-row"><button type="button">Aplicar masa revisada</button><button type="button" class="quiet">Descartar</button></div>';
   root.prepend(box);
-  const message = box.querySelector("p"),
-    [accept, discard] = box.querySelectorAll("button");
-  function preview() {
-    try {
-      const p = applyMass(target, get(), packet);
-      message.textContent = `${packet.description} ${packet.mode === "add" ? "Añadir" : "Sustituir"} ${packet.mass.toFixed(3)} kg: ${p.before.toFixed(3)} → ${p.after.toFixed(3)} kg${target === "launch" ? ` en etapa ${packet.stage + 1}` : ""}. Revisa si esa masa ya está incluida. No se guarda automáticamente.`;
-      accept.disabled = false;
-    } catch (e) {
-      message.textContent = `No aplicable: ${e.message}`;
-      accept.disabled = true;
-    }
+  const message=box.querySelector('[data-mass-status]'),selector=box.querySelector('[data-mass-case]'),parameters=box.querySelector('[data-mass-parameters]'),[accept,discard]=box.querySelectorAll('button');
+  if(packet.version!==2){selector.value='current';selector.querySelector('[value=source]').disabled=true;}
+  const configuration=()=>selector.value==='source'?packet.source:get();
+  function preview(){
+   try{
+    if(localStorage.getItem(transferKey(target))!==raw)throw new Error('Propuesta reemplazada o consumida. Recarga antes de aplicar.');
+    const base=configuration(),p=applyMass(target,base,packet);
+    message.textContent=`${packet.description} ${selector.value==='source'?'Caso de origen: se recuperarán sus parámetros completos.':'Caso abierto: se conservan las entradas actuales.'} ${packet.mode==='add'?'Añadir':'Sustituir'} ${packet.mass.toFixed(3)} kg: ${p.before.toFixed(3)} → ${p.after.toFixed(3)} kg${target==='launch'?` en etapa ${packet.stage+1}`:''}. Revisa si esa masa ya está incluida. No se guarda automáticamente.`;
+    parameters.textContent=JSON.stringify(base,null,2);accept.disabled=false;
+   }catch(e){message.textContent=`No aplicable: ${e.message}`;parameters.textContent='Sin caso válido.';accept.disabled=true;}
   }
-  preview();
-  root.addEventListener("input", preview);
-  root.addEventListener("change", preview);
-  function remove() {
-    localStorage.removeItem(transferKey(target));
-    root.removeEventListener("input", preview);
-    root.removeEventListener("change", preview);
-    box.remove();
+  preview();root.addEventListener('input',preview);root.addEventListener('change',preview);window.addEventListener('storage',preview);
+  function close(){root.removeEventListener('input',preview);root.removeEventListener('change',preview);window.removeEventListener('storage',preview);box.remove();}
+  async function commit(){
+   try{const p=applyMass(target,configuration(),packet);consumeMassProposal(target,raw);close();apply(p.configuration);}catch(e){message.textContent=`No se aplicó: ${e.message}`;accept.disabled=true;}
   }
-  accept.addEventListener("click", () => {
-    try {
-      const p = applyMass(target, get(), packet);
-      remove();
-      apply(p.configuration);
-    } catch (e) {
-      message.textContent = e.message;
-    }
+  accept.addEventListener('click',()=>{
+   // Coordinate receivers across tabs where Web Locks is available.
+   if(navigator.locks)navigator.locks.request(`aerolab-mass-${target}`,commit).catch(e=>message.textContent=e.message);else commit();
   });
-  discard.addEventListener("click", () => {
-    try {
-      remove();
-    } catch (e) {
-      message.textContent = `No se pudo descartar: ${e.message}`;
-    }
-  });
+  discard.addEventListener('click',()=>{try{if(localStorage.getItem(transferKey(target))===raw)consumeMassProposal(target,raw);close();}catch(e){message.textContent=`No se pudo descartar: ${e.message}`;}});
 }

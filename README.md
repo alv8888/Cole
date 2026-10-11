@@ -1,4 +1,4 @@
-# AEROLAB 0.12 · Space, Aircraft, Rocket y Structure Lab
+# AEROLAB 0.13 · Space, Aircraft, Rocket y Structure Lab
 
 Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y visores reales de vehículos con Three.js/WebGL. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab incorpora voladizos rectangulares y compresión tubular, con propiedades declaradas y coeficientes frente a referencias resistentes. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md), [ENGINEERING.md](docs/ENGINEERING.md) y [STRUCTURE.md](docs/STRUCTURE.md).
 
@@ -176,3 +176,9 @@ Geometría paramétrica NACA/ellipsoide, cohete por secciones y envolvente esfé
 Pestañas: **Geometría y Materiales**, **Simulación de Cargas**, **Análisis Finito y Resultados**. Importa casos válidos abiertos en Aircraft/Rocket y envía una propuesta de masa revisable en destino, sin modificar sus ecuaciones ni el resto de sus parámetros. JSON, CSV, almacenamiento local y URL exacta con compatibilidad de enlaces antiguos.
 
 Consulta [STRUCTURE-DESIGN.md](docs/STRUCTURE-DESIGN.md) para arquitectura, propiedades, ecuaciones, unidades, ejecución, pruebas manuales, límites y tareas pendientes. Todo el código completo se entrega en los archivos de la versión, sin fragmentos pendientes. No hay nueva dependencia de ejecución: se reutiliza Three.js vendorizado.
+
+## Correcciones de auditoría · versión 0.13
+
+Cuerpos centrales validados sin propiedades heredadas, estados de vuelo finitos, corte de motor coherente, deformación térmica con Poisson y borradores geométricos independientes. Las propuestas de masa conservan ahora el caso completo de origen y permiten elegir explícitamente entre ese caso y las entradas abiertas. No hay guardado automático.
+
+Entrega, archivos, ejecución y pruebas manuales: [CORRECTIONS.md](docs/CORRECTIONS.md). Se mantienen los cuatro laboratorios y sus formatos anteriores.

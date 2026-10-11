@@ -100,7 +100,7 @@ export function range(value, min, max, label) {
   if (!Number.isFinite(value) || value < min || value > max)
     throw new Error(`${label}: ${min}–${max}.`);
 }
-export function validate(c) {
+export function validate(c, { activeOnly = false } = {}) {
   if (
     !c ||
     !["aircraft", "rocket", "sphere"].includes(c.object) ||
@@ -126,56 +126,62 @@ export function validate(c) {
     r = c.rocket,
     s = c.sphere;
   if (!w || !f || !r || !s) throw new Error("Geometría incompleta.");
-  for (const [key, min, max] of [
-    ["span", 2, 40],
-    ["root", 0.2, 6],
-    ["tip", 0.2, 6],
-    ["sweep", -30, 45],
-    ["dihedral", -10, 20],
-    ["ratio", 0.06, 0.25],
-    ["camber", 0, 0.08],
-    ["camberPosition", 0.1, 0.8],
-    ["thickness", 0.0001, 0.02],
-  ])
-    range(w[key], min, max, `Ala ${key}`);
-  if (w.thickness > Math.min(w.root, w.tip) * w.ratio * 0.05)
-    throw new Error(
-      "Pared alar demasiado gruesa para el modelo de sección delgada: t ≤ 5 % de la altura mínima.",
-    );
-  for (const [key, min, max] of [
-    ["length", 1, 30],
-    ["diameter", 0.2, 5],
-    ["thickness", 0.0001, 0.03],
-  ])
-    range(f[key], min, max, `Fuselaje ${key}`);
-  range(r.nose, 0.1, 5, "Longitud de ojiva");
-  if (!["cone", "ellipsoid"].includes(r.noseType))
-    throw new Error("Tipo de ojiva inválido.");
-  range(r.finCount, 0, 6, "Número de aletas");
-  if (!Number.isInteger(r.finCount))
-    throw new Error("Número de aletas entero requerido.");
-  range(r.finChord, 0.1, 3, "Cuerda de aleta");
-  range(r.finHeight, 0.05, 2, "Altura de aleta");
-  range(r.finThickness, 0.001, 0.05, "Espesor de aleta");
-  if (
-    !Array.isArray(r.sections) ||
-    r.sections.length < 1 ||
-    r.sections.length > 4
-  )
-    throw new Error("Se requieren 1–4 secciones cilíndricas.");
-  for (const section of r.sections) {
-    range(section.length, 0.2, 15, "Longitud de sección");
-    range(section.diameter, 0.1, 5, "Diámetro de sección");
-    range(section.thickness, 0.0001, 0.03, "Pared de sección");
-    if (section.thickness > section.diameter / 40)
+  if (!activeOnly || c.object === "aircraft") {
+    for (const [key, min, max] of [
+      ["span", 2, 40],
+      ["root", 0.2, 6],
+      ["tip", 0.2, 6],
+      ["sweep", -30, 45],
+      ["dihedral", -10, 20],
+      ["ratio", 0.06, 0.25],
+      ["camber", 0, 0.08],
+      ["camberPosition", 0.1, 0.8],
+      ["thickness", 0.0001, 0.02],
+    ])
+      range(w[key], min, max, `Ala ${key}`);
+    if (w.thickness > Math.min(w.root, w.tip) * w.ratio * 0.05)
       throw new Error(
-        "Pared tubular: t/D ≤ 1/40 para presión de pared delgada.",
+        "Pared alar demasiado gruesa para el modelo de sección delgada: t ≤ 5 % de la altura mínima.",
       );
+    for (const [key, min, max] of [
+      ["length", 1, 30],
+      ["diameter", 0.2, 5],
+      ["thickness", 0.0001, 0.03],
+    ])
+      range(f[key], min, max, `Fuselaje ${key}`);
   }
-  range(s.radius, 0.1, 5, "Radio de esfera");
-  range(s.thickness, 0.0001, 0.03, "Espesor de esfera");
-  if (s.thickness > s.radius / 20)
-    throw new Error("Esfera delgada: t/R ≤ 1/20.");
+  if (!activeOnly || c.object === "rocket") {
+    range(r.nose, 0.1, 5, "Longitud de ojiva");
+    if (!["cone", "ellipsoid"].includes(r.noseType))
+      throw new Error("Tipo de ojiva inválido.");
+    range(r.finCount, 0, 6, "Número de aletas");
+    if (!Number.isInteger(r.finCount))
+      throw new Error("Número de aletas entero requerido.");
+    range(r.finChord, 0.1, 3, "Cuerda de aleta");
+    range(r.finHeight, 0.05, 2, "Altura de aleta");
+    range(r.finThickness, 0.001, 0.05, "Espesor de aleta");
+    if (
+      !Array.isArray(r.sections) ||
+      r.sections.length < 1 ||
+      r.sections.length > 4
+    )
+      throw new Error("Se requieren 1–4 secciones cilíndricas.");
+    for (const section of r.sections) {
+      range(section.length, 0.2, 15, "Longitud de sección");
+      range(section.diameter, 0.1, 5, "Diámetro de sección");
+      range(section.thickness, 0.0001, 0.03, "Pared de sección");
+      if (section.thickness > section.diameter / 40)
+        throw new Error(
+          "Pared tubular: t/D ≤ 1/40 para presión de pared delgada.",
+        );
+    }
+  }
+  if (!activeOnly || c.object === "sphere") {
+    range(s.radius, 0.1, 5, "Radio de esfera");
+    range(s.thickness, 0.0001, 0.03, "Espesor de esfera");
+    if (s.thickness > s.radius / 20)
+      throw new Error("Esfera delgada: t/R ≤ 1/20.");
+  }
   return clone(c);
 }
 
