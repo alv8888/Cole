@@ -1,3 +1,4 @@
+import { createDesignComparison } from './comparison-ui.js';
 import { groupInspector } from '../../navigation/inspector.js';
 import { createCalculationState } from '../../navigation/calculation-state.js';
 import { createLineChart } from '../../charts/line.js';
@@ -28,6 +29,7 @@ let draft = clone(DEFAULT),
   viewer = null,
   playing = false;
 let calculationError = null, visualError = null;
+const designComparison=createDesignComparison(()=>({result,documentError,object:draft.object}));
 function reviewTarget() {
   const invalid = [...document.querySelectorAll('#design-form [aria-invalid="true"],#design-load-form [aria-invalid="true"],#design-magnification[aria-invalid="true"],#design-fraction[aria-invalid="true"]')];
   // Inactive geometry is retained: focus its selector without changing the active model.
@@ -410,6 +412,7 @@ function render() {
     (id) => ($(id).disabled = !result || (id !== "design-csv" && !!documentError)),
   );
   exportPreview();
+  designComparison.render();
 }
 function update() {
   read();

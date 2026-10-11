@@ -257,3 +257,19 @@ PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run
 Casos nuevos: A/B válidas, una inválida con el resultado restante conservado, ambas inválidas, acceso al campo B con el grupo plegado y ancho mínimo legible a 390 px; solución Structure activa conservada con borrador inactivo inválido; revisar sin cambiar objeto ni campo calculado; recuperación del borrador; opciones visuales inválidas con resultados/revisión FEM conservados; navegación automática a controles de cargas/vista; esfera UD etiquetada solo geometría/masa y banco anterior independiente. Se conservan todas las regresiones de cálculos, guardados, enlaces, exportaciones, transferencia de masa, escenas WebGL y errores de contexto/almacenamiento. Workbench verifica 320–1440 px, zoom CSS 200 % y visores inicialmente visibles.
 
 Capturas `/tmp/aerolab-019-state-{desktop,mobile}.png`, `/tmp/aerolab-019-draft-mobile.png` y `/tmp/aerolab-019-space-mobile.png` inspeccionadas. La última muestra el inspector en una columna, con revisión accesible fuera del grupo plegado. No se afirma validación experimental de los modelos ni auditoría WCAG completa; pendientes Firefox/Safari, hardware, lectores de pantalla y rendimiento medido.
+
+## Entrega 20 · Comparación del diseñador (0.20)
+
+116 pruebas unitarias aprobadas, 0 fallos/omitidas: 112 anteriores y 4 nuevas. Comprueban escalado lineal con la fuerza sin cambiar masa, conversiones Pa/MPa y m/mm, conservación de entradas, incompatibilidad de criterios metal/UD y casos de carga, referencia cero, desplazamientos negativos, magnitudes ausentes en esfera UD y CSV con configuraciones completas validadas. Exportar rechaza borradores inactivos inválidos. No se modifican los modelos científicos originales.
+
+La ejecución completa aprobó 16 suites Chromium y 124 grupos (120 anteriores y 4 nuevos). Después de mejorar descripciones de referencias y conservación ante entradas inválidas se repitió la suite nueva, aprobada; tras el refinamiento de columnas móviles/zoom se repitió nuevamente. Son las mismas 4 comprobaciones ampliadas, no grupos nuevos. Un intento de repetición con AEROLAB_URL apuntó al servidor de la ejecución completa ya finalizada y falló en disponibilidad HTTP antes de abrir el navegador; se ejecutó después con servidor propio y pasó.
+
+```sh
+node --test --test-isolation=none tests/*.test.js
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser -- design-comparison-browser.mjs
+```
+
+La suite nueva captura un diseño real, cambia fuerza 14700→29400 N, verifica masa constante y esfuerzo +100 %, descarga/lee/parsea CSV de 11 columnas y tres métricas, comprueba JSON completos y ausencia de escrituras en localStorage. Restablecer conserva referencia (esfuerzo −50 %), entradas inválidas limpian tabla/CSV y conservan la identificación de referencia. Hay referencias aisladas por objeto, diferencias incompatibles explícitas, borrador inactivo bloqueando captura/CSV sin ocultar resultados activos y vista inválida que no afecta comparación ni revisión FEM. Se comprueban esfera UD sin magnitudes ficticias, eliminación/recarga de referencias, teclado, reflujo 320–1440 px, zoom CSS 200 % y ausencia de errores JavaScript.
+
+Capturas finales `/tmp/aerolab-020-comparison-desktop.png` y `/tmp/aerolab-020-comparison-mobile.png` inspeccionadas. Tabla con desplazamiento local, criterios explícitos y sin desbordamiento global. Se conservan regresiones anteriores de datos, enlaces, guardados, puente de masa y WebGL. Pendientes lectores de pantalla reales, Firefox/Safari, hardware y rendimiento medido; estos casos no demuestran validación experimental ni seguridad.

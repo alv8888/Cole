@@ -99,3 +99,11 @@
 
 /* Shared route back to the existing homepage catalog. */
 .catalog-return{display:block;margin:0 0 14px;font-size:13px;text-underline-offset:4px}
+
+.design-comparison > summary { cursor: pointer; font-weight: 600; font-size: 16px; }
+/* Fixed columns let mobile show a metric and its reference before horizontal scrolling. */
+.design-comparison table { min-width: 700px; table-layout: fixed; white-space: normal; }
+.design-comparison thead th:first-child { width: 26%; }
+.design-comparison thead th:last-child { width: 32%; }
+.design-comparison tbody th { font-size: 13px; text-transform: none; letter-spacing: 0; }
+.design-comparison caption { text-align: left; padding: 12px 0; }
