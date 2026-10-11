@@ -136,3 +136,7 @@ El script Three.js usa Chromium con `--use-gl=angle --use-angle=swiftshader --en
 ## No comprobado
 
 GPU física, restauración de contexto, Safari, Firefox, dispositivos físicos, lectores de pantalla, una auditoría WCAG completa, hosting real, incertidumbre de constantes, efemérides reales, perturbaciones orbitales, conservación durante integración numérica (no hay integrador), e>0,9, órbitas abiertas ni fidelidad experimental de Aircraft/Rocket, CFD, estabilidad, resistencia última de materiales, ciclo de vida ambiental ni fidelidad experimental de la trayectoria radial multietapa. Ninguno de estos resultados se anuncia como validado.
+
+## Entrega 9 · Pestañas y URL
+
+61 pruebas unitarias y 56 grupos Chromium pasaron. Nuevas pruebas: `tests/navigation.test.js` (4) y `tests/navigation-browser.mjs` (5). Validan teclado, panel activo único, cambios conservados, enlaces a teoría, URL con referencias/tiempo, portapapeles real, copia manual y rechazo atómico sin sobrescribir localStorage. Se repitieron las seis suites de navegador, incluyendo modelos previos y Three.js. Los selectores de controles utilizan la pestaña apropiada; esperar tablas ocultas usa estado attached. Ver [NAVIGATION.md](NAVIGATION.md) para comandos y pruebas manuales.

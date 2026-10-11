@@ -945,3 +945,20 @@ body[data-lab=aircraft] .engineering-visual { position: static; }
 .globe-controls button { font-size: 11px; padding: 9px 12px; }
 .globe-panel > .helper { margin: 14px 22px; }
 @media (max-width: 600px) { .globe-host { height: 340px; } .globe-controls { padding: 12px 16px 0; } .globe-panel > .helper { margin-inline: 16px; } }
+
+/* Internal lab tabs: panels retain their controls and calculations. */
+[hidden] { display: none !important; }
+.lab-navigation { margin: 1.5rem 0; }
+.lab-toolbar { display: flex; align-items: start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.lab-toolbar [role="tablist"] { display: flex; flex-wrap: wrap; gap: .5rem; }
+.lab-toolbar [role="tab"] { background: transparent; color: var(--muted, #a1afc2); border: 1px solid #354359; }
+.lab-toolbar [aria-selected="true"] { background: #173b3b; color: #b1f4df; border-color: #8edfcc; }
+[role="tabpanel"]:focus-visible { outline: 2px solid #8edfcc; outline-offset: 6px; }
+#share-manual { display: block; margin-top: .75rem; }
+#share-url { display: block; width: 100%; margin-top: .5rem; }
+#panel-theory > details { padding: 1.5rem; }
+@media (max-width: 600px) {
+  .lab-toolbar, .lab-toolbar [role="tablist"] { width: 100%; }
+  .lab-toolbar [role="tab"] { flex: 1 1 100%; text-align: left; }
+  #share-simulation { width: 100%; }
+}

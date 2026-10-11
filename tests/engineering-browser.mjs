@@ -12,7 +12,7 @@ try{
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto(`${base}/${kind}.html`);
     await check(`${kind}: known calculations and camera geometry`,async()=>{
-      await page.waitForSelector('#engineering-results tr');
+      await page.waitForSelector('#engineering-results tr', {state:'attached'});
       assert.match(await page.locator('#engineering-results').innerText(),kind==='aircraft'?/14\.700,000/:/1\.318,335/);
       const before=await page.locator('#engineering-canvas').evaluate(canvas=>canvas.toDataURL());
       await page.locator('#view-yaw').fill('120');

@@ -1,3 +1,5 @@
+import { registerSharePart } from '../navigation/ui.js';
+import { numberIn, choice } from '../navigation/share.js';
 import { G0 } from './models.js';
 import { decodeAircraftRecord } from '../aircraft/configuration.js';
 import { createAircraftForces } from '../aircraft/visualization.js';
@@ -93,3 +95,23 @@ $('engineering-load').addEventListener('click',()=>{
   catch(error){status(`No se pudo cargar: ${error.message}`);}
 });
 $('engineering-export').addEventListener('click',()=>{try{downloadFile(JSON.stringify({version:kind==='aircraft'?2:1,module:kind,configuration:current},null,2),`aerolab-${kind}.json`,'application/json');status('JSON generado con parámetros y módulo identificados.');}catch(error){status(error.message);}});
+
+registerSharePart(kind==='aircraft'?'aircraft':'calculator', {
+  get: () => ({ configuration:read(), reference, yaw:$('view-yaw').valueAsNumber, pitch:$('view-pitch').valueAsNumber }),
+  validate(state) {
+    const validateConfig = config => {
+      if (!config || typeof config !== 'object') throw new Error('Configuración incompleta.');
+      profile.fields.forEach(field=>numberIn(config[field.key],...profile.ranges[field.key]));
+      if(kind==='aircraft')choice(config.dragMode,['polar','direct']);
+      profile.compute(config);
+    };
+    validateConfig(state.configuration);
+    if(state.reference!==null)validateConfig(state.reference);
+    numberIn(state.yaw,0,360); numberIn(state.pitch,-80,80);
+  },
+  apply(state) {
+    reference=state.reference; fill(state.configuration); update();
+    $('view-yaw').value=state.yaw; $('view-pitch').value=state.pitch;
+    $('view-yaw').dispatchEvent(new Event('input')); $('view-pitch').dispatchEvent(new Event('input'));
+  },
+});

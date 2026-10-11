@@ -93,3 +93,7 @@ Fase 3 completada: esfera texturizada, líneas de órbita/lanzamiento, marcador 
 Fase 4: 57 pruebas unitarias y 51 grupos de navegador; conversiones y extremos, renderizado WebGL con SwiftShader, textura y recursos locales, imagen cambia al girar/acercar, estados sincronizados, diseño 320–1440 px, pérdida/ausencia de WebGL, fallo de textura y regresiones anteriores. Capturas inspeccionadas. Problemas importantes antes de ampliar: muestreo de dibujo, precisión Float32/escala extrema, textura estática sin geolocalización, carga de recursos y GPU no probada físicamente.
 
 Fases 5/6 pendientes: trayectoria no radial validada, pruebas en otros navegadores y hardware, accesibilidad completa y hosting con compresión/caché. Código actualizado en GitHub; no se ha desplegado un sitio. THREE-VIEWS.md registra límites y pruebas no realizadas.
+
+## Entrega 9 · Navegación y enlaces (0.9)
+
+Fases 1–4 completadas: tres pestañas por laboratorio, teclado y anclas, pausa al ocultar simulaciones, URL versionada con parámetros/referencias/tiempo y recuperación conjunta validada antes de aplicar. No cambia la física ni agrega dependencias. 61 pruebas unitarias y 56 grupos Chromium pasaron. Problemas tratados: conservar nodos/listeners, evitar restauraciones parciales y gestionar el portapapeles bloqueado. Pendientes: otros navegadores, accesibilidad completa y hosting HTTPS. Véase NAVIGATION.md.

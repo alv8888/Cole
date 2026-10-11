@@ -24,9 +24,11 @@ try {
     assert.match(await page.locator('#launch-outcome').innerText(),/impacto calculado/);
     assert.match(await page.locator('#launch-events').innerText(),/Separación/);
     assert.equal(await page.locator('#launch-altitude polyline').count(),1);assert.equal(await page.locator('#launch-velocity polyline').count(),1);
+    await page.locator('#tab-analysis').click();
     const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#launch-csv').click()]);
     const csv=await readFile(await download.path(),'utf8'),lines=csv.trim().split('\n');
     assert.match(lines[0],/altitude_m,radial_velocity_m_s/);assert.ok(lines.length>16000);
+    await page.locator('#tab-simulation').click();
     assert.equal(Number(lines.at(-1).split(',')[1]),0);assert.ok(Number(lines.at(-1).split(',')[2])<0);
   });
   await check('multietapa: escape lunar, reproducción y pausa',async()=>{

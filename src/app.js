@@ -1,3 +1,5 @@
+import { registerSharePart } from './navigation/ui.js';
+import { numberIn, choice } from './navigation/share.js';
 import { createGlobePanel } from './three/bridge.js';
 import { orbitPath, orbitPoint } from './three/geometry.js';
 import { BODIES, DEFAULTS } from './data.js';
@@ -325,4 +327,19 @@ sensitivity = createSensitivity({
     configurations.map((current, index) => index === target ? config : current),
     `Muestra aplicada a ${target === 0 ? 'A' : 'B'}. La otra configuración se conserva; tiempo reiniciado.`,
   ),
+});
+
+
+document.addEventListener('aerolab:tabchange', event => { if (event.detail.tab !== 'simulation') pause(); });
+registerSharePart('space', {
+  get: () => ({ configurations, elapsed, speed: $('#speed').value, reference: $('#reference').value, globe: $('#globe-configuration').value }),
+  validate(state) {
+    parseConfigurations(JSON.stringify({version:2, configurations:state.configurations}));
+    numberIn(state.elapsed,0,1e12); choice(state.speed,['1','60','600']); choice(state.reference,['0','1']); choice(state.globe,['0','1']);
+  },
+  apply(state) {
+    applyConfigurations(state.configurations,'Configuraciones del enlace recuperadas.');
+    elapsed=state.elapsed; $('#speed').value=state.speed; $('#reference').value=state.reference; $('#globe-configuration').value=state.globe;
+    refreshGlobePath(); refreshPositions();
+  },
 });

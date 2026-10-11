@@ -1,3 +1,5 @@
+import { registerSharePart } from '../navigation/ui.js';
+import { numberIn, choice } from '../navigation/share.js';
 import { createGlobePanel } from '../three/bridge.js';
 import { rocketPath, rocketPoint } from '../three/geometry.js';
 import { BODIES } from './model.js';
@@ -75,17 +77,18 @@ $('launch-count').addEventListener('change', () => {
   const count = Number($('launch-count').value), old = config().stages;
   renderStages(Array.from({ length: count }, (_, i) => old[i] ?? { dry:100, propellant:600, thrust:15000, duration:100 })); invalidate();
 });
-$('launch-run').addEventListener('click', () => {
+function calculateLaunch(autoPlay = false, restoredClock = 0) {
   pause();
   try {
     result = simulate(config());
     globe.setPath({body:result.config.body,description:`${BODIES[result.config.body].name} · radio ${BODIES[result.config.body].radius/1000} km · 1 unidad 3D = radio del cuerpo.`,...rocketPath(result.samples,BODIES[result.config.body].radius),closed:false});
-    clock = 0; $('launch-timeline').max = 100;
+    clock = restoredClock; $('launch-timeline').max = 100;
     for (const id of ['launch-play','launch-timeline','launch-csv']) $(id).disabled = false;
     $('launch-message').textContent = 'Trayectoria calculada con RK4, paso máximo 0,1 s. Se reproduce el tiempo calculado, acelerado según el control.';
-    display(); if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { playing = true; $('launch-play').textContent = 'Pausar'; }
+    display(); if (autoPlay && !matchMedia('(prefers-reduced-motion: reduce)').matches) { playing = true; $('launch-play').textContent = 'Pausar'; }
   } catch (e) { invalidate(); $('launch-message').textContent = e.message; }
-});
+}
+$('launch-run').addEventListener('click', () => calculateLaunch(true));
 $('launch-play').addEventListener('click', () => {
   if (playing) pause(); else { if (clock >= result.final.t) clock = 0; playing = true; previousFrame = null; $('launch-play').textContent = 'Pausar'; }
 });
@@ -108,3 +111,15 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 fill(clone(DEFAULT)); requestAnimationFrame(frame);
+
+document.addEventListener('aerolab:tabchange', event=>{if(event.detail.tab!=='simulation')pause();});
+registerSharePart('launch', {
+  get: () => ({ configuration:config(), calculated:!!result, clock, speed:$('launch-speed').value }),
+  validate(state) {
+    budget(state.configuration); choice(state.speed,['1','10','60','300']);
+    choice(state.calculated,[true,false]); numberIn(state.clock,0,state.configuration.horizon);
+    if(!state.calculated && state.clock!==0)throw new Error('Reloj sin trayectoria calculada.');
+    if(state.calculated && state.clock>simulate(state.configuration).final.t)throw new Error('Tiempo posterior al final de la trayectoria.');
+  },
+  apply(state) { fill(state.configuration); $('launch-speed').value=state.speed; if(state.calculated)calculateLaunch(false,state.clock); },
+});

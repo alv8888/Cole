@@ -58,6 +58,7 @@ export function createAircraftForces(side, chart, summary, button) {
   function stop() { animating=false;previous=null;button.textContent='Animar aire ilustrativo';button.setAttribute('aria-pressed','false'); }
   button.addEventListener('click',()=>{if(animating)stop();else if(current){animating=true;previous=null;button.textContent='Pausar aire ilustrativo';button.setAttribute('aria-pressed','true');}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+  document.addEventListener('aerolab:tabchange',event=>{if(event.detail.tab!=='simulation')stop();});
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   reduced.addEventListener('change',()=>{if(reduced.matches)stop();});
   function frame(now) {

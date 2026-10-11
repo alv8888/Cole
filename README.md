@@ -1,4 +1,4 @@
-# AEROLAB 0.8 · Space, Aircraft y Rocket Lab
+# AEROLAB 0.9 · Space, Aircraft y Rocket Lab
 
 Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y geometría 3D con proyección en Canvas 2D. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
 
@@ -15,7 +15,7 @@ Abre `http://localhost:8000` en tu equipo local. En una máquina remota, utiliza
 
 Alternativa con Node y npm presentes: `npm start`. No se necesita `npm install` para usar la aplicación o ejecutar las pruebas unitarias.
 
-Si el puerto 8000 está ocupado, ejecuta `python3 -m http.server 8001 --bind 0.0.0.0` y utiliza el puerto 8001. Las entregas 4, 5, 6, 7 y 8 se validaron en 8001 porque un servidor anterior ocupaba 8000 sin responder correctamente; no se detuvo ese proceso al no poder verificar su propiedad desde el entorno actual.
+Si el puerto 8000 está ocupado, ejecuta `python3 -m http.server 8001 --bind 0.0.0.0` y utiliza el puerto 8001. Las entregas 4, 5, 6, 7, 8 y 9 se validaron en 8001 porque un servidor anterior ocupaba 8000 sin responder correctamente; no se detuvo ese proceso al no poder verificar su propiedad desde el entorno actual.
 
 ## Pruebas
 
@@ -156,3 +156,7 @@ Los archivos son estáticos y se pueden servir mediante cualquier alojamiento co
 Antes de publicar: ejecuta las pruebas, verifica el sitio sobre HTTPS, revisa enlaces y accesibilidad manual y configura políticas de seguridad en el proveedor. No se introducen secretos ni contenido remoto durante el cálculo. Three.js es código de terceros fijado y servido localmente; conserva sus licencias y revisa actualizaciones antes de cambiar versión. El almacenamiento local no está cifrado y depende del origen del sitio; úsalo solo para parámetros públicos. No uses el servidor de Python como servidor de producción.
 
 Para actualizar modelos, conserva pruebas de regresión y migra o cambia la versión del formato guardado. Las extensiones futuras deben tener modelos y pruebas independientes.
+
+## Pestañas y simulaciones compartibles · versión 0.9
+
+Cada laboratorio separa configuración, análisis y teoría mediante pestañas con teclado. **Copiar enlace de simulación** guarda parámetros, referencias e instante en la URL; el enlace se abre pausado sin sobrescribir guardados. Si el navegador bloquea el portapapeles, muestra copia manual. Alcance, archivos y pruebas: [NAVIGATION.md](docs/NAVIGATION.md).
