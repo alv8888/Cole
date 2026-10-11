@@ -186,6 +186,8 @@ export function validate(c, { activeOnly = false } = {}) {
 }
 
 export function validateSettings(s) {
+  if (s.display !== undefined && !["field", "geometry"].includes(s.display))
+    throw new Error("Modo de visualización inválido.");
   range(s.magnification, 1, 200, "Amplificación");
   range(s.fraction, 0, 100, "Fracción");
   if (typeof s.mesh !== "boolean" || typeof s.nodes !== "boolean")

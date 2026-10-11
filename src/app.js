@@ -1,3 +1,4 @@
+import { groupInspector } from './navigation/inspector.js';
 import { registerSharePart } from './navigation/ui.js';
 import { numberIn, choice } from './navigation/share.js';
 import { createGlobePanel } from './three/bridge.js';
@@ -69,6 +70,7 @@ function createFields() {
         <p id="${letter}-${key}-error" class="field-error"></p></div>`).join('')}
       <p id="${letter}-warning" class="warning"></p>
     </fieldset>`).join('');
+  groupInspector($('#configuration-fields'));
 }
 
 function fillFields() {

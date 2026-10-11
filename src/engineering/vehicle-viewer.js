@@ -1,3 +1,4 @@
+import { setupPresentation, framingBoxDistance } from '../rendering/presentation.js';
 import * as THREE from 'three';
 import { OrbitControls } from '../../vendor/three/OrbitControls.js';
 import { aircraftGeometry, forceArrows, plumePower } from './vehicle-geometry.js';
@@ -10,8 +11,7 @@ export function createVehicleViewer(canvas,yawInput,pitchInput,kind,report) {
   const scene=new THREE.Scene();scene.background=new THREE.Color('#080f1c');
   const camera=new THREE.PerspectiveCamera(45,1,.01,10000);camera.up.set(0,0,1);
   const controls=new OrbitControls(camera,canvas);controls.enablePan=true;controls.enableDamping=false;
-  scene.add(new THREE.HemisphereLight(0xc7efff,0x152338,2));
-  const light=new THREE.DirectionalLight(0xffffff,3);light.position.set(10,-15,25);scene.add(light);
+  setupPresentation(THREE, renderer, scene);
   const grid=new THREE.GridHelper(120,40,0x347b89,0x18283d);grid.rotation.x=Math.PI/2;grid.position.z=-3;scene.add(grid);
   const model=new THREE.Group();scene.add(model);
   let extent=10,valid=false,lost=false,plume=null,power=0,animation=false,raf=null,phase=0,last=null,previousSize=null;
@@ -23,8 +23,17 @@ export function createVehicleViewer(canvas,yawInput,pitchInput,kind,report) {
   function angles(){const a=Number(yawInput.value)*Math.PI/180,b=Number(pitchInput.value)*Math.PI/180,d=camera.position.distanceTo(controls.target)||extent*2.8;camera.position.set(controls.target.x+d*Math.cos(b)*Math.cos(a),controls.target.y+d*Math.cos(b)*Math.sin(a),controls.target.z+d*Math.sin(b));controls.update();snapshot();render();}
   controls.addEventListener('change',()=>{const v=camera.position.clone().sub(controls.target),d=v.length();yawInput.value=(Math.atan2(v.y,v.x)*180/Math.PI+360)%360;pitchInput.value=Math.max(-80,Math.min(80,Math.asin(v.z/d)*180/Math.PI));snapshot();render();});
   yawInput.addEventListener('input',angles);pitchInput.addEventListener('input',angles);
-  function fit(){controls.target.set(0,0,0);camera.position.set(extent*2.8,0,0);controls.minDistance=extent*.25;controls.maxDistance=extent*20;camera.near=extent/1000;camera.far=extent*100;camera.updateProjectionMatrix();angles();}
-  function resize(){const width=canvas.clientWidth;if(!width)return;renderer.setSize(width,420,false);camera.aspect=width/420;camera.updateProjectionMatrix();render();}
+  function fit(){
+    const box=new THREE.Box3().setFromObject(model);
+    const center=box.isEmpty()?new THREE.Vector3():box.getCenter(new THREE.Vector3());
+    const size=box.isEmpty()?[extent,extent,extent]:box.getSize(new THREE.Vector3()).toArray();
+    const yaw=Number(yawInput.value)*Math.PI/180,pitch=Number(pitchInput.value)*Math.PI/180;
+    const direction=[Math.cos(pitch)*Math.cos(yaw),Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch)];
+    const distance=framingBoxDistance(size,camera.aspect,direction,[0,0,1],camera.fov);
+    controls.target.copy(center);camera.position.copy(center).add(new THREE.Vector3(...direction).multiplyScalar(distance));
+    controls.minDistance=extent*.25;controls.maxDistance=extent*20;camera.near=extent/1000;camera.far=extent*100;camera.updateProjectionMatrix();angles();
+  }
+  function resize(){const width=canvas.clientWidth,height=canvas.clientHeight;if(!width||!height)return;renderer.setSize(width,height,false);camera.aspect=width/height;canvas.dataset.viewport=JSON.stringify([width,height]);camera.updateProjectionMatrix();render();}
   new ResizeObserver(resize).observe(canvas);
   function disposeModel(){model.traverse(node=>{node.geometry?.dispose();if(node.material){const materials=Array.isArray(node.material)?node.material:[node.material];materials.forEach(m=>{m.map?.dispose();m.dispose();});}});model.clear();plume=null;}
   function mesh(geometry,color,position=[0,0,0]){const value=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color,metalness:.55,roughness:.35,side:THREE.DoubleSide}));value.position.set(...position);model.add(value);return value;}
@@ -68,7 +77,8 @@ export function createVehicleViewer(canvas,yawInput,pitchInput,kind,report) {
   return {
     update(config,result){stop();disposeModel();valid=!!result;canvas.dataset.valid=String(valid);if(!valid){legend.textContent='Corrige los parámetros para ver el modelo y sus fuerzas.';canvas.dataset.forces='[]';canvas.dataset.plumePower='0';if(toggle)toggle.disabled=true;render();return;}
       if(kind==='aircraft')drawAircraft(config,result);else drawRocket(config,result);
-      grid.position.z=-extent*.6;const size=kind==='aircraft'?Math.max(extent,config.span):extent;if(size!==previousSize){fit();previousSize=size;}render();
+      grid.scale.setScalar(extent*2.4/120);
+    grid.position.z=-extent*.6;const size=kind==='aircraft'?Math.max(extent,config.span):extent;if(size!==previousSize){fit();previousSize=size;}render();
       if(kind==='rocket'&&power&&!motion.matches){animation=true;toggle.textContent='Pausar pluma';toggle.setAttribute('aria-pressed','true');canvas.dataset.animating='true';raf=requestAnimationFrame(tick);}
     },
     action(action){if(lost)return;if(action==='reset'){yawInput.value=30;pitchInput.value=20;fit();}else if(action==='in'||action==='out'){const offset=camera.position.clone().sub(controls.target);offset.setLength(THREE.MathUtils.clamp(offset.length()*(action==='in'?.8:1.25),controls.minDistance,controls.maxDistance));camera.position.copy(controls.target).add(offset);controls.update();render();}else{const delta=new THREE.Vector3(action==='left'?-extent*.1:action==='right'?extent*.1:0,0,action==='up'?extent*.1:-extent*.1);camera.position.add(delta);controls.target.add(delta);controls.update();render();}}

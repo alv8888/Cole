@@ -1,4 +1,4 @@
-# AEROLAB 0.13 · Space, Aircraft, Rocket y Structure Lab
+# AEROLAB 0.14 · Space, Aircraft, Rocket y Structure Lab
 
 Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y visores reales de vehículos con Three.js/WebGL. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab incorpora voladizos rectangulares y compresión tubular, con propiedades declaradas y coeficientes frente a referencias resistentes. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md), [ENGINEERING.md](docs/ENGINEERING.md) y [STRUCTURE.md](docs/STRUCTURE.md).
 
@@ -151,7 +151,7 @@ El CSV usa coma como separador y punto decimal, sin formato regional. Hay 482 fi
 
 ## Publicación inicial
 
-Los archivos son estáticos y se pueden servir mediante cualquier alojamiento con HTTPS y soporte de tipos MIME JavaScript. Publica `index.html`, `aircraft.html`, `rocket.html`, `styles.css`, `src/`, `docs/`, `vendor/` y `assets/`; no publiques `.git`, pruebas ni herramientas temporales. Los enlaces y módulos son relativos y funcionan bajo un subdirectorio. No se ha desplegado el proyecto ni comprobado un hosting real.
+Los archivos son estáticos y se pueden servir mediante cualquier alojamiento con HTTPS y soporte de tipos MIME JavaScript. Publica `index.html`, `aircraft.html`, `rocket.html`, `structure.html`, `styles.css`, `workbench.css`, `src/`, `docs/`, `vendor/` y `assets/`; no publiques `.git`, pruebas ni herramientas temporales. Los enlaces y módulos son relativos y funcionan bajo un subdirectorio. No se ha desplegado el proyecto ni comprobado un hosting real.
 
 Antes de publicar: ejecuta las pruebas, verifica el sitio sobre HTTPS, revisa enlaces y accesibilidad manual y configura políticas de seguridad en el proveedor. No se introducen secretos ni contenido remoto durante el cálculo. Three.js es código de terceros fijado y servido localmente; conserva sus licencias y revisa actualizaciones antes de cambiar versión. El almacenamiento local no está cifrado y depende del origen del sitio; úsalo solo para parámetros públicos. No uses el servidor de Python como servidor de producción.
 
@@ -182,3 +182,9 @@ Consulta [STRUCTURE-DESIGN.md](docs/STRUCTURE-DESIGN.md) para arquitectura, prop
 Cuerpos centrales validados sin propiedades heredadas, estados de vuelo finitos, corte de motor coherente, deformación térmica con Poisson y borradores geométricos independientes. Las propuestas de masa conservan ahora el caso completo de origen y permiten elegir explícitamente entre ese caso y las entradas abiertas. No hay guardado automático.
 
 Entrega, archivos, ejecución y pruebas manuales: [CORRECTIONS.md](docs/CORRECTIONS.md). Se mantienen los cuatro laboratorios y sus formatos anteriores.
+
+## Interfaz y renderizado · versión 0.14
+
+Los cuatro laboratorios muestran antes sus visores, con inspectores agrupados y reproducción junto a la escena. Servicios comunes de iluminación/encuadre; Structure separa geometría iluminada y campos resistentes sin iluminación, actualiza normales/bounds de la deformación y conserva el cálculo al modificar opciones visuales. Su gráfica tiene ejes firmados, ticks y selección de nodos con teclado/puntero. Los gráficos conservan legibilidad en móvil mediante regiones desplazables.
+
+Pruebas y CI de navegador: `PLAYWRIGHT_MODULE=/ruta/node_modules/playwright/index.mjs npm run test:browser`. El runner inicia y detiene su propio servidor local; Playwright es una herramienta de pruebas, no una dependencia del sitio. Guía completa de archivos, ejecución, pruebas manuales y límites: [WORKBENCH.md](docs/WORKBENCH.md). Preparación de hosting: [DEPLOYMENT.md](docs/DEPLOYMENT.md).

@@ -173,3 +173,15 @@ Las herramientas de navegador solo se instalaron en `/tmp`, fuera de dependencia
 Node 24.19.0: **94 pruebas individuales aprobadas**, 0 fallos/omisiones, mediante `node --test --test-isolation=none tests/*.test.js`. El runner con aislamiento de este entorno solo reportaba archivos; esos resultados no se contabilizaron como pruebas individuales. Ocho regresiones nuevas cubren catálogo heredado, estados finitos, borradores independientes, termoelasticidad/Poisson, UD, corte, origen y consumo de propuestas.
 
 Chromium local sobre HTTP en puerto 8013: **86 grupos aprobados**, sin omitir suites previas: Space 20, engineering 10, fuerzas 7, vuelo 7, Three 7, navegación 5, vehículos 8, Structure anterior 8, diseñador 11 y audit-regressions-browser 3. El primer intento del diseñador requirió actualizar la espera de su test: la aplicación ahora utiliza Web Locks de manera asíncrona; la suite espera a que termine antes de leer resultados. Casos manuales, fórmulas y límites en CORRECTIONS.md. Sin validación en hosting ni otros navegadores.
+
+## Entrega 14 · Interfaz y renderizado
+
+**101 pruebas individuales Node 24 y 96 grupos Chromium aprobados**. Siete pruebas numéricas nuevas: mapa de colores/leyenda, encuadre esférico y por caja, ejes firmados/cero, cursor nodal, ciclo de reproducción bajo demanda y compatibilidad de opciones visuales. `node --test --test-isolation=none tests/*.test.js` confirma los tests individuales en este sandbox.
+
+`PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser` inicia/verifica/detiene servidor HTTP en 8060 y ejecuta las 11 suites: Space 20, engineering 10, fuerzas 7, vuelo 7, Three 7, navegación 5, vehículos 8, Structure anterior 8, diseñador 11, correcciones 3 y workbench 10. Se conserva salida no cero si cualquier suite falla. También se comprobó selección de suites y servidor externo con AEROLAB_URL.
+
+Las diez comprobaciones nuevas abarcan distribución/reflujo en cuatro módulos, 200 % zoom CSS, ausencia de solve al mover controles visuales, normales/bounds tras deformación, invalidez visual recuperable, ejes/cero y selección de nodo, URL con display, disclosure por teclado, recuperación de WebGL estructural sin perder resultados y ausencia de RAF en reposo/pausa. La primera prueba de normales podía devolver la misma amplitud tras dos ajustes; su timeout se resolvió haciendo distinto el estado final, sin quitar la comprobación.
+
+Capturas revisadas y medidas de posición del visor/contrastes en WORKBENCH.md. Se añadió tarea de navegador a GitHub Actions con herramienta fijada, pero aquí se valida la ejecución local del runner; no se afirma aprobación de una ejecución remota ni validación de hosting/otros navegadores/hardware.
+
+Tras el ajuste final de tamaño inicial y recuperación de contexto se repitieron las suites del diseñador (11) y workbench (10), ambas aprobadas. Se confirmó además la existencia de Playwright 1.64.0 en el registro npm; esto no sustituye la ejecución remota del workflow.

@@ -1,3 +1,4 @@
+import { setupPresentation, fieldColor, framingBoxDistance } from '../../rendering/presentation.js';
 import { sampleField, deformVertex } from "./deformation.js";
 import * as THREE from "three";
 import { OrbitControls } from "../../../vendor/three/OrbitControls.js";
@@ -21,10 +22,7 @@ export function createDesigner(host) {
   camera.up.set(0, 0, 1);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = false;
-  scene.add(new THREE.HemisphereLight(0xcbeaff, 0x142141, 2));
-  const light = new THREE.DirectionalLight(0xffffff, 3);
-  light.position.set(8, -6, 15);
-  scene.add(light);
+  setupPresentation(THREE, renderer, scene);
   let group = new THREE.Group();
   scene.add(group);
   let result = null,
@@ -33,7 +31,9 @@ export function createDesigner(host) {
     nodal = [],
     frameId = 0,
     playing = false,
-    lost = false;
+    lost = false,
+    lastAmplitude = null,
+    normalUpdates = 0;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   function sample(s) { return sampleField(result.points,s); }
   function deform(...args) { return deformVertex(result,...args); }
@@ -48,15 +48,16 @@ export function createDesigner(host) {
         t = Math.min(1, p.index),
         color = neutral
           ? new THREE.Color(0x475978)
-          : new THREE.Color().setHSL(0.5 * (1 - t), 0.8, 0.53);
+          : new THREE.Color().setRGB(...fieldColor(t), THREE.SRGBColorSpace);
       colors.push(color.r, color.g, color.b);
     }
     geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-    const mat = new THREE.MeshStandardMaterial({
-      vertexColors: true,
-      side: THREE.DoubleSide,
-      roughness: 0.5,
-      metalness: 0.25,
+    const mat = new THREE.MeshBasicMaterial({
+      vertexColors: true, side: THREE.DoubleSide, toneMapped: false,
+    });
+    const geometryMaterial = new THREE.MeshStandardMaterial({
+      color: neutral ? 0x475978 : 0x83b6c6, side: THREE.DoubleSide,
+      roughness: 0.38, metalness: 0.35,
     });
     const mesh = new THREE.Mesh(geo, mat),
       wire = new THREE.Mesh(
@@ -70,7 +71,7 @@ export function createDesigner(host) {
       );
     wire.visible = options.mesh;
     group.add(mesh, wire);
-    meshes.push({ geo, base: vertices.slice(), positions, active, wire });
+    meshes.push({ geo, base: vertices.slice(), positions, active, wire, mesh, fieldMaterial: mat, geometryMaterial });
   }
   function tube(radius, length, offset, active = true, nose = false) {
     const vertices = [],
@@ -106,17 +107,13 @@ export function createDesigner(host) {
     make(vertices, indices, positions, active, !active);
   }
   function clear() {
-    group.traverse((o) => {
-      if (o.isMesh || o.isLine || o.isPoints) {
-        if (o.geometry) o.geometry.dispose();
-        if (o.material) o.material.dispose();
-      }
-    });
+    const geometries = new Set(), materials = new Set();
+    group.traverse(o => { if (o.geometry) geometries.add(o.geometry); if (o.material) materials.add(o.material); });
+    meshes.forEach(item => { materials.add(item.fieldMaterial); materials.add(item.geometryMaterial); });
+    geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose());
     scene.remove(group);
-    group = new THREE.Group();
-    scene.add(group);
-    meshes = [];
-    nodal = [];
+    group = new THREE.Group(); scene.add(group);
+    meshes = []; nodal = []; lastAmplitude = null;
   }
   function build() {
     clear();
@@ -281,22 +278,25 @@ export function createDesigner(host) {
         ? (Math.sin(now / 1400 - Math.PI / 2) + 1) / 2
         : options.fraction / 100;
     const amp = options.magnification * fraction;
+    const changed = amp !== lastAmplitude;
     for (const item of [...meshes, ...nodal]) {
-      const arr = item.geo.attributes.position;
-      for (let i = 0; i < arr.count; i++)
-        arr.setXYZ(
-          i,
-          ...deform(
-            ...item.base.slice(3 * i, 3 * i + 3),
-            item.positions[i],
-            item.active !== false,
-            amp,
-          ),
-        );
-      arr.needsUpdate = true;
-      if (item.wire) item.wire.visible = options.mesh;
-      else item.points.visible = options.nodes;
+      if (changed) {
+        const arr = item.geo.attributes.position;
+        for (let i = 0; i < arr.count; i++)
+          arr.setXYZ(i, ...deform(...item.base.slice(3 * i, 3 * i + 3), item.positions[i], item.active !== false, amp));
+        arr.needsUpdate = true;
+        if (item.mesh) { item.geo.computeVertexNormals(); normalUpdates++; }
+        item.geo.computeBoundingBox(); item.geo.computeBoundingSphere();
+      }
+      if (item.wire) {
+        item.wire.visible = options.mesh;
+        item.mesh.material = options.display === 'geometry' ? item.geometryMaterial : item.fieldMaterial;
+      } else item.points.visible = options.nodes;
     }
+    lastAmplitude = amp;
+    host.dataset.normalUpdates = String(normalUpdates);
+    host.dataset.display = options.display ?? 'field';
+    host.dataset.renderCount = String(Number(host.dataset.renderCount ?? 0) + 1);
     renderer.render(scene, camera);
     host.dataset.rendered = "true";
     host.dataset.fraction = fraction.toFixed(3);
@@ -313,14 +313,14 @@ export function createDesigner(host) {
     controls.target.copy(center);
     camera.position
       .copy(center)
-      .add(new THREE.Vector3(size * 1.05, -size * 1.1, size * 0.65));
+      .add(new THREE.Vector3(1, -1.1, .65).normalize().multiplyScalar(framingBoxDistance(box.getSize(new THREE.Vector3()).toArray(), camera.aspect, [1, -1.1, .65], [0, 0, 1], camera.fov)));
     camera.near = Math.max(0.001, size / 1000);
     camera.far = Math.max(100, size * 100);
     camera.updateProjectionMatrix();
     controls.update();
     request();
   }
-  const observer = new ResizeObserver(() => {
+  function resize() {
     const { width, height } = host.getBoundingClientRect();
     if (width > 0 && height > 0) {
       renderer.setSize(width, height, false);
@@ -328,8 +328,10 @@ export function createDesigner(host) {
       camera.updateProjectionMatrix();
       request();
     }
-  });
+  }
+  const observer = new ResizeObserver(resize);
   observer.observe(host);
+  resize();
   controls.addEventListener("change", request);
   document.addEventListener("aerolab:tabchange", request);
   document.addEventListener("visibilitychange", request);
@@ -337,13 +339,20 @@ export function createDesigner(host) {
   renderer.domElement.addEventListener("webglcontextlost", (e) => {
     e.preventDefault();
     lost = true;
+    playing = false;
+    cancelAnimationFrame(frameId); frameId = 0;
     host.dataset.rendered = "false";
     host.dispatchEvent(
       new CustomEvent("designer:error", {
         detail:
-          "Contexto WebGL perdido; cálculos y tablas siguen disponibles. Recarga para recuperar el visor.",
+          "Contexto WebGL perdido; cálculos y tablas siguen disponibles. Esperando recuperación del navegador; recarga si no se restaura.",
       }),
     );
+  });
+  renderer.domElement.addEventListener("webglcontextrestored", () => {
+    lost = false;
+    host.dispatchEvent(new CustomEvent("designer:ready"));
+    request();
   });
   renderer.domElement.addEventListener("keydown", (e) => {
     const offset = camera.position.clone().sub(controls.target);

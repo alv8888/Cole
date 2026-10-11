@@ -1,3 +1,5 @@
+import { groupInspector } from '../../navigation/inspector.js';
+import { createLineChart } from '../../charts/line.js';
 import { saveDesign, loadDesign } from "./storage.js";
 import { registerSharePart } from "../../navigation/ui.js";
 import {
@@ -17,6 +19,8 @@ import {
   applyMass,
 } from "../../integration/bridge.js";
 const $ = (id) => document.getElementById(id);
+const displacementChart = createLineChart($("design-chart"), $("design-chart-readout"));
+let physicsRevision = 0;
 let draft = clone(DEFAULT),
   result = null,
   documentError = null,
@@ -84,6 +88,7 @@ function buildFields() {
     group("rocket", "Ojiva y aletas · solo masa", "rocket") +
     `<fieldset data-object="rocket"><legend>Secciones cilíndricas · base → punta</legend><div class="field"><label for="design-section-count">Número de secciones (1–4)</label><select id="design-section-count">${[1, 2, 3, 4].map((n) => `<option value="${n}">${n}</option>`).join("")}</select></div><div class="field"><label for="design-nose-type">Forma de ojiva</label><select id="design-nose-type"><option value="cone">Cono</option><option value="ellipsoid">Semielipsoide</option></select></div>${draft.rocket.sections.map((s, i) => `<fieldset><legend>Sección ${i + 1}</legend><div class="engineering-field-grid">${definitions.section.map((d) => field(`rocket.sections.${i}.${d[0]}`, d)).join("")}</div></fieldset>`).join("")}</fieldset>` +
     group("sphere", "Envolvente esférica · satélite ideal", "sphere");
+  groupInspector($("design-geometry-fields"));
   $("design-section-count").addEventListener("change", () => {
     read();
     const n = Number($("design-section-count").value);
@@ -151,6 +156,7 @@ function settings() {
     fraction: $("design-fraction").valueAsNumber,
     mesh: $("design-mesh").checked,
     nodes: $("design-nodes").checked,
+    display: $("design-display").value,
   };
 }
 const fmt = (value, digits = 3) =>
@@ -171,50 +177,34 @@ function row(label, value) {
   return tr;
 }
 function graph() {
-  const svg = $("design-chart");
-  svg.replaceChildren();
-  if (!result?.points.length) {
-    svg.setAttribute("aria-label", "Sin campo válido.");
-    return;
-  }
-  const points = result.points,
-    maxX = points.at(-1).position || 1,
-    maxY = Math.max(1e-12, ...points.map((p) => Math.abs(p.displacement))),
-    ns = "http://www.w3.org/2000/svg";
-  function node(tag, attrs, text) {
-    const e = document.createElementNS(ns, tag);
-    Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
-    if (text) e.textContent = text;
-    svg.append(e);
-    return e;
-  }
-  node("path", { d: "M60 20V220H680", stroke: "#7989a5", fill: "none" });
-  node("polyline", {
-    points: points
-      .map(
-        (p) =>
-          `${60 + (p.position / maxX) * 610},${120 - (p.displacement / maxY) * 90}`,
-      )
-      .join(" "),
-    stroke: "#9eecd9",
-    "stroke-width": 3,
-    fill: "none",
+  displacementChart.render((result?.points ?? []).map(p => ({ x: p.position, y: p.displacement * 1000 })), {
+    x: "Posición", xUnit: "m", y: "Desplazamiento", yUnit: "mm"
   });
-  node(
-    "text",
-    { x: 70, y: 25, fill: "#d5e2fa" },
-    `u máx ±${fmt(maxY * 1000)} mm`,
-  );
-  node(
-    "text",
-    { x: 350, y: 255, fill: "#d5e2fa" },
-    `Posición 0 → ${fmt(maxX)} m`,
-  );
-  node("text", { x: 65, y: 120, fill: "#b1c4de" }, "0");
-  svg.setAttribute(
-    "aria-label",
-    `Desplazamiento nodal máximo ${fmt(maxY * 1000)} mm, longitud ${fmt(maxX)} m`,
-  );
+}
+function updateVisual() {
+  for (const id of ["design-magnification", "design-fraction"]) {
+    const input = $(id);
+    input.setAttribute("aria-invalid", String(!input.checkValidity() || !Number.isFinite(input.valueAsNumber)));
+  }
+  try {
+    validateSettings(settings());
+    $("design-fraction-value").textContent = `${fmt(settings().fraction, 0)} %`;
+    document.querySelector(".design-legend").hidden = settings().display === "geometry";
+    $("design-display-note").textContent = settings().display === "geometry"
+      ? "Geometría iluminada. Colores de material ilustrativos; consulta esfuerzos en las tablas."
+      : "Campo por sección interpolado en superficie; no tensor FEM 3D. Colores estables sin iluminación.";
+    $("design-save").disabled = $("design-json").disabled = !result || !!documentError;
+    $("design-animate").disabled = !result;
+    viewer?.update(result, { ...settings(), playing });
+  } catch (e) {
+    playing = false;
+    $("design-animate").textContent = "Animar deformación";
+    $("design-animate").setAttribute("aria-pressed", "false");
+    $("design-display-note").textContent = `Vista pendiente: ${e.message}. Los resultados físicos se conservan.`;
+    $("design-save").disabled = $("design-json").disabled = true;
+    $("design-animate").disabled = true;
+    viewer?.update(null, { ...settings(), playing: false });
+  }
 }
 function exportPreview() {
   try {
@@ -428,7 +418,7 @@ function update() {
   if (draft.sphere.thickness > draft.sphere.radius / 20)
     $("design-sphere-thickness").setAttribute("aria-invalid", "true");
   try {
-    validateSettings(settings());
+    $("design-view").dataset.physicsRevision = String(++physicsRevision);
     result = analyzeDesign(draft);
     $("design-status").textContent =
       "Objeto activo calculado. Modelo lineal educativo; consulta campos, hipótesis y límites." + (documentError ? ` Para guardar/compartir el documento completo, corrige el borrador: ${documentError}` : "");
@@ -442,7 +432,7 @@ function update() {
   $("design-fraction-value").textContent = `${fmt(settings().fraction, 0)} %`;
   $("design-animate").disabled = !result;
   render();
-  viewer?.update(result, { ...settings(), playing });
+  updateVisual();
 }
 function apply(configuration) {
   draft = clone(configuration);
@@ -481,8 +471,9 @@ for (const id of [
   "design-fraction",
   "design-mesh",
   "design-nodes",
+  "design-display",
 ])
-  $(id).addEventListener("input", update);
+  $(id).addEventListener("input", updateVisual);
 $("design-reset").addEventListener("click", () => apply(DEFAULT));
 $("design-camera").addEventListener("click", () => viewer?.reset());
 $("design-animate").addEventListener("click", () => {
@@ -503,6 +494,7 @@ function applyState(s) {
   $("design-fraction").value = s.fraction;
   $("design-mesh").checked = s.mesh;
   $("design-nodes").checked = s.nodes;
+  $("design-display").value = s.display ?? "field";
   apply(s.configuration);
 }
 $("design-save").addEventListener("click", () => {
@@ -601,8 +593,17 @@ document.addEventListener("aerolab:tabchange", (e) => {
 });
 $("design-view").addEventListener(
   "designer:error",
-  (e) => ($("design-view-status").textContent = e.detail),
+  (e) => {
+    playing = false;
+    $("design-animate").textContent = "Animar deformación";
+    $("design-animate").setAttribute("aria-pressed", "false");
+    $("design-view-status").textContent = e.detail;
+  },
 );
+$("design-view").addEventListener("designer:ready", () => {
+  $("design-view-status").textContent = "Contexto WebGL recuperado; resultados físicos conservados y animación pausada.";
+  updateVisual();
+});
 import("./viewer.js")
   .then(({ createDesigner }) => {
     viewer = createDesigner($("design-view"));

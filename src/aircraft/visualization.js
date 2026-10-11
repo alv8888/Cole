@@ -1,3 +1,4 @@
+import { createAnimationLoop } from '../rendering/clock.js';
 import { number } from '../units.js';
 const NS = 'http://www.w3.org/2000/svg';
 const COLORS = { lift: '#8edfcc', weight: '#ffbd8a', thrust: '#c0afff', drag: '#85c5ff' };
@@ -55,8 +56,9 @@ export function drawForceChart(svg, result) {
 }
 export function createAircraftForces(side, chart, summary, button) {
   let current = null, animating = false, previous = null, phase = 0;
-  function stop() { animating=false;previous=null;button.textContent='Animar aire ilustrativo';button.setAttribute('aria-pressed','false'); }
-  button.addEventListener('click',()=>{if(animating)stop();else if(current){animating=true;previous=null;button.textContent='Pausar aire ilustrativo';button.setAttribute('aria-pressed','true');}});
+  const playback = createAnimationLoop(frame);
+  function stop() { playback.stop();animating=false;previous=null;button.textContent='Animar aire ilustrativo';button.setAttribute('aria-pressed','false'); }
+  button.addEventListener('click',()=>{if(animating)stop();else if(current){animating=true;previous=null;button.textContent='Pausar aire ilustrativo';button.setAttribute('aria-pressed','true');playback.start();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
   document.addEventListener('aerolab:tabchange',event=>{if(event.detail.tab!=='simulation')stop();});
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -67,9 +69,8 @@ export function createAircraftForces(side, chart, summary, button) {
       previous=now;
       side.querySelector('.aircraft-flow')?.setAttribute('stroke-dashoffset',phase);
     }
-    requestAnimationFrame(frame);
+    return animating && !!current;
   }
-  requestAnimationFrame(frame);
   return { update(result) {
     current=result;button.disabled=!result;drawAircraftSide(side,result);drawForceChart(chart,result);
     if(!result){stop();summary.textContent='Corrige las entradas: perfil, gráfico y balance sin resultados vigentes.';return;}

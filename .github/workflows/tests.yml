@@ -18,3 +18,27 @@ jobs:
           node-version: '24'
       - name: Check physical models and persistence
         run: npm test
+
+  browser-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned browser test tooling outside the application
+        run: |
+          npm install --prefix /tmp/aerolab-browser --no-save playwright@1.64.0
+          /tmp/aerolab-browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Exercise all four labs in Chromium
+        env:
+          PLAYWRIGHT_MODULE: /tmp/aerolab-browser/node_modules/playwright/index.mjs
+        run: npm run test:browser
+      - name: Save screenshots for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aerolab-browser-screenshots
+          path: /tmp/aerolab*.png
+          if-no-files-found: ignore

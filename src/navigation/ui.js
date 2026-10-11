@@ -1,3 +1,4 @@
+import { arrangeWorkbench, arrangeCharts } from './workbench.js';
 import { encodeLink, decodeLink } from './share.js';
 
 const lab = document.body.dataset.lab || 'space';
@@ -42,6 +43,8 @@ if (lab === 'space') {
 }
 // Panels are placed in reading order, independently of their visibility.
 panels.forEach(panel => main.append(panel));
+arrangeWorkbench(lab, panels[0], panels[1]);
+arrangeCharts(panels[1]);
 function select(index, focus = false) {
   panels.forEach((panel, i) => {
     panel.hidden = i !== index;

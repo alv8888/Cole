@@ -117,3 +117,9 @@ Pendiente de fase 6: hosting y comprobación allí; auditoría de accesibilidad 
 ## Entrega 13 · Correcciones posteriores a auditoría (0.13)
 
 Cinco defectos confirmados corregidos y comprobados: catálogo Rocket, continuidad del caso en transferencia de masa, validación del objeto activo, deformación radial termoelástica y corte de motor. 94 pruebas unitarias y 86 grupos Chromium aprobados. Se conservan módulos y compatibilidad de formatos anteriores, sin dependencias adicionales. CORRECTIONS.md describe entrega y límites. Próxima fase: diseño visual y renderizado según diagnóstico, conservando modelos comprobados.
+
+## Entrega 14 · Cierre de interfaz y renderizado (0.14)
+
+Completadas las fases de reorganización y presentación posteriores a la auditoría: banco de trabajo en los cuatro módulos, agrupación plegable, reproducción próxima al visor, servicios comunes de iluminación/cámara, campo independiente de iluminación, normales/bounds coherentes con deformación y opciones visuales sin repetir FEM. Gráfica estructural con escala firmada/cursor y legibilidad de los gráficos en móvil; reproducción bajo demanda, runner y tarea CI de navegador.
+
+Validación: 101 pruebas unitarias y 96 grupos Chromium. Problemas resueltos antes de cerrar: preservar DOM/listeners/formatos, evitar que el sombreado altere el campo, encuadrar según orientación y bounds, no programar frames pausados y comprobar la amplitud deformada efectiva. WORKBENCH.md documenta entrega; DEPLOYMENT.md prepara hosting. Quedan fuera de este cierre: modelos físicos nuevos, FEM 3D/CFD, otros navegadores/hardware, auditoría WCAG completa y despliegue HTTPS realmente verificado.

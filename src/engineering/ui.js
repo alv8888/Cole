@@ -1,3 +1,4 @@
+import { groupInspector } from '../navigation/inspector.js';
 import { publishSnapshot, attachMassInbox } from '../integration/bridge.js';
 import { registerSharePart } from '../navigation/ui.js';
 import { numberIn, choice } from '../navigation/share.js';
@@ -15,6 +16,7 @@ const defaults=()=>({...Object.fromEntries(profile.fields.map(field=>[field.key,
 let reference=null,current=null;
 const groups=[...new Set(profile.fields.map(field=>field.group))];
 $('engineering-fields').innerHTML=groups.map(group=>`<fieldset><legend>${group}</legend><div class="engineering-field-grid">${profile.fields.filter(field=>field.group===group).map(field=>`<div class="field"><label for="eng-${field.key}">${field.label}<span>${field.unit}</span></label><input id="eng-${field.key}" type="number" min="${profile.ranges[field.key][0]}" max="${profile.ranges[field.key][1]}" step="any" required aria-describedby="limit-${field.key} error-${field.key}"><p id="limit-${field.key}" class="limits">${profile.ranges[field.key].join(' – ')} ${field.unit}</p><p id="error-${field.key}" class="field-error"></p></div>`).join('')}</div></fieldset>`).join('');
+groupInspector($('engineering-fields'));
 $('engineering-equations').textContent=profile.equations;
 $('engineering-limits').textContent=profile.limits;
 const view=createView3D($('engineering-canvas'),$('view-yaw'),$('view-pitch'),kind);

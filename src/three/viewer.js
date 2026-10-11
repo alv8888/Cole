@@ -1,3 +1,4 @@
+import { setupPresentation, framingDistance } from '../rendering/presentation.js';
 import * as THREE from 'three';
 import { OrbitControls } from '../../vendor/three/OrbitControls.js';
 import { visibleCount } from './geometry.js';
@@ -12,8 +13,7 @@ export function createViewer(host, report) {
   const camera=new THREE.PerspectiveCamera(45,1,.005,1000);
   const controls=new OrbitControls(camera,renderer.domElement);
   controls.enableDamping=false;controls.enablePan=true;
-  scene.add(new THREE.HemisphereLight(0xc4e3ff,0x162b45,2));
-  const light=new THREE.DirectionalLight(0xffffff,2.5);light.position.set(5,3,5);scene.add(light);
+  setupPresentation(THREE, renderer, scene);
   const material=new THREE.MeshStandardMaterial({color:0x83bdd8,roughness:1});
   const planet=new THREE.Mesh(new THREE.SphereGeometry(1,64,32),material);scene.add(planet);
   const marker=new THREE.Mesh(new THREE.SphereGeometry(.018,12,8),new THREE.MeshBasicMaterial({color:0xffe4a3}));marker.visible=false;scene.add(marker);
@@ -26,18 +26,18 @@ export function createViewer(host, report) {
     controls.update();render();
   }
   function fit(){
-    controls.target.set(0,0,0);distance=Math.max(4,extent*3.4);yaw=35;pitch=22;
+    controls.target.set(0,0,0);distance=Math.max(2.5,framingDistance(extent,camera.aspect,camera.fov));yaw=35;pitch=22;
     camera.near=.005;camera.far=Math.max(1000,extent*100);camera.updateProjectionMatrix();
     controls.minDistance=1.15;controls.maxDistance=Math.max(25,extent*30);cameraFromAngles();
   }
   controls.addEventListener('change',()=>{
     const offset=camera.position.clone().sub(controls.target);distance=offset.length();yaw=Math.atan2(offset.x,offset.z)*180/Math.PI;pitch=Math.asin(offset.y/distance)*180/Math.PI;render();
   });
-  function resize(){const width=host.clientWidth,height=host.clientHeight;if(!width||!height)return;renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();render();}
+  function resize(){const width=host.clientWidth,height=host.clientHeight;if(!width||!height)return;renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();host.dataset.viewport=JSON.stringify([width,height]);render();}
   const observer=new ResizeObserver(resize);observer.observe(host);fit();resize();
   const loader=new THREE.TextureLoader();
   loader.load(new URL('../../assets/textures/earth-atmos-2048.jpg',import.meta.url).href,value=>{
-    if(disposed){value.dispose();return;}texture=value;texture.colorSpace=THREE.SRGBColorSpace;
+    if(disposed){value.dispose();return;}texture=value;texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
     if(state?.body==='earth'){material.map=texture;material.needsUpdate=true;host.dataset.texture='ready';render();report('Tierra con textura local estática cargada.');}
   },undefined,()=>{textureFailed=true;if(state?.body==='earth'){host.dataset.texture='error';report('No se pudo cargar la textura; se conserva esfera simple y modelos 2D.');}});
   renderer.domElement.addEventListener('webglcontextlost',event=>{
@@ -53,7 +53,7 @@ export function createViewer(host, report) {
       material.color.set(data.body==='earth'?0xffffff:data.body==='moon'?0xa4a9b3:data.body==='mars'?0xc17553:0x7094b0);material.needsUpdate=true;
       host.dataset.texture=data.body==='earth'?(texture?'ready':textureFailed?'error':'loading'):'not-applicable';
       const geometry=new THREE.BufferGeometry().setFromPoints(data.points.map(p=>new THREE.Vector3(...p)));
-      const lineMaterial=new THREE.LineBasicMaterial({color:data.color??0x8edfcc});
+      const lineMaterial=new THREE.LineBasicMaterial({color:data.color??0x8edfcc,toneMapped:false});
       path=data.closed?new THREE.LineLoop(geometry,lineMaterial):new THREE.Line(geometry,lineMaterial);
       times=data.times??null;if(times)geometry.setDrawRange(0,1);
       scene.add(path);extent=Math.max(1,...data.points.map(p=>Math.hypot(...p)));

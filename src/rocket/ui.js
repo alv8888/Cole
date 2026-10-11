@@ -1,3 +1,5 @@
+import { groupInspector } from '../navigation/inspector.js';
+import { createAnimationLoop } from '../rendering/clock.js';
 import { publishSnapshot, attachMassInbox } from '../integration/bridge.js';
 import { registerSharePart } from '../navigation/ui.js';
 import { numberIn, choice } from '../navigation/share.js';
@@ -11,8 +13,9 @@ import { downloadFile } from '../files.js';
 const $ = id => document.getElementById(id);
 const globe=createGlobePanel($('rocket-globe'));
 let result = null, playing = false, clock = 0, previousFrame = null;
+const playback = createAnimationLoop(frame);
 const fields = [['dry','Masa seca','kg',1,100000],['propellant','Propelente','kg',1,1000000],['thrust','Empuje','N',1,10000000],['duration','Duración','s',1,600]];
-function pause() { playing = false; previousFrame = null; $('launch-play').textContent = 'Reproducir'; }
+function pause() { playback.stop(); playing = false; previousFrame = null; $('launch-play').textContent = 'Reproducir'; }
 function invalidate() {
   pause(); result = null; clock = 0; globe.setPath(null);
   for (const id of ['launch-play','launch-timeline','launch-csv']) $(id).disabled = true;
@@ -27,6 +30,7 @@ function config() {
 }
 function renderStages(stages) {
   $('launch-stages').innerHTML = stages.map((s, i) => `<fieldset><legend>Etapa ${i + 1} · ${i === 0 ? 'encendido inicial' : 'después de la anterior'}</legend><div class="engineering-field-grid">${fields.map(([key,label,unit,min,max]) => `<div class="field"><label for="stage-${i}-${key}">${label}<span>${unit}</span></label><input id="stage-${i}-${key}" type="number" min="${min}" max="${max}" step="any" required value="${s[key]}" aria-describedby="stage-${i}-${key}-limit"><p class="limits" id="stage-${i}-${key}-limit">${min}–${max} ${unit}</p></div>`).join('')}</div></fieldset>`).join('');
+  groupInspector($('launch-stages'));
 }
 function fill(c) {
   $('launch-body').value = c.body; $('launch-payload').value = c.payload; $('launch-horizon').value = c.horizon; $('launch-count').value = c.stages.length; renderStages(c.stages); invalidate();
@@ -86,12 +90,12 @@ function calculateLaunch(autoPlay = false, restoredClock = 0) {
     clock = restoredClock; $('launch-timeline').max = 100;
     for (const id of ['launch-play','launch-timeline','launch-csv']) $(id).disabled = false;
     $('launch-message').textContent = 'Trayectoria calculada con RK4, paso máximo 0,1 s. Se reproduce el tiempo calculado, acelerado según el control.';
-    display(); if (autoPlay && !matchMedia('(prefers-reduced-motion: reduce)').matches) { playing = true; $('launch-play').textContent = 'Pausar'; }
+    display(); if (autoPlay && !matchMedia('(prefers-reduced-motion: reduce)').matches) { playing = true; $('launch-play').textContent = 'Pausar'; playback.start(); }
   } catch (e) { invalidate(); $('launch-message').textContent = e.message; }
 }
 $('launch-run').addEventListener('click', () => calculateLaunch(true));
 $('launch-play').addEventListener('click', () => {
-  if (playing) pause(); else { if (clock >= result.final.t) clock = 0; playing = true; previousFrame = null; $('launch-play').textContent = 'Pausar'; }
+  if (playing) pause(); else { if (clock >= result.final.t) clock = 0; playing = true; previousFrame = null; $('launch-play').textContent = 'Pausar'; playback.start(); }
 });
 $('launch-timeline').addEventListener('input', () => { pause(); const fraction = $('launch-timeline').valueAsNumber; clock = fraction >= 100 ? result.final.t : result.final.t * (fraction / 100); display(); });
 $('launch-reset').addEventListener('click', () => fill(clone(DEFAULT)));
@@ -109,9 +113,9 @@ function frame(now) {
     if (previousFrame !== null) clock = Math.min(result.final.t, clock + Math.min((now-previousFrame)/1000,.1) * Number($('launch-speed').value));
     previousFrame = now; display(); if (clock >= result.final.t) pause();
   }
-  requestAnimationFrame(frame);
+  return playing && !!result;
 }
-fill(clone(DEFAULT)); requestAnimationFrame(frame);
+fill(clone(DEFAULT));
 
 document.addEventListener('aerolab:tabchange', event=>{if(event.detail.tab!=='simulation')pause();});
 registerSharePart('launch', {
