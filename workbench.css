@@ -4,7 +4,11 @@
 .calculation-state p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; color: #c1cede; }
 .calculation-state[data-state=pending] { border-color: #c0afff; }
 .calculation-state[data-state=invalid] { border-color: #ffba8a; }
+.calculation-state[data-state=warning], .calculation-state[data-state=partial] { border-color: #ffda8a; }
 .calculation-state button { margin-top: 10px; min-height: 44px; }
+#configuration-fields { grid-template-columns: minmax(0, 1fr); }
+.controls-panel .field label { font-size: 13px; }
+.controls-panel .limits { font-size: 11px; }
 .site-header { padding-block: 16px; }
 .intro { padding: 24px 0 20px; }
 .intro h1 { font-size: clamp(28px, 3.3vw, 42px); margin-bottom: 10px; }

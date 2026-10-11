@@ -1,4 +1,5 @@
 import { groupInspector } from './navigation/inspector.js';
+import { createCalculationState } from './navigation/calculation-state.js';
 import { registerSharePart } from './navigation/ui.js';
 import { numberIn, choice } from './navigation/share.js';
 import { createGlobePanel } from './three/bridge.js';
@@ -26,6 +27,7 @@ let previousFrame = null;
 let frameId = null;
 let revision = 0;
 let sensitivity = null;
+let calculationStates = [];
 const globe=createGlobePanel($('#orbit-globe'));
 function refreshGlobePath(){
   const index=Number($('#globe-configuration').value),orbit=orbits[index],config=configurations[index];
@@ -104,6 +106,7 @@ function update() {
   configurations = readFields();
   orbits = configurations.map((config, index) => {
     const errors = validateConfiguration(config);
+    $(`#${letters[index]}-body`).setAttribute('aria-invalid', String(!!errors.body));
     for (const key of Object.keys(LIMITS)) {
       const input = $(`#${letters[index]}-${key}`);
       input.setAttribute('aria-invalid', errors[key] ? 'true' : 'false');
@@ -119,6 +122,9 @@ function update() {
     }
   });
   const allValid = orbits.every(Boolean);
+  calculationStates.forEach((state,index)=>state.update(orbits[index]?'ready':'invalid',orbits[index]
+    ? `Configuración ${letters[index].toUpperCase()} recalculada con el modelo de dos cuerpos. ${allValid?'Comparación y reproducción disponibles.':'La otra configuración es inválida: este resultado se conserva; comparación y reproducción conjunta deshabilitadas.'}`
+    : `Configuración ${letters[index].toUpperCase()}: ${$(`#${letters[index]}-warning`).textContent} ${orbits[1-index]?'La otra órbita conserva sus resultados.':'No hay órbitas válidas.'}`));
   $('#save').disabled = !allValid;
   $('#play').disabled = !allValid;
   for (const id of ['export-json', 'export-csv', 'check-prediction', 'phase', 'reference', 'go-periapsis', 'go-apoapsis']) $(`#${id}`).disabled = !allValid;
@@ -222,6 +228,10 @@ $('#scenarios').replaceChildren(...SCENARIOS.map(scenario => {
 selectStudy('altitude');
 $('#globe-configuration').addEventListener('change',()=>{refreshGlobePath();refreshPositions();});
 createFields();
+calculationStates = letters.map((letter,index)=>{
+  const fieldset=$(`#configuration-fields fieldset[data-index="${index}"]`);
+  return createCalculationState(fieldset,`space-${letter}-calculation-state`,{label:`Estado del cálculo · configuración ${letter.toUpperCase()}`,before:fieldset.closest('details')});
+});
 fillFields();
 update();
 $('#parameters').addEventListener('submit', event => event.preventDefault());

@@ -146,3 +146,9 @@ Validación de la entrega 17: 112 pruebas unitarias y 113 grupos Chromium en 14 
 Aircraft y las dos herramientas Rocket separan estado científico y notificaciones de archivos. El lanzamiento distingue trayectoria pendiente de cálculo vigente; entradas inválidas ofrecen acceso al primer control afectado, abriendo su grupo. Los errores entre parámetros conservan su explicación sin marcar un culpable ficticio. No se modifican modelos, resultados, guardados, conexiones ni rutas. CALCULATION-STATE.md documenta archivos, ejecución, pruebas y límites.
 
 Validación: 112 pruebas unitarias y 116 grupos Chromium agregados en 15 suites aprobados; se documenta la corrección y repetición de la nueva suite. Pendiente: extender el patrón a A/B de Space y a los borradores geométricos inactivos de Structure, sin confundir invalidez del documento con validez del modelo activo.
+
+## Entrega 19 · Estados Space y Structure (0.19)
+
+Se completa la integración de indicadores en los laboratorios. Space conserva validez independiente A/B y explica restricciones conjuntas; estados y revisión permanecen visibles con grupos plegados. Inspector orbital en una columna con unidades legibles. Structure distingue cálculo activo, documento pendiente, vista pendiente y combinaciones solo geometría/masa, sin modificar borradores ni activar objetos automáticamente. El banco analítico anterior conserva su estado independiente. STATE-INTEGRATION.md registra archivos, ejecución, manuales y límites.
+
+Validación: 112 unitarias y 120 grupos Chromium en 15 suites; tras el refinamiento visual final se repitieron los 37 grupos afectados, todos aprobados. Corregido el botón oculto detectado por teclado. Conservados modelos, guardados, enlaces, visores y puentes. Pendientes: validación con usuarios y evaluación de navegadores/dispositivos, accesibilidad y rendimiento; no se incorpora FEM 3D/CFD ni certificación.

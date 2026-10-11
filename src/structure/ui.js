@@ -1,4 +1,5 @@
 import { registerSharePart } from '../navigation/ui.js';
+import { createCalculationState } from '../navigation/calculation-state.js';
 import { choice } from '../navigation/share.js';
 import { MATERIALS, DEFAULT, SUPPORTS, FIELDS, activeKeys } from './materials.js';
 import { analyze, cleanConfiguration } from './model.js';
@@ -7,6 +8,7 @@ import { drawStructure,drawChart } from './visualization.js';
 import { number } from '../units.js';
 import { downloadFile } from '../files.js';
 const $=id=>document.getElementById(id);
+const calculationState=createCalculationState($('structure-form'),'structure-calculation-state');
 let current=null,reference=null;
 $('structure-material').replaceChildren(...Object.entries(MATERIALS).map(([value,data])=>new Option(data.name,value)));
 $('structure-support').replaceChildren(...Object.entries(SUPPORTS).map(([value,data])=>new Option(`${data.name} · K=${data.k}`,value)));
@@ -36,7 +38,8 @@ function update(){
  const preset=MATERIALS[c.material];
  const custom=preset&&['modulus','tensile','compressive'].some(key=>c[key]!==preset[key]);
  $('structure-material-note').textContent=`${custom?'Propiedades editadas: se calcula con las entradas actuales. ':''}${preset?.note??'Material inválido.'} Las propiedades mostradas son editables; al cambiar material se restablecen sus valores orientativos.`;
- let result=null;try{result=analyze(c);current=result.config;status('Cálculo analítico actualizado; referencias orientativas, sin certificación.');}catch(error){current=null;status(error.message);if(c.mode==='compression'&&c.thickness>=c.diameter/2){$('str-thickness').setAttribute('aria-invalid','true');$('str-thickness-error').textContent='Debe ser menor que D/2.';}}
+ let result=null,modelError=null;try{result=analyze(c);current=result.config;status('Cálculo analítico actualizado; referencias orientativas, sin certificación.');}catch(error){modelError=error.message;current=null;status(error.message);if(c.mode==='compression'&&c.thickness>=c.diameter/2){$('str-thickness').setAttribute('aria-invalid','true');$('str-thickness-error').textContent='Debe ser menor que D/2.';}}
+ calculationState.update(result?'ready':'invalid',result?'Banco analítico recalculado. Es independiente del diseñador 3D; las referencias resistentes no certifican seguridad.':modelError);
  ['structure-reference','structure-save','structure-json','structure-csv'].forEach(id=>$(id).disabled=!result);$('structure-clear').disabled=!reference;
  renderResults(result);visualize(result);
  drawChart($('structure-displacement'),result,'displacement',1000,c.mode==='compression'?'Acortamiento axial (mm)':'Deflexión v(x) (mm)');

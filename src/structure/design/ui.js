@@ -1,4 +1,5 @@
 import { groupInspector } from '../../navigation/inspector.js';
+import { createCalculationState } from '../../navigation/calculation-state.js';
 import { createLineChart } from '../../charts/line.js';
 import { saveDesign, loadDesign } from "./storage.js";
 import { registerSharePart } from "../../navigation/ui.js";
@@ -26,6 +27,28 @@ let draft = clone(DEFAULT),
   documentError = null,
   viewer = null,
   playing = false;
+let calculationError = null, visualError = null;
+function reviewTarget() {
+  const invalid = [...document.querySelectorAll('#design-form [aria-invalid="true"],#design-load-form [aria-invalid="true"],#design-magnification[aria-invalid="true"],#design-fraction[aria-invalid="true"]')];
+  // Inactive geometry is retained: focus its selector without changing the active model.
+  const active = invalid.find(input=>!input.closest('[data-object][hidden]') && !input.closest('.field[hidden]'));
+  if (active) return active;
+  if (invalid.some(input=>input.closest('[data-object][hidden]'))) return $('design-object');
+  if (invalid.length) return $('design-case');
+  return $('design-object');
+}
+const calculationStates = ['design-form','design-load-form'].map((id,index)=>createCalculationState($(id),`design-${index?'load':'geometry'}-calculation-state`,{reviewTarget,reviewLabel:'Revisar entradas',label:'Estado del análisis estructural'}));
+function refreshCalculationState() {
+  const names = {aircraft:'Avión',rocket:'Cohete',sphere:'Envolvente esférica'};
+  const inactive = [...new Set([...document.querySelectorAll('#design-geometry-fields [aria-invalid="true"]')].map(input=>input.closest('[data-object][hidden]')?.dataset.object).filter(Boolean))];
+  const draftNote = inactive.length ? ` Borrador pendiente: ${inactive.map(object=>names[object]).join(', ')}. Selecciona ese objeto para corregirlo; revisar no cambia el objeto activo.` : '';
+  const issues = [result && documentError ? `Documento completo pendiente: ${documentError}${draftNote}` : '',visualError ? `Vista pendiente: ${visualError}.${result?' Los resultados físicos se conservan.':''}` : ''].filter(Boolean);
+  const state = !result ? 'invalid' : result.maximum === null ? 'partial' : issues.length ? 'warning' : 'ready';
+  const detail = !result ? `Sin solución del objeto activo: ${calculationError}` : (result.maximum === null
+    ? 'No se calculan esfuerzos ni deformación: la orientación UD en una esfera no está definida. Geometría y masa disponibles.'
+    : `${result.model}. Solución estática educativa; no demuestra seguridad ni certificación.`);
+  calculationStates.forEach(panel=>panel.update(state,[detail,...issues].join(' '),!result||!!issues.length));
+}
 const definitions = {
   wing: [
     ["span", "Envergadura", "m", 2, 40],
@@ -182,6 +205,7 @@ function graph() {
   });
 }
 function updateVisual() {
+  visualError = null;
   for (const id of ["design-magnification", "design-fraction"]) {
     const input = $(id);
     input.setAttribute("aria-invalid", String(!input.checkValidity() || !Number.isFinite(input.valueAsNumber)));
@@ -197,6 +221,7 @@ function updateVisual() {
     $("design-animate").disabled = !result;
     viewer?.update(result, { ...settings(), playing });
   } catch (e) {
+    visualError = e.message;
     playing = false;
     $("design-animate").textContent = "Animar deformación";
     $("design-animate").setAttribute("aria-pressed", "false");
@@ -205,6 +230,7 @@ function updateVisual() {
     $("design-animate").disabled = true;
     viewer?.update(null, { ...settings(), playing: false });
   }
+  refreshCalculationState();
 }
 function exportPreview() {
   try {
@@ -387,6 +413,7 @@ function render() {
 }
 function update() {
   read();
+  calculationError = null;
   documentError = null;
   try {
     validate(draft);
@@ -423,6 +450,7 @@ function update() {
     $("design-status").textContent =
       "Objeto activo calculado. Modelo lineal educativo; consulta campos, hipótesis y límites." + (documentError ? ` Para guardar/compartir el documento completo, corrige el borrador: ${documentError}` : "");
   } catch (e) {
+    calculationError = e.message;
     result = null;
     playing = false;
     $("design-animate").textContent = "Animar deformación";

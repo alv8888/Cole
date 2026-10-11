@@ -243,3 +243,17 @@ PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run
 ```
 
 La nueva suite comprueba estado vigente independiente del guardado, invalidación/recuperación, explicación del error físico, apertura de campos plegados y foco por teclado, trayectoria pendiente tras edición, independencia de la calculadora ideal, ausencia de errores JavaScript y reflujo 320–1440 px. Las capturas `/tmp/aerolab-018-state-desktop.png` y `/tmp/aerolab-018-state-mobile.png` fueron inspeccionadas. Las regresiones existentes comprueban además zoom CSS 200 %, visores inicialmente visibles y conservación de controles. No se afirma validación con lectores de pantalla, Firefox/Safari o dispositivos reales.
+
+## Entrega 19 · Estados Space/Structure (0.19)
+
+112 pruebas unitarias aprobadas, 0 fallos/omitidas; no se modifican modelos. La ejecución inicial detectó que el botón de revisión Space quedaba dentro de un grupo plegable: se corrigió su montaje fuera de details. Después, la ejecución completa aprobó las 15 suites Chromium, 120 grupos (116 anteriores y 4 nuevos). Tras el ajuste final del inspector Space a una columna se repitieron las suites calculation-state, browser y workbench: 37 grupos aprobados, sin fallos; no son 37 casos nuevos.
+
+```sh
+node --test --test-isolation=none tests/*.test.js
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser -- calculation-state-browser.mjs browser.mjs workbench-browser.mjs
+```
+
+Casos nuevos: A/B válidas, una inválida con el resultado restante conservado, ambas inválidas, acceso al campo B con el grupo plegado y ancho mínimo legible a 390 px; solución Structure activa conservada con borrador inactivo inválido; revisar sin cambiar objeto ni campo calculado; recuperación del borrador; opciones visuales inválidas con resultados/revisión FEM conservados; navegación automática a controles de cargas/vista; esfera UD etiquetada solo geometría/masa y banco anterior independiente. Se conservan todas las regresiones de cálculos, guardados, enlaces, exportaciones, transferencia de masa, escenas WebGL y errores de contexto/almacenamiento. Workbench verifica 320–1440 px, zoom CSS 200 % y visores inicialmente visibles.
+
+Capturas `/tmp/aerolab-019-state-{desktop,mobile}.png`, `/tmp/aerolab-019-draft-mobile.png` y `/tmp/aerolab-019-space-mobile.png` inspeccionadas. La última muestra el inspector en una columna, con revisión accesible fuera del grupo plegado. No se afirma validación experimental de los modelos ni auditoría WCAG completa; pendientes Firefox/Safari, hardware, lectores de pantalla y rendimiento medido.
