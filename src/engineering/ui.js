@@ -1,3 +1,4 @@
+import { publishSnapshot, attachMassInbox } from '../integration/bridge.js';
 import { registerSharePart } from '../navigation/ui.js';
 import { numberIn, choice } from '../navigation/share.js';
 import { G0 } from './models.js';
@@ -64,7 +65,7 @@ function update(preserveWeight=false){
   });
   let result=null;
   try{if(valid)result=profile.compute(config);}catch(error){status(error.message);}
-  current=result?config:null;
+  current=result?config:null; if(result)publishSnapshot(kind==='aircraft'?'aircraft':'calculator',config);
   for(const id of ['capture-reference','engineering-save','engineering-export'])$(id).disabled=!result;
   $('clear-reference').disabled=!reference;
   renderResults(result);view.update(config,result);drawGraph(config,result);forces?.update(result);
@@ -115,3 +116,5 @@ registerSharePart(kind==='aircraft'?'aircraft':'calculator', {
     $('view-yaw').dispatchEvent(new Event('input')); $('view-pitch').dispatchEvent(new Event('input'));
   },
 });
+
+attachMassInbox({target:kind==='aircraft'?'aircraft':'calculator',get:read,apply:config=>{fill(config);update();},root:document.querySelector('.engineering-layout')});

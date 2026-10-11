@@ -1,4 +1,4 @@
-name: Space Lab physics tests
+name: AeroLab physical models and integration tests
 
 on:
   push:

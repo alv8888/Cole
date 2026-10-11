@@ -105,3 +105,11 @@ Fases 1–4 completadas: sustitución de proyección manual por Three.js, OrbitC
 ## Entrega 11 · Cuarto laboratorio (0.11)
 
 Fases 1–4 completadas: Structure independiente, voladizo rectangular con fuerza puntual/uniforme, compresión tubular y filtro de Euler, cuatro materiales declarados/editables, deformación SVG con escala indicada, esfuerzo/coeficientes, referencias, persistencia, archivos y enlaces. Cuatro menús activos; ninguna dependencia nueva. 73 pruebas unitarias y 72 grupos Chromium. Antes de ampliar se resolvieron: carbono sin fluencia universal, falta de pandeo en análisis axial, no aplicabilidad de Euler, condiciones de borde, recortes del dibujo y estados inválidos. Pendiente: propiedades trazables, estructuras de pared delgada/laminados, cargas combinadas y validación experimental; también hosting y pruebas adicionales de accesibilidad/navegadores. STRUCTURE.md describe lo calculado y lo no validado.
+
+## Entrega 12 · Diseñador estructural (0.12)
+
+Fase 5: Structure Lab ampliado con geometría paramétrica, visor Three.js, FEM 1D y membranas analíticas, criterios UD y materiales declarados, masa por componentes, campos y exportaciones. Fase 4 de esta ampliación: referencias cerradas, convergencia, casos límite, entradas inválidas, pruebas de navegador, almacenamiento, URL compatible, transferencia de masa y regresiones de todos los laboratorios.
+
+Problemas tratados: distinguir malla superficial de elementos calculados; carbono sin criterio isotrópico; geometrías ausentes en módulos fuente; masas parciales frente a masa total; cambio exclusivo del campo de masa y propuesta consumida una sola vez. No se modifica la física previa. Banco de pruebas y guardados anteriores conservados.
+
+Pendiente de fase 6: hosting y comprobación allí; auditoría de accesibilidad y navegadores adicionales. FEM de cascarones/volúmenes, laminados, cargas combinadas y validación experimental requieren otro alcance. Modelos y entrega completa en STRUCTURE-DESIGN.md; ejecuciones en TESTING.md.

@@ -1,4 +1,4 @@
-# AEROLAB 0.11 · Space, Aircraft, Rocket y Structure Lab
+# AEROLAB 0.12 · Space, Aircraft, Rocket y Structure Lab
 
 Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y visores reales de vehículos con Three.js/WebGL. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab incorpora voladizos rectangulares y compresión tubular, con propiedades declaradas y coeficientes frente a referencias resistentes. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md), [ENGINEERING.md](docs/ENGINEERING.md) y [STRUCTURE.md](docs/STRUCTURE.md).
 
@@ -168,3 +168,11 @@ Aircraft y la calculadora de una etapa de Rocket utilizan Three.js con cámara o
 ## Structure Lab · versión 0.11
 
 Abre `structure.html` desde cualquiera de los cuatro menús. Selecciona material y carga, configura geometría/propiedades y consulta esfuerzo, coeficiente material, deflexión de voladizo o acortamiento axial. Hay diagramas SVG, filtro de aplicabilidad de Euler, comparación, guardado exclusivo, exportación JSON/CSV y enlaces compartibles. Carbono utiliza un laminado hipotético con resistencias supuestas, sin afirmar un límite elástico. Archivos, casos conocidos, pruebas y límites: [STRUCTURE.md](docs/STRUCTURE.md).
+
+## Structure Lab · diseñador 0.12
+
+Geometría paramétrica NACA/ellipsoide, cohete por secciones y envolvente esférica. Visor Three.js local con nodos 1D, campo de esfuerzos, deformación amplificada y cámara interactiva. Flexión Euler–Bernoulli, barras termoelásticas, membranas de presión y pandeo global ideal; carbono UD por máximo esfuerzo por dirección, sin Von Mises. No es FEM volumétrico ni una certificación. Los presets y guardados del banco anterior permanecen independientes.
+
+Pestañas: **Geometría y Materiales**, **Simulación de Cargas**, **Análisis Finito y Resultados**. Importa casos válidos abiertos en Aircraft/Rocket y envía una propuesta de masa revisable en destino, sin modificar sus ecuaciones ni el resto de sus parámetros. JSON, CSV, almacenamiento local y URL exacta con compatibilidad de enlaces antiguos.
+
+Consulta [STRUCTURE-DESIGN.md](docs/STRUCTURE-DESIGN.md) para arquitectura, propiedades, ecuaciones, unidades, ejecución, pruebas manuales, límites y tareas pendientes. Todo el código completo se entrega en los archivos de la versión, sin fragmentos pendientes. No hay nueva dependencia de ejecución: se reutiliza Three.js vendorizado.

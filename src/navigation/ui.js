@@ -2,13 +2,13 @@ import { encodeLink, decodeLink } from './share.js';
 
 const lab = document.body.dataset.lab || 'space';
 const parts = new Map();
-const expected = lab === 'rocket' ? ['calculator', 'launch'] : [lab];
+const expected = lab === 'rocket' ? ['calculator', 'launch'] : lab === 'structure' ? ['structure','design'] : [lab];
 const main = document.querySelector('main');
 const navigation = document.createElement('section');
 navigation.className = 'lab-navigation';
 navigation.innerHTML = `<div class="lab-toolbar"><div role="tablist" aria-label="Secciones del laboratorio"></div><button type="button" id="share-simulation">Copiar enlace de simulación</button></div><p id="share-status" role="status" aria-live="polite" class="helper"></p><label id="share-manual" hidden>Enlace para copiar manualmente<input id="share-url" type="text" readonly aria-describedby="share-status"></label>`;
 document.querySelector('.modules').after(navigation);
-const names = ['Configuración y Simulación', 'Análisis y Gráficos', 'Teoría y Modelos'];
+const names = lab === 'structure' ? ['Geometría y Materiales','Simulación de Cargas','Análisis Finito y Resultados'] : ['Configuración y Simulación', 'Análisis y Gráficos', 'Teoría y Modelos'];
 const ids = ['simulation', 'analysis', 'theory'];
 const panels = ids.map((id, index) => {
   const panel = document.createElement('div');
@@ -61,7 +61,7 @@ navigation.querySelectorAll('[role=tab]').forEach((tab, index) => {
 function revealHash() {
   const target = document.getElementById(location.hash.slice(1));
   const index = panels.findIndex(panel => target && panel.contains(target));
-  if (index >= 0) { select(index); if (target.tagName === 'DETAILS') target.open = true; target.scrollIntoView(); }
+  if (index >= 0) { for(let p=target.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true; select(index); if (target.tagName === 'DETAILS') target.open = true; target.scrollIntoView(); }
 }
 window.addEventListener('hashchange', revealHash);
 document.addEventListener('click', event => {
@@ -69,7 +69,7 @@ document.addEventListener('click', event => {
   if (!anchor) return;
   const target = document.getElementById(anchor.hash.slice(1));
   const index = panels.findIndex(panel => target && panel.contains(target));
-  if (index >= 0) { select(index); if(target.tagName==='DETAILS')target.open=true; }
+  if (index >= 0) { for(let p=target.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true; select(index); if(target.tagName==='DETAILS')target.open=true; }
   if (anchor.hash === location.hash) revealHash();
 });
 select(0); revealHash();
@@ -92,6 +92,7 @@ export function registerSharePart(key, adapter) {
   try {
     const state = decodeLink(location.href, lab);
     if (!state) return;
+    if(lab==='structure' && Object.keys(state).length===1 && Object.hasOwn(state,'structure'))state.design=parts.get('design').get();
     if (Object.keys(state).length !== expected.length || !expected.every(name => Object.hasOwn(state, name))) throw new Error('Faltan configuraciones del laboratorio.');
     // Validate every independent configuration before applying any of them.
     expected.forEach(name => parts.get(name).validate(state[name]));

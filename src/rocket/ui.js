@@ -1,3 +1,4 @@
+import { publishSnapshot, attachMassInbox } from '../integration/bridge.js';
 import { registerSharePart } from '../navigation/ui.js';
 import { numberIn, choice } from '../navigation/share.js';
 import { createGlobePanel } from '../three/bridge.js';
@@ -35,7 +36,7 @@ function updateBudget() {
     input.setAttribute('aria-invalid', String(!Number.isFinite(input.valueAsNumber) || !input.checkValidity()));
   }
   try {
-    const c = config(), b = budget(c);
+    const c = config(), b = budget(c); publishSnapshot('launch',c);
     $('launch-budget').textContent = `Masa inicial: ${b.initialMass.toFixed(1)} kg · Masa final retenida: ${b.finalMass.toFixed(1)} kg · Δv ideal total: ${b.deltaV.toFixed(2)} m/s. No es velocidad final de lanzamiento.`;
     $('launch-stage-budget').replaceChildren(...b.stages.map((s, i) => {
       const li = document.createElement('li'); li.textContent = `Etapa ${i + 1}: m₀=${s.before.toFixed(1)} kg → mf=${s.after.toFixed(1)} kg; desprende ${s.dropped} kg; ṁ=${s.flow.toFixed(2)} kg/s; ve=${s.exhaust.toFixed(2)} m/s; Δv=${s.deltaV.toFixed(2)} m/s.`; return li;
@@ -123,3 +124,5 @@ registerSharePart('launch', {
   },
   apply(state) { fill(state.configuration); $('launch-speed').value=state.speed; if(state.calculated)calculateLaunch(false,state.clock); },
 });
+
+attachMassInbox({target:'launch',get:config,apply:fill,root:document.getElementById('launch-lab')});

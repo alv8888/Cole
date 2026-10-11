@@ -148,3 +148,22 @@ GPU física, restauración de contexto, Safari, Firefox, dispositivos físicos, 
 ## Entrega 11 · Structure Lab
 
 73 pruebas unitarias y 72 grupos Chromium pasaron: ocho pruebas nuevas de estructura y ocho grupos nuevos de navegador, más todas las suites anteriores. Referencias Python independientes para voladizo puntual/uniforme y tubo comprimido; comprobación dimensional, escalas, carga nula, casos inválidos/extremos, aplicación de Euler y almacenamiento exclusivo. Navegador verifica formularios, materiales/propiedades, apoyo, dibujos, comparación, exportaciones reales, URL, menús y móvil 320–1440 px. Capturas `/tmp/aerolab-structure-desktop.png` y `/tmp/aerolab-structure-mobile.png` inspeccionadas. No hay validación experimental ni certificación de materiales/estructuras. Instrucciones: STRUCTURE.md.
+
+## Entrega 12 · Diseño estructural y FEM 1D
+
+Validación en Node 24 y Chromium local: **86 pruebas unitarias** (13 nuevas) y **83 grupos de navegador** (11 nuevos, más 72 de regresión). Se ejecutaron todas las suites anteriores: Space (20), engineering (10), fuerzas Aircraft (7), lanzamiento (7), Three.js (7), navegación (5), vehículos (8), Structure anterior (8). Nuevo `structure-design-browser.mjs` (11): formas/mallas/nodos, cambio real de imagen al rotar, cámara por teclado, carga, deformación animada, UD y esfera, invalidación, JSON/CSV/persistencia, URL nueva/antigua/rechazo atómico, importación sin guardar, propuestas de masa aplicadas una sola vez, destino multietapa, móvil/movimiento reducido y falta de WebGL/almacenamiento bloqueado.
+
+Casos unitarios: fórmula cerrada de voladizo uniforme, esfuerzo raíz, equilibrio y Euler K=2; axial/temperatura; presión cilíndrica/esférica; criterio UD y esfera no soportada; masa y fronteras; refinamiento 8/16/32; cargas cero, singularidad y datos inválidos; importaciones y aplicación de masa sobre configuración vigente. El código de fórmulas independientes no utiliza el ensamblaje FEM.
+
+Cálculos Python independientes ejecutados para E=71,7 GPa, L=3 m, b=0,08 m, h=0,12 m, F=5000 N uniforme: δpunta=0,020430177824267787 m, σraíz=39.062.500 Pa y Pcr(K=2)=226.448,20337859416 N. Cilindro L=4 m, D=0,6 m, t=0,003 m, Δp=100.000 Pa: σθ=9.950.000 Pa, VM=8.616.952,767655164 Pa, desplazamiento axial=0,00009436541143654115 m. Las pruebas FEM comparan con estas expresiones y tolerancias explícitas; no son datos experimentales.
+
+Comandos utilizados:
+
+```sh
+npm test
+AEROLAB_URL=http://127.0.0.1:8001 \
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs \
+node tests/structure-design-browser.mjs
+```
+
+Las herramientas de navegador solo se instalaron en `/tmp`, fuera de dependencias del producto. Capturas de escritorio y móvil: `/tmp/aerolab-structure-design-desktop.png`, `/tmp/aerolab-structure-design-mobile.png`; captura de visor `/tmp/design-canvas.png`. Se inspecciona la geometría renderizada y la distribución. No se ha validado fidelidad experimental, FEM volumétrico/cascarón, un diseño real, GPU física, Safari/Firefox, lectores de pantalla, WCAG completa ni hosting. Los casos ideales comprobados no certifican estructuras ni materiales. Pruebas manuales detalladas: [STRUCTURE-DESIGN.md](STRUCTURE-DESIGN.md).
