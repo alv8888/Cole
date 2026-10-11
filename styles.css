@@ -817,6 +817,32 @@ input[type=range] { accent-color: var(--a); border: 0; padding: 0; margin: 10px 
 .file-actions button { font-size: 11px; }
 .analysis-panel, .prediction-panel { margin-top: 18px; }
 .sensitivity-panel { margin-top: 18px; }
+.engineering-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.engineering-layout h2, .results-panel h2, .model-panel h2 { font-size: 15px; margin: 0; font-weight: 600; }
+.engineering-visual { position: sticky; top: 12px; }
+#engineering-canvas { display: block; width: 100%; height: 360px; touch-action: none; }
+.camera-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 14px 22px 0; }
+.camera-controls label { color: var(--muted); font-size: 11px; }
+#engineering-graph { display: block; width: 100%; }
+#engineering-fields { padding: 18px 22px; }
+#engineering-fields legend { color: var(--a); font-size: 12px; }
+#engineering-fields fieldset { margin-bottom: 15px; }
+.engineering-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.engineering-warnings { color: #dfc799; font-size: 12px; padding: 0 22px 0 38px; margin-bottom: 20px; }
+.engineering-warnings li { margin-bottom: 7px; }
+.engineering-documentation { padding: 20px 22px; color: var(--muted); font-size: 13px; }
+.engineering-documentation h3 { color: var(--text); }
+@media (max-width: 900px) {
+  .engineering-layout { grid-template-columns: 1fr; }
+  .engineering-visual { position: static; }
+}
+@media (max-width: 430px) {
+  #engineering-fields { padding: 16px; }
+  .engineering-field-grid { gap: 10px; }
+  .engineering-field-grid label { display: block; min-height: 32px; }
+  .engineering-field-grid label span { display: block; }
+  #engineering-graph text { font-size: 15px; }
+}
 .sweep-controls {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

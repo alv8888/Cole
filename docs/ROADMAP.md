@@ -1,6 +1,6 @@
 # AEROLAB · registro de fases y entregas
 
-Entrega 1: MVP circular. Entrega 2 (0.2): extensión elíptica. Entrega 3 (0.3): experimentos y archivos portables. Entrega 4 (0.4): barridos y análisis de sensibilidad. Se mantiene el alcance en Space Lab.
+Entrega 1: MVP circular. Entrega 2 (0.2): extensión elíptica. Entrega 3 (0.3): experimentos y archivos portables. Entrega 4 (0.4): barridos y análisis de sensibilidad. Entrega 5 (0.5): primera versión Aircraft Lab, seguida de Rocket Lab, con geometría 3D ilustrativa. Las entregas anteriores describen el alcance de su momento.
 
 ## Fase 1 · concepto y alcance — completada
 
@@ -42,11 +42,25 @@ Entrega 3 completada: cuatro escenarios con objetivos explícitos; control de ti
 
 Problemas tratados: distinguir porcentaje de tiempo y ángulo; explicar que cada curva usa su propio periodo; conservar el estado ante importaciones inválidas; borrar respuestas obsoletas al cambiar parámetros; indicar que interpolar curvas no mejora la precisión del modelo. No se añaden dependencias ni datos de misiones inventados. Validación: 30 pruebas unitarias y 17 checks de Chromium.
 
-Pendiente: accesibilidad completa, otros navegadores, incertidumbre de parámetros y eventual modelo de perturbaciones con referencias nuevas. Aircraft, Rocket y Structure Lab permanecen fuera de esta entrega.
+Pendiente: accesibilidad completa, otros navegadores, incertidumbre de parámetros y eventual modelo de perturbaciones con referencias nuevas. Aircraft, Rocket y Structure Lab permanecían fuera de la entrega 3.
 
 Entrega 4 completada: barridos de hₚ/e con base A o B; selección de periodo o velocidades extremas; gráfica, tabla y CSV; aplicación de una muestra a la base elegida. Arquitectura: sensitivity.js puro y sensitivity-ui.js independiente de los eventos del laboratorio. Validación: 34 pruebas unitarias y 20 comprobaciones Chromium.
 
 Antes de cerrar esta ampliación se trataron intervalos fuera de límites, resultados obsoletos tras cambios, conservación de variables fijas, modificación exclusiva de la base y diferencia entre explorar configuraciones y simular una maniobra. La interpolación gráfica y la precisión física permanecen limitadas por el modelo original. No se incorporaron librerías ni servicios nuevos.
+
+## Entrega 5 · Aircraft y Rocket — fases 1 a 4 completadas para modelos iniciales
+
+Objetivo: incorporar aerodinámica, viento uniforme, estructura alar ideal y energía a Aircraft; después, conservación de masa y Tsiolkovski a Rocket. Usuarios: estudiantes y docentes; propósito educativo, sin diseño de motores ni aplicaciones armamentísticas.
+
+Antes de implementar se identificaron riesgos: confundir geometría con CFD; introducir coeficientes sin datos; considerar una viga segura sin resistencia del material; llamar sustentable a un simple factor de carbono; convertir Δv en trayectoria real. Se resolvieron con modelos identificables, unidades SI, coeficientes hipotéticos declarados, avisos de rango y límites explícitos en ENGINEERING.md y la interfaz.
+
+Arquitectura: páginas independientes con modelos puros comunes, perfiles declarados, interfaz, persistencia por módulo y renderizador de vértices 3D en Canvas 2D. No se añade Three.js: una proyección ortográfica con cámara giratoria basta para esta geometría y evita dependencias innecesarias. No hay integrador numérico; las gráficas muestrean expresiones analíticas.
+
+Completado: controles con validación, resultados, comparación con referencia, gráficas, reset, JSON exportable, guardados separados, viento relativo, viga en voladizo, métricas energéticas y balance de propelente. Validación: 40 pruebas unitarias en total y 30 grupos de comprobaciones Chromium, conservando Space Lab. Casos independientes de fuerzas, flexión y Δv se calcularon con Python. Se comprobó anchura de 320 a 1440 px y se inspeccionaron capturas.
+
+Problemas importantes antes de ampliar: la fidelidad física no está contrastada con ensayos; CL no depende de ángulo/Reynolds; viento uniforme sin ráfagas; CG sin estabilidad; viga sin torsión ni límite resistente; emisiones sin ciclo de vida; cohete sin trayectoria, arrastre o gravedad variable. Los resultados no certifican diseño, seguridad o sustentabilidad. No hay datos externos actualizados automáticamente.
+
+Pendiente de fases siguientes: datos trazables y modelos aerodinámicos identificados; cargas y estructuras más completas; trayectoria educativa de cohete con algoritmo y validación propios; módulo Structure independiente; evaluación ambiental con fuentes y alcance; importación JSON Aircraft/Rocket; auditoría de accesibilidad y otros navegadores. Cada ampliación necesita sus propios casos de prueba antes de anunciarse funcional.
 
 ## Fase 6 · publicación y mantenimiento — preparación inicial, publicación pendiente
 

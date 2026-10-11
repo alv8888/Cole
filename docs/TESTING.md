@@ -1,14 +1,14 @@
-# Pruebas y evidencia de la entrega 4 · Space Lab 0.4
+# Pruebas y evidencia de la entrega 5 · AEROLAB 0.5
 
 ## Resultado observado
 
-- Node.js 24.19.0: **34 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
-- Chromium headless mediante Playwright: **20 comprobaciones de integración aprobadas**, sin errores JavaScript no capturados en la página principal.
+- Node.js 24.19.0: **40 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
+- Chromium headless mediante Playwright: **30 comprobaciones de integración aprobadas** (20 Space y 10 Aircraft/Rocket), sin errores JavaScript no capturados en las tres páginas.
 - Cálculo independiente con Python 3.12.14: valores terrestres a 400 km y a radio 42164 km concordantes con las referencias de las pruebas.
 - Página y módulos servidos por HTTP con Python; no se requiere instalación de paquetes de aplicación ni compilación.
 - Capturas de escritorio de 1440 px y móvil de 390 px inspeccionadas. Comprobación automática sin desbordamiento global a 1440, 768, 390 y 320 px. La tabla permite desplazamiento horizontal propio en móvil.
 
-Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 20 checks de navegador son grupos de aserciones, no 20 modelos científicos adicionales.
+Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 30 checks de navegador son grupos de aserciones, no 30 modelos científicos adicionales.
 
 ## Qué comprueban las pruebas unitarias
 
@@ -19,6 +19,8 @@ La ampliación verifica e=0 como regresión circular, caso normalizado elíptico
 La entrega 3 añade comprobaciones de formato JSON portable, límite de bytes y entradas incorrectas, propiedades ajenas descartadas, muestreo con extremos, filas CSV y tiempos/unidades, coherencia física de los cuatro escenarios, predicciones basadas en valores actuales y extremos del control temporal. Los archivos JSON se validan antes de aplicar ambos estados; una importación parcial no se acepta.
 
 La entrega 4 añade cuatro pruebas: extremos y leyes de escala del barrido de altura, condiciones fijas y relaciones analíticas del barrido de e, rechazo de intervalos/tamaños inválidos y contenido/unidades del CSV. En navegador se comprueban gráfica y tabla, selección de muestras, borrado de datos obsoletos, configuración inválida, exportación real y aplicación exclusiva a B.
+
+La entrega 5 añade seis pruebas de ingeniería: fuerzas de referencia; viento relativo y escalamiento; geometría/viga/energía; balance y estados de cohete; escalamiento, gravedad cero y dimensiones visuales; rechazo de entradas no finitas y fuera de rango en todos los campos. Los casos y sus dimensiones están en ENGINEERING.md.
 
 Comando:
 
@@ -52,7 +54,8 @@ Con el servidor de README funcionando en otra terminal:
 
 ```sh
 cd /workspace/Cole
-PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/browser.mjs
+AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/browser.mjs
+AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/engineering-browser.mjs
 ```
 
 Opciones: `CHROMIUM_PATH` para otro ejecutable y `AEROLAB_URL` para otra dirección de prueba. El script lanza Chromium sin sandbox dentro de este contenedor de pruebas; para ejecutar en otro entorno, revisa la política de aislamiento antes de reutilizar esa opción. Las capturas se escriben en `/tmp/aerolab-desktop.png` y `/tmp/aerolab-mobile.png`, fuera del checkout. No se necesita acceso a servicios externos durante las pruebas.
@@ -64,6 +67,8 @@ Comprobaciones: resultados iniciales; comparación e invalidez; presets y person
 También se comprueban geometría elíptica con el cuerpo en un foco, resultados de los extremos, entradas e≥1 rechazadas, lecturas de velocidad/distancia variables, persistencia de e y migración v1 sin sobrescribir datos hasta Guardar.
 
 Interacciones nuevas verificadas en Chromium: los cuatro escenarios; cargas y edición propia; control temporal, 100 %, accesos de apsis, cambio de referencia conservando segundos y marcadores de curvas; corrección de predicciones y limpieza de respuestas antiguas; descargas JSON/CSV leídas desde sus archivos reales; selector de archivo; importación válida sin guardar automáticamente; archivos corruptos y demasiado grandes que conservan el estado; funciones nuevas deshabilitadas con entradas inválidas. Se revisaron capturas de las curvas en escritorio y móvil.
+
+Aircraft/Rocket añaden 10 grupos: resultados conocidos y cámara; referencias e invalidez; persistencia/exportación real y datos dañados; viento invertido y gravedad cero; anchuras, navegación y etiquetas. Capturas: `/tmp/aerolab-aircraft-desktop.png`, `/tmp/aerolab-aircraft-mobile.png`, `/tmp/aerolab-rocket-desktop.png`, `/tmp/aerolab-rocket-mobile.png`.
 
 ## Pruebas manuales para el usuario
 
@@ -87,6 +92,13 @@ Interacciones nuevas verificadas en Chromium: los cuatro escenarios; cargas y ed
 18. Introduce un mínimo mayor que el máximo: debe aparecer un error y no quedar datos aplicables o exportables. Prueba una entrada inválida en la base y comprueba el mismo comportamiento.
 19. Exporta el barrido de 21 muestras: el archivo debe contener encabezado más 21 filas. Comprueba columnas de μ, R, hₚ, e, periodo y velocidades.
 
+20. Abre Aircraft: con los parámetros iniciales, L=14700 N y D≈1174 N. Introduce viento longitudinal −10 m/s: Vaire=60 m/s y L=21168 N. +10 m/s da 40 m/s. No son resultados de una aeronave real.
+21. Captura referencia, cambia velocidad y revisa Actual/Referencia/%. Duplica el módulo elástico de 70 a 140 GPa: la deflexión debe pasar de 0,0084 a 0,0042 m, manteniendo las demás condiciones.
+22. Gira ambos modelos por arrastre y controles de cámara. Cambia envergadura/estrechamiento en Aircraft y diámetro/longitud en Rocket. Las dimensiones visuales de Rocket no deben alterar Δv.
+23. Abre Rocket: masa inicial 300 kg, flujo 5 kg/s y Δv total≈1318,335 m/s. Estado 50 %: masa 200 kg; 100 %: masa 100 kg y Δv acumulado igual al total. Gravedad 0 muestra T/W indefinido y no descuenta gravedad.
+24. Guarda parámetros distintos en cada módulo, recarga y carga. Deben recuperarse de manera independiente. Exporta JSON y verifica módulo/versión/parámetros. Capturar referencia no debe guardar automáticamente; restablecer no debe borrar el guardado.
+25. Vacía campos y supera sus límites: los cálculos se ocultan y guardar/exportar/capturar quedan deshabilitados. Corrige y confirma recuperación. Prueba con teclado y pantalla estrecha.
+
 ## No comprobado
 
-Safari, Firefox, dispositivos físicos, lectores de pantalla, una auditoría WCAG completa, hosting real, incertidumbre de constantes, efemérides reales, perturbaciones orbitales, conservación durante integración numérica (no hay integrador), e>0,9, órbitas abiertas ni otros módulos. Ninguno de estos resultados se anuncia como validado.
+Safari, Firefox, dispositivos físicos, lectores de pantalla, una auditoría WCAG completa, hosting real, incertidumbre de constantes, efemérides reales, perturbaciones orbitales, conservación durante integración numérica (no hay integrador), e>0,9, órbitas abiertas ni fidelidad experimental de Aircraft/Rocket, CFD, estabilidad, resistencia última de materiales, ciclo de vida ambiental ni trayectoria de lanzamiento. Ninguno de estos resultados se anuncia como validado.
