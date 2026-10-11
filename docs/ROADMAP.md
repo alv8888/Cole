@@ -64,7 +64,7 @@ Pendiente de fases siguientes: datos trazables y modelos aerodinámicos identifi
 
 ## Fase 6 · publicación y mantenimiento — preparación inicial, publicación pendiente
 
-Aplicación estática, sin claves ni dependencias en runtime. README documenta ejecución y publicación. Falta elegir y probar hosting HTTPS, revisar políticas de seguridad, comprobar navegadores objetivos y realizar revisión de accesibilidad. No hay despliegue efectuado. Las configuraciones se pueden transportar manualmente mediante JSON; no hay sincronización remota ni cuentas.
+Aplicación estática sin claves; desde la entrega 8 hay dependencia Three.js local para WebGL. README documenta ejecución y publicación. Falta elegir y probar hosting HTTPS, revisar políticas de seguridad, comprobar navegadores objetivos y realizar revisión de accesibilidad. No hay despliegue efectuado. Las configuraciones se pueden transportar manualmente mediante JSON; no hay sincronización remota ni cuentas.
 
 ## Entrega 6 · lanzamiento multietapa (0.6)
 
@@ -83,3 +83,13 @@ Fase 3 completada: peso/masa vinculados, empuje editable, polar/CD directo, perf
 Problemas tratados antes de cerrar: vincular un único parámetro de masa/peso; CD directo sin sumar inducida; fuerzas con componentes en viento vertical; guardados incompletos conservan interfaz; resultados inválidos limpian flechas/barras; panel visual deja de ser fijo para que su mayor altura se pueda recorrer. La banda del 0,5 % es pedagógica y los datos de perfiles siguen hipotéticos.
 
 Pendiente para fase 5: coeficientes trazables, ángulo de ataque, momentos y estabilidad, movimiento integrado con validación y modelo lateral 3D. Fase 6: código publicado en GitHub; sitio y auditoría completa de accesibilidad todavía pendientes. Las limitaciones se describen en AIRCRAFT-FORCES.md.
+
+## Entrega 8 · Three.js y vistas planetarias (0.8)
+
+Fases 1/2: alcance de visualización con textura y cámara, conservando los modelos existentes. Riesgos identificados: falsear trayectoria radial como curva orbital, texturizar cuerpos distintos como Tierra, mezclar unidades y dejar cálculos bloqueados por WebGL. Se eligió dependencia Three.js r180 local con licencia/procedencia, conversión pura SI/radio y carga diferida con fallback. Sin CDN ni API nueva.
+
+Fase 3 completada: esfera texturizada, líneas de órbita/lanzamiento, marcador sincronizado, configuración A/B, arrastre/zoom y botones de cámara, radios relativos del cuerpo, limpieza de estados inválidos y avisos de contexto. La órbita sigue siendo plana en espacio 3D; el cohete sigue radial y no adquiere guiado u órbita por dibujarse en WebGL.
+
+Fase 4: 57 pruebas unitarias y 51 grupos de navegador; conversiones y extremos, renderizado WebGL con SwiftShader, textura y recursos locales, imagen cambia al girar/acercar, estados sincronizados, diseño 320–1440 px, pérdida/ausencia de WebGL, fallo de textura y regresiones anteriores. Capturas inspeccionadas. Problemas importantes antes de ampliar: muestreo de dibujo, precisión Float32/escala extrema, textura estática sin geolocalización, carga de recursos y GPU no probada físicamente.
+
+Fases 5/6 pendientes: trayectoria no radial validada, pruebas en otros navegadores y hardware, accesibilidad completa y hosting con compresión/caché. Código actualizado en GitHub; no se ha desplegado un sitio. THREE-VIEWS.md registra límites y pruebas no realizadas.

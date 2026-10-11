@@ -1,14 +1,14 @@
-# Pruebas y evidencia de la entrega 7 · AEROLAB 0.7
+# Pruebas y evidencia de la entrega 8 · AEROLAB 0.8
 
 ## Resultado observado
 
-- Node.js 24.19.0: **54 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
-- Chromium headless mediante Playwright: **44 comprobaciones de integración aprobadas** (20 Space, 10 Aircraft/Rocket anterior, 7 lanzamiento multietapa y 7 Aircraft lateral), sin errores JavaScript no capturados en las tres páginas.
+- Node.js 24.19.0: **57 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
+- Chromium headless mediante Playwright: **51 comprobaciones de integración aprobadas** (20 Space, 10 Aircraft/Rocket anterior, 7 lanzamiento multietapa, 7 Aircraft lateral y 7 Three.js), sin errores JavaScript no capturados en las tres páginas.
 - Cálculo independiente con Python 3.12.14: valores terrestres a 400 km y a radio 42164 km concordantes con las referencias de las pruebas.
 - Página y módulos servidos por HTTP con Python; no se requiere instalación de paquetes de aplicación ni compilación.
 - Capturas de escritorio de 1440 px y móvil de 390 px inspeccionadas. Comprobación automática sin desbordamiento global a 1440, 768, 390 y 320 px. La tabla permite desplazamiento horizontal propio en móvil.
 
-Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 44 checks de navegador son grupos de aserciones, no 44 modelos científicos adicionales.
+Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 51 checks de navegador son grupos de aserciones, no 51 modelos científicos adicionales.
 
 ## Qué comprueban las pruebas unitarias
 
@@ -25,6 +25,8 @@ La entrega 5 añade seis pruebas de ingeniería: fuerzas de referencia; viento r
 La entrega 6 añade ocho pruebas: presupuesto multietapa con masas superiores; despegue tardío y plataforma; caída y escape; reducción de paso y conservación de energía; horizonte incompleto; referencia independiente Python; entradas inválidas y extremos; persistencia versionada exclusiva. Los resultados y el algoritmo se documentan en ROCKET-FLIGHT.md.
 
 La entrega 7 añade seis pruebas: fuerzas/aceleraciones de referencia; equilibrio y banda del 0,5 %; CD directo sin duplicar inducida y arrastre cero; proyección vertical/balance lateral no resuelto; nuevas entradas inválidas; migración v1/v2. El cálculo independiente de referencia en Python se detalla en AIRCRAFT-FORCES.md.
+
+La entrega 8 añade tres pruebas de conversión geométrica: foco/radios y estado orbital; trayectoria radial/escala/extremos temporales; casos cortos e invalidez. No se cambia la física: se verifica que representarla en 3D conserva sus distancias y plano.
 
 Comando:
 
@@ -62,6 +64,7 @@ AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_mo
 AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/engineering-browser.mjs
 AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/rocket-flight-browser.mjs
 AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/aircraft-forces-browser.mjs
+AEROLAB_URL=http://127.0.0.1:8001 PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node tests/three-browser.mjs
 ```
 
 Opciones: `CHROMIUM_PATH` para otro ejecutable y `AEROLAB_URL` para otra dirección de prueba. El script lanza Chromium sin sandbox dentro de este contenedor de pruebas; para ejecutar en otro entorno, revisa la política de aislamiento antes de reutilizar esa opción. Las capturas se escriben en `/tmp/aerolab-desktop.png` y `/tmp/aerolab-mobile.png`, fuera del checkout. No se necesita acceso a servicios externos durante las pruebas.
@@ -123,6 +126,13 @@ El navegador multietapa verificó siete grupos: edición de etapas/presupuesto; 
 
 La entrega 7 verificó siete grupos de navegador: flechas/barras iniciales; peso/masa bidireccionales y escritura gradual; CD directo/equilibrio; viento y entradas inválidas; animación sin alterar física; migración/persistencia/exportación; etiquetas y anchuras. Capturas inspeccionadas: `/tmp/aerolab-aircraft-forces-desktop.png` y `/tmp/aerolab-aircraft-forces-mobile.png`. Se ejecutaron también los tres scripts anteriores para regresión. Ningún error JavaScript no capturado.
 
+38. En Space Lab, espera Tierra texturizada en el visor nuevo. Gira por arrastre y botones; acerca/aleja y restablece. Debe cambiar la perspectiva sin cambiar cálculos orbitales. A/B elige solo la configuración mostrada en 3D.
+39. Reproduce o ve a apoapsis: el marcador 3D debe seguir el mismo tiempo del SVG. Cambia el cuerpo seleccionado a Luna/Marte: debe mostrar esfera simple, no textura terrestre. Vacía su altitud: la línea y marcador deben desaparecer hasta corregir.
+40. En Rocket, calcula y explora el tiempo. El marcador sube según h y la línea crece radialmente. Al impacto debe volver a la superficie; no se dibuja una órbita circular. Cambiar una entrada debe retirar la trayectoria anterior.
+41. Prueba cámara con teclado y pantalla estrecha. Si no hay WebGL, lee el aviso y comprueba que siguen disponibles tablas, SVG, guardados y simulación. La textura no representa clima actual ni geolocalización de una misión.
+
+El script Three.js usa Chromium con `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader` para verificar render WebGL por software en el contenedor. Compara capturas reales tras cámara/zoom, comprueba textura y que no hay recursos externos, valida selección/invalidación/marcadores/trayectoria y simula pérdida de contexto. Se bloqueó además la solicitud de textura para verificar esfera sin mapa, cámara y cálculos operativos. Un segundo Chromium con `--disable-webgl` verifica fallback sin bloquear cálculos. Se ejecutaron los otros cuatro scripts de integración como regresión. Capturas inspeccionadas: `/tmp/aerolab-three-orbit-desktop.png`, `/tmp/aerolab-three-orbit-mobile.png`, `/tmp/aerolab-three-rocket-desktop.png`, `/tmp/aerolab-three-rocket-mobile.png`.
+
 ## No comprobado
 
-Safari, Firefox, dispositivos físicos, lectores de pantalla, una auditoría WCAG completa, hosting real, incertidumbre de constantes, efemérides reales, perturbaciones orbitales, conservación durante integración numérica (no hay integrador), e>0,9, órbitas abiertas ni fidelidad experimental de Aircraft/Rocket, CFD, estabilidad, resistencia última de materiales, ciclo de vida ambiental ni fidelidad experimental de la trayectoria radial multietapa. Ninguno de estos resultados se anuncia como validado.
+GPU física, restauración de contexto, Safari, Firefox, dispositivos físicos, lectores de pantalla, una auditoría WCAG completa, hosting real, incertidumbre de constantes, efemérides reales, perturbaciones orbitales, conservación durante integración numérica (no hay integrador), e>0,9, órbitas abiertas ni fidelidad experimental de Aircraft/Rocket, CFD, estabilidad, resistencia última de materiales, ciclo de vida ambiental ni fidelidad experimental de la trayectoria radial multietapa. Ninguno de estos resultados se anuncia como validado.

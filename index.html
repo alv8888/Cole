@@ -6,6 +6,7 @@
   <meta name="description" content="AEROLAB: explora órbitas circulares y elípticas de dos cuerpos, con ecuaciones visibles y comparación de configuraciones.">
   <title>AEROLAB · Space Lab</title>
   <link rel="stylesheet" href="styles.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three/three.module.js"}}</script>
   <script type="module" src="src/app.js"></script>
 </head>
 <body>
@@ -28,12 +29,13 @@
       <div class="module unavailable"><span aria-hidden="true">▱</span><span>Structure Lab<small>Fase posterior · no disponible</small></span></div>
     </nav>
     <section id="lab" aria-labelledby="lab-title">
-      <div class="section-heading"><div><p class="eyebrow">01 / MECÁNICA ORBITAL</p><h2 id="lab-title">Space Lab <span class="badge">VERSIÓN 0.7</span></h2></div><p class="model-chip">Modelo educativo · dos cuerpos</p></div>
+      <div class="section-heading"><div><p class="eyebrow">01 / MECÁNICA ORBITAL</p><h2 id="lab-title">Space Lab <span class="badge">VERSIÓN 0.8</span></h2></div><p class="model-chip">Modelo educativo · dos cuerpos</p></div>
       <section class="panel study-panel" aria-labelledby="studies-title">
         <div class="panel-heading"><h3 id="studies-title">Elige un experimento</h3><span class="subtle">ESCENARIOS IDEALIZADOS</span></div>
         <div id="scenarios" class="scenario-grid"></div>
         <p id="scenario-note" class="study-description"></p>
       </section>
+<section class="panel globe-panel" id="orbit-globe" aria-labelledby="orbit-globe-title"><div class="panel-heading"><h3 id="orbit-globe-title">Planeta y órbita · WebGL 3D</h3><span class="subtle">THREE.JS</span></div><div class="globe-toolbar"><label for="globe-configuration">Configuración visible</label><select id="globe-configuration" aria-describedby="orbit-globe-note"><option value="0">A</option><option value="1">B</option></select></div><div class="globe-host" aria-describedby="orbit-globe-note"></div><div class="globe-controls" aria-label="Controles de cámara 3D"><button type="button" data-camera="left" class="quiet">Girar izquierda</button><button type="button" data-camera="right" class="quiet">Girar derecha</button><button type="button" data-camera="up" class="quiet">Subir cámara</button><button type="button" data-camera="down" class="quiet">Bajar cámara</button><button type="button" data-camera="in" class="quiet">Acercar</button><button type="button" data-camera="out" class="quiet">Alejar</button><button type="button" data-camera="reset" class="quiet">Restablecer cámara</button></div><p class="globe-caption helper"></p><p class="globe-status helper" role="status" aria-live="polite">Cargando vista 3D local…</p><p id="orbit-globe-note" class="helper">La esfera conserva el radio relativo del cuerpo seleccionado. La línea es la órbita calculada en su plano; el satélite sigue el reloj del laboratorio. Marcador ampliado, sin tamaño real de satélite. Cámara y marcadores son visuales: no calculan inclinación, rotación del planeta ni perturbaciones. Tierra con textura estática; otros cuerpos con apariencia simple.</p></section>
       <div class="workspace">
         <section class="panel visual-panel" aria-labelledby="visual-title">
           <div class="panel-heading"><h3 id="visual-title">Vista orbital</h3><span class="subtle">PLANO DE LA ÓRBITA</span></div>

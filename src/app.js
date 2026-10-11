@@ -1,3 +1,5 @@
+import { createGlobePanel } from './three/bridge.js';
+import { orbitPath, orbitPoint } from './three/geometry.js';
 import { BODIES, DEFAULTS } from './data.js';
 import { LIMITS, validateConfiguration } from './validation.js';
 import { kmToM, km3ToM3, mToKm, secondsToMinutes, number } from './units.js';
@@ -21,6 +23,11 @@ let previousFrame = null;
 let frameId = null;
 let revision = 0;
 let sensitivity = null;
+const globe=createGlobePanel($('#orbit-globe'));
+function refreshGlobePath(){
+  const index=Number($('#globe-configuration').value),orbit=orbits[index],config=configurations[index];
+  globe.setPath(orbit?{body:config.body,description:`${index===0?'A':'B'} · ${BODIES[config.body]?.name??'Cuerpo personalizado'} · radio ${number(config.radius)} km · 1 unidad 3D = radio del cuerpo.`,points:orbitPath(orbit,kmToM(config.radius)),closed:true,color:index===0?0x8edfcc:0xc0afff}:null);
+}
 
 function selectStudy(id) {
   const scenario = SCENARIOS.find(item => item.id === id);
@@ -155,6 +162,7 @@ function update() {
     drawOrbit($(`#orbit-${letter}`), config, orbits[index], index, maxRadius);
     $(`#caption-${letter}`).textContent = `${letter.toUpperCase()} · ${BODIES[config.body]?.name ?? 'Personalizado'}${orbits[index] ? ` · hₚ = ${number(config.altitude)} km` : ' · sin cálculo'}`;
   });
+  refreshGlobePath();
   sensitivity?.refresh();
   refreshPositions();
 }
@@ -165,6 +173,8 @@ function refreshPositions() {
     $(`#instant-${letter}`).textContent = state ? `r actual = ${number(mToKm(state.r))} km · v actual = ${number(mToKm(state.speed))} km/s` : 'Sin estado orbital: corrige las entradas.';
     return state;
   });
+  const globeIndex=Number($('#globe-configuration').value);
+  globe.setPosition(states[globeIndex]?orbitPoint(states[globeIndex],kmToM(configurations[globeIndex].radius)):null);
   $('#elapsed').textContent = `${number(elapsed, 0)} s`;
   const reference = orbits[Number($('#reference').value)];
   const fraction = reference ? periodFraction(elapsed, reference.period) : 0;
@@ -206,6 +216,7 @@ $('#scenarios').replaceChildren(...SCENARIOS.map(scenario => {
   return button;
 }));
 selectStudy('altitude');
+$('#globe-configuration').addEventListener('change',()=>{refreshGlobePath();refreshPositions();});
 createFields();
 fillFields();
 update();

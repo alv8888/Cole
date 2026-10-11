@@ -1,13 +1,17 @@
+import { createGlobePanel } from '../three/bridge.js';
+import { rocketPath, rocketPoint } from '../three/geometry.js';
+import { BODIES } from './model.js';
 import { DEFAULT, clone, budget, simulate } from './model.js';
 import { saveLaunch, loadLaunch } from './storage.js';
 import { chart, stageDiagram } from './visualization.js';
 import { downloadFile } from '../files.js';
 const $ = id => document.getElementById(id);
+const globe=createGlobePanel($('rocket-globe'));
 let result = null, playing = false, clock = 0, previousFrame = null;
 const fields = [['dry','Masa seca','kg',1,100000],['propellant','Propelente','kg',1,1000000],['thrust','Empuje','N',1,10000000],['duration','Duración','s',1,600]];
 function pause() { playing = false; previousFrame = null; $('launch-play').textContent = 'Reproducir'; }
 function invalidate() {
-  pause(); result = null; clock = 0;
+  pause(); result = null; clock = 0; globe.setPath(null);
   for (const id of ['launch-play','launch-timeline','launch-csv']) $(id).disabled = true;
   $('launch-state').textContent = 'Diseño modificado: calcula un nuevo lanzamiento.';
   $('launch-outcome').textContent = 'Sin trayectoria vigente.';
@@ -54,7 +58,9 @@ function display() {
   // Binary search locates a computed physical state; no fictitious interpolation.
   let low = 0, high = result.samples.length - 1;
   while (low < high) { const mid = Math.ceil((low + high) / 2); if (result.samples[mid].t <= clock) low = mid; else high = mid - 1; }
-  const s = result.samples[low], prefix = result.samples.slice(0, low + 1);
+  const s = result.samples[low];
+  globe.setPosition(rocketPoint(s,BODIES[result.config.body].radius),s.t);
+  const prefix = result.samples.slice(0, low + 1);
   $('launch-state').textContent = `t=${s.t.toFixed(1)} s · Altitud=${(s.h/1000).toFixed(3)} km · Velocidad radial=${s.v.toFixed(2)} m/s · Masa=${s.mass.toFixed(1)} kg · ${s.stage < result.config.stages.length ? `Etapa ${s.stage+1}` : 'Vuelo sin propulsión'} · Escape local=${s.escapeSpeed.toFixed(1)} m/s`;
   $('launch-timeline').value = result.final.t ? clock / result.final.t * 100 : 0;
   $('launch-outcome').textContent = clock >= result.final.t ? outcomes[result.outcome] : 'Lanzamiento en reproducción; el desenlace se muestra al final.';
@@ -72,7 +78,9 @@ $('launch-count').addEventListener('change', () => {
 $('launch-run').addEventListener('click', () => {
   pause();
   try {
-    result = simulate(config()); clock = 0; $('launch-timeline').max = 100;
+    result = simulate(config());
+    globe.setPath({body:result.config.body,description:`${BODIES[result.config.body].name} · radio ${BODIES[result.config.body].radius/1000} km · 1 unidad 3D = radio del cuerpo.`,...rocketPath(result.samples,BODIES[result.config.body].radius),closed:false});
+    clock = 0; $('launch-timeline').max = 100;
     for (const id of ['launch-play','launch-timeline','launch-csv']) $(id).disabled = false;
     $('launch-message').textContent = 'Trayectoria calculada con RK4, paso máximo 0,1 s. Se reproduce el tiempo calculado, acelerado según el control.';
     display(); if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { playing = true; $('launch-play').textContent = 'Pausar'; }

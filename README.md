@@ -1,6 +1,6 @@
-# AEROLAB 0.7 · Space, Aircraft y Rocket Lab
+# AEROLAB 0.8 · Space, Aircraft y Rocket Lab
 
-Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y geometría 3D con proyección en Canvas 2D. Sin dependencias de aplicación, API, base de datos, compilación ni cuentas. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
+Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y geometría 3D con proyección en Canvas 2D. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
 
 ## Ejecutar
 
@@ -15,7 +15,7 @@ Abre `http://localhost:8000` en tu equipo local. En una máquina remota, utiliza
 
 Alternativa con Node y npm presentes: `npm start`. No se necesita `npm install` para usar la aplicación o ejecutar las pruebas unitarias.
 
-Si el puerto 8000 está ocupado, ejecuta `python3 -m http.server 8001 --bind 0.0.0.0` y utiliza el puerto 8001. Las entregas 4, 5, 6 y 7 se validaron en 8001 porque un servidor anterior ocupaba 8000 sin responder correctamente; no se detuvo ese proceso al no poder verificar su propiedad desde el entorno actual.
+Si el puerto 8000 está ocupado, ejecuta `python3 -m http.server 8001 --bind 0.0.0.0` y utiliza el puerto 8001. Las entregas 4, 5, 6, 7 y 8 se validaron en 8001 porque un servidor anterior ocupaba 8000 sin responder correctamente; no se detuvo ese proceso al no poder verificar su propiedad desde el entorno actual.
 
 ## Pruebas
 
@@ -34,10 +34,16 @@ Cole/
 ├── aircraft.html              # Aerodinámica, viento, viga, energía y comparación
 ├── rocket.html                # Balance de masa, Δv ideal y comparación
 ├── styles.css                 # Identidad visual, estados, foco y diseño adaptable
-├── package.json               # Comandos, sin dependencias
+├── package.json               # Comandos; dependencia local en vendor/
 ├── .gitignore
 ├── .github/workflows/tests.yml # Pruebas unitarias en GitHub Actions
+├── vendor/three/              # Three.js r180, OrbitControls, licencia y procedencia
+├── assets/textures/           # Textura terrestre estática y procedencia
 ├── src/
+│   ├── three/
+│   │   ├── geometry.js        # Conversiones SI/3D y muestreo, sin WebGL
+│   │   ├── viewer.js          # Escena y cámara WebGL
+│   │   └── bridge.js          # Carga diferida y fallback
 │   ├── aircraft/
 │   │   ├── forces.js          # Suma vectorial y balance instantáneo, sin DOM
 │   │   ├── visualization.js   # Perfil lateral, cuatro fuerzas y animación
@@ -72,6 +78,8 @@ Cole/
 │   ├── exploration.test.js    # Escenarios, archivos, muestreo y predicciones
 │   ├── sensitivity.test.js    # Barridos, conservación de condiciones y leyes de escala
 │   ├── storage.test.js        # Persistencia y errores
+│   ├── three-geometry.test.js # Escalas, extremos y trayectoria radial
+│   ├── three-browser.mjs      # Render, cámara, textura y fallback
 │   ├── aircraft-forces.test.js # Balance, proyecciones, CD y migración
 │   ├── aircraft-forces-browser.mjs # Perfil lateral, controles y guardados
 │   ├── rocket-flight.test.js  # Trayectoria, masa, energía y referencia Python
@@ -81,12 +89,19 @@ Cole/
 │   └── browser.mjs            # Integración opcional con Playwright y Chromium
 └── docs/
     ├── MODEL.md               # Modelo, dimensiones, supuestos y precisión
+    ├── THREE-VIEWS.md         # Visores WebGL, recursos y validación
     ├── AIRCRAFT-FORCES.md     # Perfil lateral, fuerzas y precisión
     ├── ROCKET-FLIGHT.md        # Lanzamiento radial multietapa, RK4 y validación
     ├── ENGINEERING.md         # Modelos Aircraft/Rocket, dimensiones y casos
     ├── TESTING.md             # Evidencia, reproducción y pruebas manuales
     └── ROADMAP.md             # Fases completadas, problemas y pendientes
 ```
+
+## Tierra y trayectorias WebGL 3D · versión 0.8
+
+Space Lab incluye un nuevo visor Three.js con Tierra texturizada, selección A/B y satélite conectado al reloj existente. Rocket Lab dibuja la trayectoria radial calculada y el marcador de altitud durante la reproducción. Arrastra para girar; rueda/pinza para zoom, o usa los botones con teclado. La textura es estática y no se aplica a otros cuerpos. No hay un modelo orbital nuevo ni una trayectoria curva de cohete inventada.
+
+La dependencia se justifica por el renderizado WebGL de esfera/textura y cámara en perspectiva; la versión fija vive en `vendor/three/` con licencia/procedencia. La imagen local está en `assets/textures/`. No hay solicitudes a CDN ni instalación adicional. Si falla WebGL se mantienen cálculos y vistas SVG. Detalles, escalas, muestreo, recursos y límites: [THREE-VIEWS.md](docs/THREE-VIEWS.md).
 
 ## Aircraft Lab · perfil lateral y cuatro fuerzas (0.7)
 
@@ -136,8 +151,8 @@ El CSV usa coma como separador y punto decimal, sin formato regional. Hay 482 fi
 
 ## Publicación inicial
 
-Los archivos son estáticos y se pueden servir mediante cualquier alojamiento con HTTPS y soporte de tipos MIME JavaScript. Publica `index.html`, `aircraft.html`, `rocket.html`, `styles.css`, `src/` y `docs/`; no publiques `.git`, pruebas ni herramientas temporales. Los enlaces y módulos son relativos y funcionan bajo un subdirectorio. No se ha desplegado el proyecto ni comprobado un hosting real.
+Los archivos son estáticos y se pueden servir mediante cualquier alojamiento con HTTPS y soporte de tipos MIME JavaScript. Publica `index.html`, `aircraft.html`, `rocket.html`, `styles.css`, `src/`, `docs/`, `vendor/` y `assets/`; no publiques `.git`, pruebas ni herramientas temporales. Los enlaces y módulos son relativos y funcionan bajo un subdirectorio. No se ha desplegado el proyecto ni comprobado un hosting real.
 
-Antes de publicar: ejecuta las pruebas, verifica el sitio sobre HTTPS, revisa enlaces y accesibilidad manual y configura políticas de seguridad en el proveedor. No se introducen secretos, código de terceros ni contenido remoto durante el cálculo. El almacenamiento local no está cifrado y depende del origen del sitio; úsalo solo para parámetros públicos. No uses el servidor de Python como servidor de producción.
+Antes de publicar: ejecuta las pruebas, verifica el sitio sobre HTTPS, revisa enlaces y accesibilidad manual y configura políticas de seguridad en el proveedor. No se introducen secretos ni contenido remoto durante el cálculo. Three.js es código de terceros fijado y servido localmente; conserva sus licencias y revisa actualizaciones antes de cambiar versión. El almacenamiento local no está cifrado y depende del origen del sitio; úsalo solo para parámetros públicos. No uses el servidor de Python como servidor de producción.
 
 Para actualizar modelos, conserva pruebas de regresión y migra o cambia la versión del formato guardado. Las extensiones futuras deben tener modelos y pruebas independientes.
