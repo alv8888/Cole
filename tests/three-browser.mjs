@@ -8,7 +8,7 @@ async function check(name,run){await run();count++;console.log(`PASS ${name}`);}
 try{
   const page=await browser.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),errors=[],external=[];
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!r.url().startsWith(base)&&!r.url().startsWith('data:'))external.push(r.url());});
-  await page.goto(base);
+  await page.goto(`${base}/index.html#lab`);
   await check('Three.js: WebGL y textura terrestre locales, cámara real',async()=>{
     await page.waitForSelector('#orbit-globe .globe-host[data-state=ready][data-texture=ready]',{timeout:20000});
     assert.equal(await page.locator('#orbit-globe canvas[data-webgl=true]').count(),1);
@@ -58,7 +58,7 @@ try{
   });
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
   const noTexture=await browser.newPage();
-  await noTexture.route('**/assets/textures/**',route=>route.abort());await noTexture.goto(base);
+  await noTexture.route('**/assets/textures/**',route=>route.abort());await noTexture.goto(`${base}/index.html#lab`);
   await check('Three.js: fallo de textura mantiene esfera, cámara y física',async()=>{
     await noTexture.waitForSelector('#orbit-globe .globe-host[data-state=ready][data-texture=error]');
     assert.match(await noTexture.locator('#orbit-globe .globe-status').innerText(),/No se pudo cargar la textura/);
@@ -69,7 +69,7 @@ try{
 }finally{await browser.close();}
 const fallback=await chromium.launch({executablePath,headless:true,args:['--no-sandbox','--disable-webgl']});
 try{
-  const page=await fallback.newPage();await page.goto(base);
+  const page=await fallback.newPage();await page.goto(`${base}/index.html#lab`);
   await check('Three.js: sin WebGL, cálculos y SVG siguen funcionando',async()=>{
     await page.waitForSelector('#orbit-globe .globe-host[data-state=unavailable]');
     assert.match(await page.locator('#results').innerText(),/7,67/);

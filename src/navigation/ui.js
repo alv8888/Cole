@@ -9,6 +9,10 @@ const navigation = document.createElement('section');
 navigation.className = 'lab-navigation';
 navigation.innerHTML = `<div class="lab-toolbar"><div role="tablist" aria-label="Secciones del laboratorio"></div><button type="button" id="share-simulation">Copiar enlace de simulación</button></div><p id="share-status" role="status" aria-live="polite" class="helper"></p><label id="share-manual" hidden>Enlace para copiar manualmente<input id="share-url" type="text" readonly aria-describedby="share-status"></label>`;
 document.querySelector('.modules').after(navigation);
+const catalogReturn = document.createElement('a');
+catalogReturn.className = 'catalog-return'; catalogReturn.href = 'index.html#catalogo';
+catalogReturn.textContent = '← Catálogo de laboratorios';
+navigation.prepend(catalogReturn);
 const names = lab === 'structure' ? ['Geometría y Materiales','Simulación de Cargas','Análisis Finito y Resultados'] : ['Configuración y Simulación', 'Análisis y Gráficos', 'Teoría y Modelos'];
 const ids = ['simulation', 'analysis', 'theory'];
 const panels = ids.map((id, index) => {

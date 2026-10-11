@@ -123,3 +123,8 @@ Cinco defectos confirmados corregidos y comprobados: catálogo Rocket, continuid
 Completadas las fases de reorganización y presentación posteriores a la auditoría: banco de trabajo en los cuatro módulos, agrupación plegable, reproducción próxima al visor, servicios comunes de iluminación/cámara, campo independiente de iluminación, normales/bounds coherentes con deformación y opciones visuales sin repetir FEM. Gráfica estructural con escala firmada/cursor y legibilidad de los gráficos en móvil; reproducción bajo demanda, runner y tarea CI de navegador.
 
 Validación: 101 pruebas unitarias y 96 grupos Chromium. Problemas resueltos antes de cerrar: preservar DOM/listeners/formatos, evitar que el sombreado altere el campo, encuadrar según orientación y bounds, no programar frames pausados y comprobar la amplitud deformada efectiva. WORKBENCH.md documenta entrega; DEPLOYMENT.md prepara hosting. Quedan fuera de este cierre: modelos físicos nuevos, FEM 3D/CFD, otros navegadores/hardware, auditoría WCAG completa y despliegue HTTPS realmente verificado.
+
+
+## Entrega 15 · Inicio y exploración (0.15)
+
+Diagnóstico presentado antes de editar: checkout limpio y cuatro módulos disponibles, portada débil y carga orbital 3D prematura. Se implementa hero orbital calculado con el modelo existente, catálogo por datos con filtros temáticos y ejemplos numéricos a demanda, regreso desde los laboratorios y carga orbital WebGL al acercarse al visor. La aplicación de la demo modifica A explícitamente, conservando B y guardados. No se reescriben páginas internas ni se agregan dependencias. HOME.md registra las fases, estructura, ejecución, pruebas manuales y pendientes de validación externa.

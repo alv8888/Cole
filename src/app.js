@@ -345,3 +345,18 @@ registerSharePart('space', {
     refreshGlobePath(); refreshPositions();
   },
 });
+
+// Applying a homepage example is explicit: replace A only, never overwrite saves or B.
+document.addEventListener('aerolab:home-orbit', event => {
+  const config = event.detail?.configuration;
+  const errors = validateConfiguration(config);
+  if (Object.keys(errors).length) {
+    document.dispatchEvent(new CustomEvent('aerolab:home-orbit-applied', { detail: { ok: false, message: 'Ejemplo rechazado: parámetros inválidos.' } }));
+    return;
+  }
+  const message = 'Demostración aplicada a A. Configuración B y guardados locales conservados; tiempo reiniciado.';
+  applyConfigurations(configurations.map((current, index) => index === 0 ? config : current), message);
+  document.dispatchEvent(new CustomEvent('aerolab:home-orbit-applied', { detail: { ok: true, message } }));
+});
+document.documentElement.dataset.spaceReady = 'true';
+document.dispatchEvent(new CustomEvent('aerolab:space-ready'));

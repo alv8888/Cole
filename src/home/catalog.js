@@ -1,0 +1,10 @@
+/** Available experiences only. Routes remain the existing laboratory entry points. */
+export const CATALOG = Object.freeze([
+  { id: 'space', number: '01', title: 'Space Lab', topic: 'motion', category: 'Mecánica orbital', href: '#lab', action: 'Explorar órbitas', description: 'Compara órbitas circulares y elípticas. Recorre su periodo y observa cómo cambian posición y velocidad.', tools: ['Órbitas 3D', 'Comparación A/B', 'Barrido de parámetros'], question: '¿Por qué un satélite acelera al acercarse a la Tierra?', model: 'Dos cuerpos · ecuación de Kepler', shape: 'orbit' },
+  { id: 'aircraft', number: '02', title: 'Aircraft Lab', topic: 'forces', category: 'Aerodinámica', href: 'aircraft.html', action: 'Equilibrar fuerzas', description: 'Modifica el ala, el viento y los coeficientes impuestos. Examina sustentación, peso, empuje y resistencia.', tools: ['Avión 3D', 'Vectores calculados', 'Barrido de velocidad'], question: '¿Qué cambia cuando el viento viene de frente?', model: 'Aerodinámica cuasiestática · sin CFD', shape: 'aircraft' },
+  { id: 'rocket', number: '03', title: 'Rocket Lab', topic: 'motion', category: 'Propulsión espacial', href: 'rocket.html', action: 'Ensayar un lanzamiento', description: 'Explora el balance de masa y el Δv ideal. Calcula un lanzamiento radial por etapas y revisa su evolución temporal.', tools: ['Lanzamiento radial', 'Etapas y masa', 'Trayectoria 3D'], question: '¿Cuánto Δv aporta consumir el propelente?', model: 'Tsiolkovsky · trayectoria radial simplificada', shape: 'rocket' },
+  { id: 'structure', number: '04', title: 'Structure Lab', topic: 'forces', category: 'Geometría y estructuras', href: 'structure.html', action: 'Analizar una estructura', description: 'Diseña alas, tubos y cuerpos esféricos. Aplica cargas, inspecciona deformaciones y revisa la masa estructural.', tools: ['Editor 3D', 'Vigas FEM 1D', 'Intercambio de masa'], question: '¿Qué relación hay entre rigidez, espesor y masa?', model: 'Vigas/barras 1D y membranas analíticas · sin FEM 3D', shape: 'structure' },
+]);
+export function selectCatalog(topic = 'all') {
+  return CATALOG.filter(item => topic === 'all' || item.topic === topic);
+}

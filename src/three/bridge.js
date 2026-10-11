@@ -12,13 +12,27 @@ export function createGlobePanel(root) {
     else if(action==='in')viewer.zoom(.8);else if(action==='out')viewer.zoom(1.25);
     else viewer.turn(action==='left'?-15:action==='right'?15:0,action==='up'?15:action==='down'?-15:0);
   }));
-  import('./viewer.js').then(({createViewer})=>{
+  let started = false;
+  function start() {
+    if (started) return;
+    started = true; host.dataset.state = 'loading';
+    report('Cargando vista 3D local…');
+    import('./viewer.js').then(({createViewer})=>{
     try{
       viewer=createViewer(host,report);host.dataset.state='ready';controls.forEach(button=>button.disabled=false);
       viewer.setPath(latestPath);if(latestPosition)viewer.setPosition(latestPosition,latestTime);
       report('Vista WebGL lista. Arrastra para girar, rueda o gesto de pinza para acercar; botones disponibles por teclado.');
     }catch(error){host.dataset.state='unavailable';report(`Vista 3D no disponible: ${error.message}. Continúa con las gráficas y resultados 2D.`);}
   }).catch(error=>{host.dataset.state='unavailable';report(`No se pudo cargar Three.js: ${error.message}. Las vistas 2D siguen disponibles.`);});
+  }
+  if (root.hasAttribute('data-defer-view') && 'IntersectionObserver' in window) {
+    host.dataset.state = 'deferred';
+    report('La vista 3D se cargará al entrar en Space Lab.');
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) { observer.disconnect(); start(); }
+    }, { rootMargin: '150px' });
+    observer.observe(root);
+  } else start();
   return {
     setPath(data){root.querySelector('.globe-caption').textContent=data?.description??'Sin trayectoria válida; calcula o corrige las entradas.';latestPath=data;latestPosition=null;viewer?.setPath(data);},
     setPosition(point,time=0){latestPosition=point;latestTime=time;viewer?.setPosition(point,time);},

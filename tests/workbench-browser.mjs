@@ -14,7 +14,13 @@ try {
  const page=await context.newPage(),errors=[],positions={};page.on('pageerror',e=>errors.push(e.message));
  for(const [file,lab,selector] of [['index.html','space','#orbit-globe canvas'],['aircraft.html','aircraft','#engineering-canvas'],['rocket.html','rocket','#rocket-globe canvas'],['structure.html','structure','#design-view canvas']]) {
   await page.setViewportSize({width:390,height:900});await page.goto(`${base}/${file}`);
+  if(lab==='space') {
+   await page.waitForSelector('#home-orbit [data-satellite]');
+   assert.ok((await page.locator('#home-orbit').boundingBox()).y<900,'homepage demonstration is available in the entry viewport');
+   await page.locator('.home-actions a[href="#lab"]').click();
+  }
   await page.waitForSelector(selector);positions[lab]=await page.locator(selector).evaluate(el=>el.getBoundingClientRect().top+scrollY);
+  if(lab==='space') positions[lab]=(await page.locator(selector).boundingBox()).y;
   assert.ok(positions[lab]<900,`${lab}: scene begins too low (${positions[lab]})`);
   for(const width of [320,768,1440]) {
    await page.setViewportSize({width,height:900});

@@ -185,3 +185,21 @@ Las diez comprobaciones nuevas abarcan distribución/reflujo en cuatro módulos,
 Capturas revisadas y medidas de posición del visor/contrastes en WORKBENCH.md. Se añadió tarea de navegador a GitHub Actions con herramienta fijada, pero aquí se valida la ejecución local del runner; no se afirma aprobación de una ejecución remota ni validación de hosting/otros navegadores/hardware.
 
 Tras el ajuste final de tamaño inicial y recuperación de contexto se repitieron las suites del diseñador (11) y workbench (10), ambas aprobadas. Se confirmó además la existencia de Playwright 1.64.0 en el registro npm; esto no sustituye la ejecución remota del workflow.
+
+## Entrega 15 · Inicio y exploración (0.15)
+
+104 pruebas unitarias: 101 regresiones previas y 3 nuevas (referencia circular y vis-viva/escalamiento de la demo; rutas y partición del catálogo; ejemplos frente a cálculos independientes de fuerzas y Tsiolkovsky, salida FEM identificada y entradas inválidas). 0 fallos, 0 omitidas. Ejecutadas con Node 24.19.0 mediante:
+
+```sh
+node --test --test-isolation=none tests/*.test.js
+```
+
+12 suites Chromium mediante el runner existente: 104 grupos de comprobaciones (96 previos y 8 del inicio), 0 fallos. La suite de inicio comprueba SVG calculado y ausencia de carga inicial de Three.js; reproducción/pausa/salida del viewport; filtros y los cuatro ejemplos; aplicación explícita a A preservando B y localStorage; enlaces y regreso desde las tres páginas; reflujo a 320, 390, 768, 1440 px y zoom CSS 200 %; error de importación y protección contra respuestas atrasadas; ausencia de solicitudes externas y errores JavaScript no capturados. Las suites 3D/workbench ahora acceden explícitamente a Space Lab y mantienen sus verificaciones anteriores.
+
+```sh
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser
+```
+
+El entorno usa Chromium instalado en `/usr/bin/chromium` y Playwright fuera del checkout. El runner crea y cierra su servidor propio, verifica HTTP y propaga fallos. La nueva suite se incorpora automáticamente al job CI existente. Ejemplos de referencia: a e=0, velocidad 7,6725985878 km/s y periodo 5544,85513975 s; a e=0,5 el periodo aumenta por 2^(3/2). Aircraft: 14700 N de sustentación y 11767,98 N de peso. Rocket: 1200 ln(3) = 1318,3347464 m/s de Δv ideal. Los valores se calculan con los mismos modelos del laboratorio, sin sustituir datos de una misión real.
+
+Durante las pruebas se detectó y corrigió una congelación de la reproducción al acumular tiempo a través del slider redondeado y una pausa tardía al quedar solo un borde de la demo visible. El reloj ahora mantiene precisión completa y pausa al quedar menos del 15 % de la demo en el viewport. La suite de inicio se repitió tras las correcciones. Capturas `/tmp/aerolab-015-home-{desktop,mobile}.png` y `/tmp/aerolab-015-catalog-{desktop,mobile}.png` inspeccionadas. No se afirma validación con Safari/Firefox, hardware móvil real, Lighthouse ni auditoría WCAG completa.
