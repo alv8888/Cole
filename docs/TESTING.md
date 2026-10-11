@@ -1,14 +1,14 @@
-# Pruebas y evidencia de la entrega 3 · Space Lab 0.3
+# Pruebas y evidencia de la entrega 4 · Space Lab 0.4
 
 ## Resultado observado
 
-- Node.js 24.19.0: **30 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
-- Chromium headless mediante Playwright: **17 comprobaciones de integración aprobadas**, sin errores JavaScript no capturados en la página principal.
+- Node.js 24.19.0: **34 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
+- Chromium headless mediante Playwright: **20 comprobaciones de integración aprobadas**, sin errores JavaScript no capturados en la página principal.
 - Cálculo independiente con Python 3.12.14: valores terrestres a 400 km y a radio 42164 km concordantes con las referencias de las pruebas.
 - Página y módulos servidos por HTTP con Python; no se requiere instalación de paquetes de aplicación ni compilación.
 - Capturas de escritorio de 1440 px y móvil de 390 px inspeccionadas. Comprobación automática sin desbordamiento global a 1440, 768, 390 y 320 px. La tabla permite desplazamiento horizontal propio en móvil.
 
-Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 17 checks de navegador son grupos de aserciones, no 17 modelos científicos adicionales.
+Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 20 checks de navegador son grupos de aserciones, no 20 modelos científicos adicionales.
 
 ## Qué comprueban las pruebas unitarias
 
@@ -17,6 +17,8 @@ Caso terrestre ideal de 400 km; periodo casi sidéreo a radio 42164 km; caso nor
 La ampliación verifica e=0 como regresión circular, caso normalizado elíptico, referencia terrestre independiente, periapsis/apoapsis, periodicidad, conservación de energía y momento angular, vis-viva, geometría en 120 fases para cuatro excentricidades, residuo de Kepler, segunda ley de áreas, e=0,9 y migración de guardados v1. Un cero con signo negativo de IEEE-754 se compara como valor numérico cero; no es una velocidad física distinta.
 
 La entrega 3 añade comprobaciones de formato JSON portable, límite de bytes y entradas incorrectas, propiedades ajenas descartadas, muestreo con extremos, filas CSV y tiempos/unidades, coherencia física de los cuatro escenarios, predicciones basadas en valores actuales y extremos del control temporal. Los archivos JSON se validan antes de aplicar ambos estados; una importación parcial no se acepta.
+
+La entrega 4 añade cuatro pruebas: extremos y leyes de escala del barrido de altura, condiciones fijas y relaciones analíticas del barrido de e, rechazo de intervalos/tamaños inválidos y contenido/unidades del CSV. En navegador se comprueban gráfica y tabla, selección de muestras, borrado de datos obsoletos, configuración inválida, exportación real y aplicación exclusiva a B.
 
 Comando:
 
@@ -55,6 +57,8 @@ PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs node te
 
 Opciones: `CHROMIUM_PATH` para otro ejecutable y `AEROLAB_URL` para otra dirección de prueba. El script lanza Chromium sin sandbox dentro de este contenedor de pruebas; para ejecutar en otro entorno, revisa la política de aislamiento antes de reutilizar esa opción. Las capturas se escriben en `/tmp/aerolab-desktop.png` y `/tmp/aerolab-mobile.png`, fuera del checkout. No se necesita acceso a servicios externos durante las pruebas.
 
+Para esta entrega se utilizó `AEROLAB_URL=http://127.0.0.1:8001` con el servidor de Python en 8001. La primera prueba contra 8000 falló por respuesta vacía del servidor anterior, antes de cargar la aplicación. El puerto estaba ocupado; el fallo se resolvió para la validación usando otro puerto, sin modificar el modelo ni omitir aserciones.
+
 Comprobaciones: resultados iniciales; comparación e invalidez; presets y personalizado; avisos; guardado persistente entre recargas; reset sin borrar; datos dañados; movimiento, pausa y reloj; diseño adaptable y enlace de salto de teclado; errores de almacenamiento mostrados al usuario.
 
 También se comprueban geometría elíptica con el cuerpo en un foco, resultados de los extremos, entradas e≥1 rechazadas, lecturas de velocidad/distancia variables, persistencia de e y migración v1 sin sobrescribir datos hasta Guardar.
@@ -78,6 +82,10 @@ Interacciones nuevas verificadas en Chromium: los cuatro escenarios; cargas y ed
 13. Exporta JSON, cambia parámetros e importa ese archivo. Deben recuperarse ambos estados sin modificar el guardado local hasta pulsar Guardar. Un JSON malformado debe mostrar un error y conservar la configuración.
 14. Exporta CSV: comprueba el encabezado de unidades y 482 filas de datos. Los últimos tiempos de A y B pueden diferir: cada bloque describe una vuelta propia.
 15. Usa Tab y las flechas sobre el control temporal. La reproducción debe quedar pausada al moverlo; los puntos de las curvas y satélites deben actualizarse.
+16. Con A terrestre y e=0, barre altitud de 400 a 2000 km: el periodo debe crecer y la velocidad en periapsis disminuir. Cambia Resultado y recalcula para comparar la tendencia.
+17. Elige B y barre excentricidad de 0 a 0,8. Selecciona la última muestra y aplícala: B debe quedar con e=0,8; A debe conservarse. El reloj vuelve a cero y el barrido deja de estar vigente.
+18. Introduce un mínimo mayor que el máximo: debe aparecer un error y no quedar datos aplicables o exportables. Prueba una entrada inválida en la base y comprueba el mismo comportamiento.
+19. Exporta el barrido de 21 muestras: el archivo debe contener encabezado más 21 filas. Comprueba columnas de μ, R, hₚ, e, periodo y velocidades.
 
 ## No comprobado
 

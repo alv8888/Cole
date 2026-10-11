@@ -1,4 +1,4 @@
-# AEROLAB · Space Lab 0.3
+# AEROLAB · Space Lab 0.4
 
 Laboratorio educativo de órbitas circulares y elípticas de dos cuerpos. HTML semántico, CSS, JavaScript modular y SVG. Sin dependencias de aplicación, API, base de datos, compilación ni cuentas. Aircraft, Rocket y Structure Lab están identificados como módulos futuros y no tienen controles ficticios.
 
@@ -14,6 +14,8 @@ python3 -m http.server 8000 --bind 0.0.0.0
 Abre `http://localhost:8000` en tu equipo local. En una máquina remota, utiliza el mecanismo de acceso al puerto que ofrezca tu proveedor. No abras `index.html` con `file://`: los módulos JavaScript necesitan servirse por HTTP. Detén el servidor con Ctrl+C. Este servidor solo sirve archivos; no es un backend físico ni almacena datos.
 
 Alternativa con Node y npm presentes: `npm start`. No se necesita `npm install` para usar la aplicación o ejecutar las pruebas unitarias.
+
+Si el puerto 8000 está ocupado, ejecuta `python3 -m http.server 8001 --bind 0.0.0.0` y utiliza el puerto 8001. La entrega 4 se validó en 8001 porque un servidor anterior ocupaba 8000 sin responder correctamente; no se detuvo ese proceso al no poder verificar su propiedad desde el entorno actual.
 
 ## Pruebas
 
@@ -40,6 +42,8 @@ Cole/
 │   ├── elliptic.js            # Elipses, ecuación de Kepler y estado orbital SI
 │   ├── configuration.js       # Formato portable JSON, migración y validación
 │   ├── exploration.js         # Muestreo, CSV, fase temporal y predicciones
+│   ├── sensitivity.js         # Barridos puros y CSV de configuraciones
+│   ├── sensitivity-ui.js      # Controles, gráfica, selección y aplicación de muestras
 │   ├── scenarios.js           # Experimentos declarados e idealizados
 │   ├── files.js               # Descargas locales mediante Blob
 │   ├── units.js               # Conversiones y formato
@@ -50,6 +54,7 @@ Cole/
 │   ├── physics.test.js        # Física, invariantes, conversiones y límites
 │   ├── elliptic.test.js       # Kepler, energía, momento angular y casos de referencia
 │   ├── exploration.test.js    # Escenarios, archivos, muestreo y predicciones
+│   ├── sensitivity.test.js    # Barridos, conservación de condiciones y leyes de escala
 │   ├── storage.test.js        # Persistencia y errores
 │   └── browser.mjs            # Integración opcional con Playwright y Chromium
 └── docs/
@@ -70,6 +75,8 @@ Cole/
 8. Examina distancia y rapidez durante una vuelta. Cada curva usa su propio periodo normalizado, con marcadores del estado actual. Las leyendas distinguen A por línea continua y B por línea discontinua.
 9. Predice si el periodo o una velocidad de B será mayor, igual o menor que A. Comprobar calcula la respuesta con los valores actuales. No hay resultados de aprendizaje ficticios ni puntuaciones de misión.
 10. Exportar JSON descarga ambas configuraciones. Importar JSON las valida antes de aplicarlas; no las guarda automáticamente. Se admiten formatos v1 y v2 hasta 16 KiB. Un archivo inválido conserva los parámetros actuales. Datos CSV descarga 241 estados por configuración, con unidades en los encabezados y tiempos en segundos para cada órbita.
+11. En Análisis de sensibilidad, selecciona base A/B, variable, intervalo, resultado y número de muestras; pulsa Calcular barrido. Al variar hₚ se conserva e; al variar e se conserva hₚ. Los radios del cuerpo y μ también permanecen fijos. Selecciona una muestra con el control de rango para inspeccionarla y Aplicar muestra para modificar solo la configuración indicada.
+12. La tabla muestra todas las muestras; Exportar barrido CSV incluye las condiciones físicas y resultados en segundos y km/s. Cambiar un parámetro base o un control del barrido retira los resultados anteriores hasta recalcular. Las opciones del barrido no se guardan al recargar; los parámetros aplicados sí pueden guardarse con Guardar ambas.
 
 Los cambios de parámetros pausan y reinician el tiempo. Ocultar la pestaña pausa la reproducción para evitar saltos al volver. No hay adquisición de telemetría ni cálculo de trayectorias reales.
 

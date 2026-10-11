@@ -9,6 +9,7 @@ import { SCENARIOS } from './scenarios.js';
 import { sampleOrbit, exportOrbitCSV, assessPrediction, periodFraction } from './exploration.js';
 import { serializeConfigurations, parseConfigurations, MAX_IMPORT_BYTES } from './configuration.js';
 import { downloadFile } from './files.js';
+import { createSensitivity } from './sensitivity-ui.js';
 
 const $ = selector => document.querySelector(selector);
 const letters = ['a', 'b'];
@@ -19,6 +20,7 @@ let elapsed = 0;
 let previousFrame = null;
 let frameId = null;
 let revision = 0;
+let sensitivity = null;
 
 function selectStudy(id) {
   const scenario = SCENARIOS.find(item => item.id === id);
@@ -153,6 +155,7 @@ function update() {
     drawOrbit($(`#orbit-${letter}`), config, orbits[index], index, maxRadius);
     $(`#caption-${letter}`).textContent = `${letter.toUpperCase()} · ${BODIES[config.body]?.name ?? 'Personalizado'}${orbits[index] ? ` · hₚ = ${number(config.altitude)} km` : ' · sin cálculo'}`;
   });
+  sensitivity?.refresh();
   refreshPositions();
 }
 
@@ -303,4 +306,12 @@ $('#check-prediction').addEventListener('click', () => {
     const words = { higher: 'mayor', equal: 'igual', lower: 'menor' };
     $('#prediction-feedback').textContent = `${result.correct ? 'Correcto.' : 'Revisa tu predicción.'} El valor de B es ${words[result.expected]} al de A; B/A = ${number(result.ratio, 4)}. La comparación usa el modelo de dos cuerpos con las entradas actuales, sin datos de una misión real.`;
   } catch (error) { $('#prediction-feedback').textContent = error.message; }
+});
+
+sensitivity = createSensitivity({
+  getConfigurations: () => configurations,
+  applyConfiguration: (target, config) => applyConfigurations(
+    configurations.map((current, index) => index === target ? config : current),
+    `Muestra aplicada a ${target === 0 ? 'A' : 'B'}. La otra configuración se conserva; tiempo reiniciado.`,
+  ),
 });

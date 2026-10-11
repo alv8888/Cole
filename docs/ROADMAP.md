@@ -1,6 +1,6 @@
 # AEROLAB · registro de fases y entregas
 
-Entrega 1: MVP circular. Entrega 2 (0.2): extensión elíptica. Entrega 3 (0.3): experimentos guiados, exploración temporal, curvas y archivos portables. Se mantiene el alcance en Space Lab.
+Entrega 1: MVP circular. Entrega 2 (0.2): extensión elíptica. Entrega 3 (0.3): experimentos y archivos portables. Entrega 4 (0.4): barridos y análisis de sensibilidad. Se mantiene el alcance en Space Lab.
 
 ## Fase 1 · concepto y alcance — completada
 
@@ -43,6 +43,10 @@ Entrega 3 completada: cuatro escenarios con objetivos explícitos; control de ti
 Problemas tratados: distinguir porcentaje de tiempo y ángulo; explicar que cada curva usa su propio periodo; conservar el estado ante importaciones inválidas; borrar respuestas obsoletas al cambiar parámetros; indicar que interpolar curvas no mejora la precisión del modelo. No se añaden dependencias ni datos de misiones inventados. Validación: 30 pruebas unitarias y 17 checks de Chromium.
 
 Pendiente: accesibilidad completa, otros navegadores, incertidumbre de parámetros y eventual modelo de perturbaciones con referencias nuevas. Aircraft, Rocket y Structure Lab permanecen fuera de esta entrega.
+
+Entrega 4 completada: barridos de hₚ/e con base A o B; selección de periodo o velocidades extremas; gráfica, tabla y CSV; aplicación de una muestra a la base elegida. Arquitectura: sensitivity.js puro y sensitivity-ui.js independiente de los eventos del laboratorio. Validación: 34 pruebas unitarias y 20 comprobaciones Chromium.
+
+Antes de cerrar esta ampliación se trataron intervalos fuera de límites, resultados obsoletos tras cambios, conservación de variables fijas, modificación exclusiva de la base y diferencia entre explorar configuraciones y simular una maniobra. La interpolación gráfica y la precisión física permanecen limitadas por el modelo original. No se incorporaron librerías ni servicios nuevos.
 
 ## Fase 6 · publicación y mantenimiento — preparación inicial, publicación pendiente
 

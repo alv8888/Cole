@@ -93,3 +93,13 @@ Las gráficas y el CSV muestrean 241 instantes igualmente espaciados entre 0 y T
 Escenarios hipotéticos: dos círculos terrestres de distinta altura; misma Tierra y periapsis con diferente excentricidad; dos elipses con μ y a idénticos, para comprobar T²/a³; y Tierra/Luna a la misma altura, con radios orbitales y μ diferentes. En el escenario de semieje mayor, a=13542 km para e=0,5 y e=0,2, con hₚ de 400 y 4462,6 km. No hay correspondencia afirmada con satélites reales.
 
 La actividad de predicción compara periodo, vₚ o vₐ de B respecto a A. Considera igualdad si |B/A−1|≤10⁻¹⁰ para evitar diferencias de redondeo; es una tolerancia de evaluación numérica, no incertidumbre física. La respuesta se vuelve a calcular al pulsar Comprobar y se borra al cambiar parámetros o la pregunta. No mide competencia profesional ni éxito de una misión.
+
+## Barridos paramétricos de la entrega 4
+
+Un barrido toma una copia de A o B y evalúa configuraciones independientes a valores equiespaciados de hₚ o e. μ y R permanecen constantes. Si se barre hₚ, se mantiene e; si se barre e, se mantiene hₚ y por tanto rₚ. La interfaz ofrece 21, 41 o 101 muestras. No hay integración temporal, optimizador, distribución probabilística ni estimación de incertidumbre. Los extremos se asignan explícitamente para evitar que el redondeo sobrepase e=0,9.
+
+Comprobaciones independientes de las tendencias: con μ y e fijos, T ∝ rₚ^(3/2) y vₚ ∝ rₚ^(−1/2). Con μ y rₚ fijos, si v₀=√(μ/rₚ) y T₀=2π√(rₚ³/μ): T/T₀=(1−e)^(−3/2), vₚ/v₀=√(1+e) y vₐ/v₀=(1−e)/√(1+e). Estas relaciones se prueban sobre los barridos, además de las regresiones físicas anteriores. No se atribuye la variación del periodo a un radio instantáneo variable.
+
+Cada punto conserva los supuestos y unidades del modelo elíptico. El resultado puede ser periodo, vₚ o vₐ; el eje vertical parte de cero. Las líneas entre muestras son solo una guía visual, sin validación de error de interpolación. Seleccionar una muestra usa su cálculo exacto, sin interpolación. La impresión a cuatro decimales no constituye una precisión física de cuatro decimales.
+
+Modificar la base o los controles invalida el barrido, impide aplicar/exportar valores antiguos y exige recalcular. Aplicar una muestra modifica solo la configuración elegida, pausa y reinicia el reloj. El CSV incluye μ, R, hₚ, e, periodo en segundos, velocidades en km/s y semieje mayor en km. El barrido no calcula maniobras entre las configuraciones ni prueba estabilidad o viabilidad.

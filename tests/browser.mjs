@@ -203,6 +203,50 @@ try {
     assert.equal(await page.locator('#radius-history [data-time-series]').count(), 1);
     await page.locator('#reset').click();
   });
+  await check('parameter sweep computes actual values, selector and data table', async () => {
+    await page.locator('#sweep-form button[type="submit"]').click();
+    assert.equal(await page.locator('#sweep-table tr').count(), 41);
+    assert.equal(await page.locator('[data-sweep-curve]').count(), 1);
+    await page.locator('#sweep-sample').fill('40');
+    assert.match(await page.locator('#sweep-result').innerText(), /2\.000,00 km/);
+    await page.locator('.sweep-data summary').click();
+    assert.ok(await page.locator('#sweep-table').isVisible());
+    await page.locator('.sweep-data summary').click();
+  });
+  await check('sweep rejects invalid ranges and never keeps stale results', async () => {
+    await page.locator('#sweep-min').fill('3000');
+    assert.equal(await page.locator('#sweep-table tr').count(), 0);
+    assert.ok(await page.locator('#apply-sweep').isDisabled());
+    await page.locator('#sweep-form button[type="submit"]').click();
+    assert.match(await page.locator('#sweep-status').innerText(), /Intervalo inválido/);
+    assert.equal(await page.locator('#sweep-min').getAttribute('aria-invalid'), 'true');
+    await page.locator('#sweep-min').fill('200');
+    await page.locator('#sweep-form button[type="submit"]').click();
+    await page.locator('#a-altitude').fill('');
+    assert.equal(await page.locator('[data-sweep-curve]').count(), 0);
+    await page.locator('#sweep-form button[type="submit"]').click();
+    assert.match(await page.locator('#sweep-status').innerText(), /Corrige la configuración/);
+    await page.locator('#reset').click();
+  });
+  await check('eccentricity sweep exports its real samples and applies only target B', async () => {
+    await page.locator('#sweep-target').selectOption('1');
+    await page.locator('#sweep-variable').selectOption('eccentricity');
+    await page.locator('#sweep-count').selectOption('21');
+    await page.locator('#sweep-metric').selectOption('apoapsisVelocity');
+    await page.locator('#sweep-form button[type="submit"]').click();
+    const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#export-sweep').click()]);
+    const csv = await readFile(await download.path(), 'utf8');
+    assert.equal(csv.trim().split('\n').length, 22);
+    assert.match(csv, /period_s/);
+    await page.locator('#sweep-sample').fill('20');
+    const unchangedA = await page.locator('#a-eccentricity').inputValue();
+    await page.locator('#apply-sweep').click();
+    assert.equal(await page.locator('#b-eccentricity').inputValue(), '0.8');
+    assert.equal(await page.locator('#a-eccentricity').inputValue(), unchangedA);
+    assert.equal(await page.locator('#elapsed').innerText(), '0 s');
+    assert.ok(await page.locator('#export-sweep').isDisabled());
+    await page.locator('#reset').click();
+  });
   await check('desktop and mobile widths, accessible controls, module availability', async () => {
     for (const width of [1440, 768, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });

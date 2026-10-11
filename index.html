@@ -28,7 +28,7 @@
       <div class="module unavailable"><span aria-hidden="true">▱</span><span>Structure Lab<small>Fase posterior · no disponible</small></span></div>
     </nav>
     <section id="lab" aria-labelledby="lab-title">
-      <div class="section-heading"><div><p class="eyebrow">01 / MECÁNICA ORBITAL</p><h2 id="lab-title">Space Lab <span class="badge">VERSIÓN 0.3</span></h2></div><p class="model-chip">Modelo educativo · dos cuerpos</p></div>
+      <div class="section-heading"><div><p class="eyebrow">01 / MECÁNICA ORBITAL</p><h2 id="lab-title">Space Lab <span class="badge">VERSIÓN 0.4</span></h2></div><p class="model-chip">Modelo educativo · dos cuerpos</p></div>
       <section class="panel study-panel" aria-labelledby="studies-title">
         <div class="panel-heading"><h3 id="studies-title">Elige un experimento</h3><span class="subtle">ESCENARIOS IDEALIZADOS</span></div>
         <div id="scenarios" class="scenario-grid"></div>
@@ -71,6 +71,25 @@
         <div class="table-scroll"><table><caption class="sr-only">Valores calculados de ambas órbitas y variación porcentual</caption><thead><tr><th scope="col">Magnitud</th><th scope="col">A <i class="swatch a"></i></th><th scope="col">B <i class="swatch b"></i></th><th scope="col">Variación</th></tr></thead><tbody id="results"></tbody></table></div>
         <div class="chart-row"><figure><figcaption>Velocidad en periapsis <span>km/s</span></figcaption><svg id="velocity-chart" viewBox="0 0 480 120" role="img" aria-label="Comparación de velocidad en periapsis"></svg></figure><figure><figcaption>Periodo orbital <span>min</span></figcaption><svg id="period-chart" viewBox="0 0 480 120" role="img" aria-label="Comparación de periodo orbital"></svg></figure></div>
         <p id="interpretation" class="interpretation"></p>
+      </section>
+      <section class="panel sensitivity-panel" aria-labelledby="sweep-title">
+        <div class="panel-heading"><h3 id="sweep-title">¿Qué cambia al variar un parámetro?</h3><span class="subtle">ANÁLISIS DE SENSIBILIDAD</span></div>
+        <p class="helper">Cada punto es una configuración independiente. Elige A o B como base; se mantienen fijos el cuerpo y el parámetro que no estás variando.</p>
+        <form id="sweep-form" class="sweep-controls" novalidate>
+          <label for="sweep-target">Configuración base<select id="sweep-target"><option value="0">A</option><option value="1">B</option></select></label>
+          <label for="sweep-variable">Variable<select id="sweep-variable"><option value="altitude">Altitud de periapsis</option><option value="eccentricity">Excentricidad</option></select></label>
+          <label for="sweep-metric">Resultado<select id="sweep-metric"><option value="period">Periodo orbital</option><option value="periapsisVelocity">Velocidad en periapsis</option><option value="apoapsisVelocity">Velocidad en apoapsis</option></select></label>
+          <label for="sweep-min">Desde<input id="sweep-min" type="number" step="any" required aria-describedby="sweep-limits sweep-status"></label>
+          <label for="sweep-max">Hasta<input id="sweep-max" type="number" step="any" required aria-describedby="sweep-limits sweep-status"></label>
+          <label for="sweep-count">Muestras<select id="sweep-count"><option value="21">21</option><option value="41" selected>41</option><option value="101">101</option></select></label>
+          <button type="submit">Calcular barrido</button>
+        </form>
+        <p id="sweep-limits" class="helper"></p>
+        <p id="sweep-status" class="study-description" role="status" aria-live="polite"></p>
+        <figure class="sweep-figure"><figcaption id="sweep-y-label">Periodo orbital (min)</figcaption><svg id="sweep-chart" viewBox="0 0 560 250" role="img" aria-label="Barrido de parámetros"></svg><p id="sweep-x-label">Altitud de periapsis (km)</p></figure>
+        <div class="sweep-selection"><label for="sweep-sample">Selecciona una muestra calculada<input id="sweep-sample" type="range" min="0" max="40" step="1" value="0" aria-describedby="sweep-result"></label><p id="sweep-result"></p><div class="action-row"><button id="apply-sweep" type="button">Aplicar muestra</button><button id="export-sweep" class="quiet" type="button">Exportar barrido CSV</button></div></div>
+        <details class="sweep-data"><summary>Ver tabla de muestras</summary><div class="table-scroll"><table><caption class="sr-only">Resultados del barrido de parámetros</caption><thead><tr><th scope="col">Muestra</th><th scope="col" id="sweep-input-heading">Entrada</th><th scope="col" id="sweep-output-heading">Resultado</th></tr></thead><tbody id="sweep-table"></tbody></table></div></details>
+        <p class="helper">Las líneas entre puntos son visuales. El barrido no calcula maniobras, incertidumbre, estabilidad ni perturbaciones. Si cambias parámetros, los resultados anteriores dejan de estar vigentes.</p>
       </section>
       <section class="panel analysis-panel" aria-labelledby="analysis-title">
         <div class="panel-heading"><h3 id="analysis-title">Anatomía de una vuelta</h3><span class="subtle">DISTANCIA Y RAPIDEZ</span></div>
