@@ -1,6 +1,6 @@
 # AEROLAB · registro de fases y entregas
 
-Entrega 1: MVP circular. Entrega 2 (0.2): extensión elíptica de dos cuerpos, sin añadir otros módulos.
+Entrega 1: MVP circular. Entrega 2 (0.2): extensión elíptica. Entrega 3 (0.3): experimentos guiados, exploración temporal, curvas y archivos portables. Se mantiene el alcance en Space Lab.
 
 ## Fase 1 · concepto y alcance — completada
 
@@ -38,8 +38,12 @@ Completado: modelo, representación con foco correcto, comparación, estado inst
 
 Problemas identificados y tratados antes de avanzar: una elipse no tiene velocidad angular uniforme; se resuelve Kepler. La altitud ahora se define en periapsis para evitar ambigüedad. Las advertencias de perturbaciones consideran el apoapsis. Los guardados anteriores se migran sin sobrescribirlos automáticamente.
 
-Pendiente: accesibilidad completa, otros navegadores, incertidumbre de parámetros, exportación de configuraciones y eventual modelo de perturbaciones con referencias nuevas. Aircraft, Rocket y Structure Lab permanecen fuera de esta entrega.
+Entrega 3 completada: cuatro escenarios con objetivos explícitos; control de tiempo con referencia A/B y accesos de apsis; curvas de distancia y rapidez en una vuelta; actividad de predicción verificada contra cálculos; JSON portable con importación validada y CSV con unidades. Arquitectura: configuration.js para intercambio y persistencia, exploration.js para muestreo y evaluación, scenarios.js para datos educativos y files.js para descargas locales. La física existente conserva las regresiones.
+
+Problemas tratados: distinguir porcentaje de tiempo y ángulo; explicar que cada curva usa su propio periodo; conservar el estado ante importaciones inválidas; borrar respuestas obsoletas al cambiar parámetros; indicar que interpolar curvas no mejora la precisión del modelo. No se añaden dependencias ni datos de misiones inventados. Validación: 30 pruebas unitarias y 17 checks de Chromium.
+
+Pendiente: accesibilidad completa, otros navegadores, incertidumbre de parámetros y eventual modelo de perturbaciones con referencias nuevas. Aircraft, Rocket y Structure Lab permanecen fuera de esta entrega.
 
 ## Fase 6 · publicación y mantenimiento — preparación inicial, publicación pendiente
 
-Aplicación estática, sin claves ni dependencias en runtime. README documenta ejecución y publicación. Falta elegir y probar hosting HTTPS, revisar políticas de seguridad, comprobar navegadores objetivos y realizar revisión de accesibilidad. No hay despliegue efectuado. Las configuraciones locales no se comparten entre dispositivos ni orígenes; no se anuncia sincronización remota.
+Aplicación estática, sin claves ni dependencias en runtime. README documenta ejecución y publicación. Falta elegir y probar hosting HTTPS, revisar políticas de seguridad, comprobar navegadores objetivos y realizar revisión de accesibilidad. No hay despliegue efectuado. Las configuraciones se pueden transportar manualmente mediante JSON; no hay sincronización remota ni cuentas.

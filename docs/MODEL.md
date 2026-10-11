@@ -83,3 +83,13 @@ Referencia ideal terrestre a h=400 km: r=6 771 000 m; v=7672.598587818517 m/s; T
 Referencia elíptica terrestre a hₚ=400 km y e=0,5: a=13 542 000 m, rₐ=20 313 000 m, vₚ=9396.975770677078 m/s, vₐ=3132.3252568923594 m/s y T=15683.218680060498 s. Para M=π/2 y e=0,5, Newton Python da E=2.0209799380897704 rad.
 
 No validado: efemérides observadas, perturbaciones, e>0,9, órbitas abiertas, precisión profesional, modelos relativistas, planetas personalizados reales, trayectorias de vuelo, seguridad de sistemas o certificación.
+
+## Exploración y visualización de la entrega 3
+
+El control temporal usa fracción de tiempo (t mod T)/T de la referencia A o B, no anomalía verdadera ni excéntrica. El 0 % representa periapsis y el 50 % apoapsis; completar exactamente una vuelta muestra 100 %, con posición equivalente a 0 %. Cambiar referencia conserva el tiempo simulado. Mover el control o utilizar accesos de apsis pausa el reloj; no aplica maniobras.
+
+Las gráficas y el CSV muestrean 241 instantes igualmente espaciados entre 0 y T de cada órbita. Cada estado se evalúa directamente por Kepler. Unir muestras con líneas es una aproximación gráfica, especialmente visible cerca de periapsis con e grande; no hay una cota validada de error de interpolación. Las lecturas actuales y los marcadores se calculan directamente, sin interpolar la curva. Los ejes parten de cero; los valores extremos pueden usar notación científica. Las curvas no representan tiempos iguales entre A y B cuando sus periodos difieren.
+
+Escenarios hipotéticos: dos círculos terrestres de distinta altura; misma Tierra y periapsis con diferente excentricidad; dos elipses con μ y a idénticos, para comprobar T²/a³; y Tierra/Luna a la misma altura, con radios orbitales y μ diferentes. En el escenario de semieje mayor, a=13542 km para e=0,5 y e=0,2, con hₚ de 400 y 4462,6 km. No hay correspondencia afirmada con satélites reales.
+
+La actividad de predicción compara periodo, vₚ o vₐ de B respecto a A. Considera igualdad si |B/A−1|≤10⁻¹⁰ para evitar diferencias de redondeo; es una tolerancia de evaluación numérica, no incertidumbre física. La respuesta se vuelve a calcular al pulsar Comprobar y se borra al cambiar parámetros o la pregunta. No mide competencia profesional ni éxito de una misión.

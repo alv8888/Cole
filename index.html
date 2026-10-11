@@ -28,7 +28,12 @@
       <div class="module unavailable"><span aria-hidden="true">▱</span><span>Structure Lab<small>Fase posterior · no disponible</small></span></div>
     </nav>
     <section id="lab" aria-labelledby="lab-title">
-      <div class="section-heading"><div><p class="eyebrow">01 / MECÁNICA ORBITAL</p><h2 id="lab-title">Space Lab <span class="badge">VERSIÓN 0.2</span></h2></div><p class="model-chip">Modelo educativo · dos cuerpos</p></div>
+      <div class="section-heading"><div><p class="eyebrow">01 / MECÁNICA ORBITAL</p><h2 id="lab-title">Space Lab <span class="badge">VERSIÓN 0.3</span></h2></div><p class="model-chip">Modelo educativo · dos cuerpos</p></div>
+      <section class="panel study-panel" aria-labelledby="studies-title">
+        <div class="panel-heading"><h3 id="studies-title">Elige un experimento</h3><span class="subtle">ESCENARIOS IDEALIZADOS</span></div>
+        <div id="scenarios" class="scenario-grid"></div>
+        <p id="scenario-note" class="study-description"></p>
+      </section>
       <div class="workspace">
         <section class="panel visual-panel" aria-labelledby="visual-title">
           <div class="panel-heading"><h3 id="visual-title">Vista orbital</h3><span class="subtle">PLANO DE LA ÓRBITA</span></div>
@@ -38,6 +43,12 @@
             <figure><svg id="orbit-b" viewBox="0 0 320 320" role="img" aria-label="Órbita B"></svg><figcaption id="caption-b">Configuración B</figcaption><p id="instant-b" class="instant-state"></p></figure>
           </div>
           <div class="animation-controls"><button id="play" type="button" aria-pressed="false">Reproducir</button><label for="speed">Tiempo simulado</label><select id="speed"><option value="1">1 s / s real</option><option value="60" selected>60 s / s real</option><option value="600">600 s / s real</option></select><button id="restart-time" class="quiet" type="button">Tiempo a cero</button></div>
+          <div class="timeline">
+            <div class="timeline-heading"><label for="phase">Recorre una vuelta <output id="phase-value">0,0 %</output></label><label for="reference">Referencia <select id="reference"><option value="0">Órbita A</option><option value="1">Órbita B</option></select></label></div>
+            <input id="phase" type="range" min="0" max="100" step="0.1" value="0" aria-describedby="phase-help">
+            <div class="phase-actions"><button id="go-periapsis" class="quiet" type="button">Ir a periapsis</button><button id="go-apoapsis" class="quiet" type="button">Ir a apoapsis</button></div>
+            <p id="phase-help" class="helper">Porcentaje de tiempo del periodo de referencia, no ángulo. Ambas órbitas comparten el mismo tiempo simulado. Mover el control pausa la reproducción.</p>
+          </div>
           <p class="visual-note">Misma escala de distancia; el cuerpo ocupa un foco de la elipse. El tamaño del punto es ilustrativo. Posición obtenida con la ecuación de Kepler, sin integración de la trayectoria.</p>
           <p class="clock">Tiempo simulado: <output id="elapsed">0 s</output></p>
         </section>
@@ -47,6 +58,8 @@
             <div id="configuration-fields"></div>
           </form>
           <div class="action-row"><button id="save" type="button">Guardar ambas</button><button id="load" class="quiet" type="button">Cargar</button><button id="reset" class="quiet" type="button">Restablecer</button></div>
+          <div class="action-row file-actions"><button id="export-json" class="quiet" type="button">Exportar JSON</button><button id="import-json" class="quiet" type="button">Importar JSON</button><button id="export-csv" class="quiet" type="button">Datos CSV</button></div>
+          <input id="import-file" type="file" accept=".json,application/json" hidden aria-label="Archivo JSON de configuraciones" aria-describedby="status">
           <p class="helper">Guardado en este navegador. Cargar recupera el último guardado; restablecer no lo borra.</p>
           <p id="status" role="status" aria-live="polite">Listo para explorar.</p>
         </section>
@@ -58,6 +71,18 @@
         <div class="table-scroll"><table><caption class="sr-only">Valores calculados de ambas órbitas y variación porcentual</caption><thead><tr><th scope="col">Magnitud</th><th scope="col">A <i class="swatch a"></i></th><th scope="col">B <i class="swatch b"></i></th><th scope="col">Variación</th></tr></thead><tbody id="results"></tbody></table></div>
         <div class="chart-row"><figure><figcaption>Velocidad en periapsis <span>km/s</span></figcaption><svg id="velocity-chart" viewBox="0 0 480 120" role="img" aria-label="Comparación de velocidad en periapsis"></svg></figure><figure><figcaption>Periodo orbital <span>min</span></figcaption><svg id="period-chart" viewBox="0 0 480 120" role="img" aria-label="Comparación de periodo orbital"></svg></figure></div>
         <p id="interpretation" class="interpretation"></p>
+      </section>
+      <section class="panel analysis-panel" aria-labelledby="analysis-title">
+        <div class="panel-heading"><h3 id="analysis-title">Anatomía de una vuelta</h3><span class="subtle">DISTANCIA Y RAPIDEZ</span></div>
+        <p class="helper">Cada curva recorre el periodo de su propia órbita: el 50 % es su apoapsis. Los puntos marcan el tiempo simulado actual de A y B; pueden ocupar porcentajes distintos.</p>
+        <div class="visual-meta"><span><i class="swatch a"></i> A · línea continua</span><span><i class="swatch b"></i> B · línea discontinua</span></div>
+        <div class="time-chart-grid"><figure><figcaption>Distancia al centro <span>km</span></figcaption><svg id="radius-history" viewBox="0 0 560 250" role="img" aria-label="Distancia durante una órbita"></svg></figure><figure><figcaption>Rapidez orbital <span>km/s</span></figcaption><svg id="speed-history" viewBox="0 0 560 250" role="img" aria-label="Rapidez durante una órbita"></svg></figure></div>
+        <p class="helper">Curvas trazadas con 241 estados calculados por órbita. Las líneas entre muestras son visuales; los valores actuales se calculan directamente con Kepler. CSV conserva segundos y unidades de cada configuración.</p>
+      </section>
+      <section class="panel prediction-panel" aria-labelledby="prediction-title">
+        <div class="panel-heading"><h3 id="prediction-title">Predice antes de comparar</h3><span class="subtle">COMPRUEBA TU INTUICIÓN</span></div>
+        <div class="prediction-controls"><label for="prediction-metric">Magnitud de B respecto de A<select id="prediction-metric"><option value="period">Periodo orbital</option><option value="periapsisVelocity">Velocidad en periapsis</option><option value="apoapsisVelocity">Velocidad en apoapsis</option></select></label><label for="prediction-answer">Tu predicción<select id="prediction-answer"><option value="higher">B es mayor</option><option value="equal">Son iguales</option><option value="lower">B es menor</option></select></label><button id="check-prediction" type="button">Comprobar</button></div>
+        <p id="prediction-feedback" class="study-description" role="status" aria-live="polite">Elige una magnitud y predice su relación. La respuesta se comprobará con tus parámetros actuales.</p>
       </section>
       <details id="model" class="panel model-panel" open>
         <summary>El modelo, sin caja negra <span>ECUACIONES Y ALCANCE</span></summary>

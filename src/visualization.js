@@ -1,6 +1,7 @@
 import { number, mToKm } from './units.js';
 import { orbitalState } from './elliptic.js';
 import { BODIES } from './data.js';
+import { periodFraction } from './exploration.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const COLORS = ['#8edfcc', '#c0afff'];
@@ -67,4 +68,46 @@ export function drawBars(svg, values, unit) {
   });
   svg.append(element('text', { x: 35, y: 114, fill: '#a1afc2', 'font-size': 10 }, '0'));
   svg.append(element('text', { x: 325, y: 114, 'text-anchor': 'end', fill: '#a1afc2', 'font-size': 10 }, `${number(max)} ${unit}`));
+}
+
+export function drawTimeChart(svg, samples, metric, unit) {
+  svg.replaceChildren();
+  const values = samples.flatMap(series => series?.map(state => state[metric] / 1000) ?? []);
+  if (!values.length) {
+    svg.append(element('text', { x: 20, y: 110, fill: '#a1afc2', 'font-size': 13 }, 'Sin datos válidos para dibujar.'));
+    svg.setAttribute('aria-label', 'Gráfica sin datos válidos.');
+    return;
+  }
+  const max = Math.max(...values) * 1.08;
+  svg.dataset.maximum = max;
+  const x = fraction => 64 + fraction * 472;
+  const y = value => 200 - value / max * 176;
+  const names = [];
+  for (let i = 0; i <= 4; i++) {
+    const value = max * i / 4;
+    svg.append(element('line', { x1: 64, y1: y(value), x2: 536, y2: y(value), stroke: '#273345' }));
+    svg.append(element('text', { x: 58, y: y(value) + 4, 'text-anchor': 'end', fill: '#a1afc2', 'font-size': 10 }, value >= 1000 || (value > 0 && value < 0.01) ? value.toExponential(1) : number(value)));
+    svg.append(element('text', { x: x(i / 4), y: 222, 'text-anchor': 'middle', fill: '#a1afc2', 'font-size': 10 }, `${i * 25} %`));
+  }
+  svg.append(element('text', { x: 300, y: 243, 'text-anchor': 'middle', fill: '#a1afc2', 'font-size': 10 }, 'Fracción del periodo de cada órbita'));
+  samples.forEach((series, index) => {
+    if (!series) return;
+    const minimum = Math.min(...series.map(state => state[metric] / 1000));
+    const maximum = Math.max(...series.map(state => state[metric] / 1000));
+    names.push(`${index === 0 ? 'A' : 'B'}: ${number(minimum)} a ${number(maximum)} ${unit}`);
+    svg.append(element('polyline', { points: series.map(state => `${x(state.fraction)},${y(state[metric] / 1000)}`).join(' '), fill: 'none', stroke: COLORS[index], 'stroke-width': 2, 'stroke-dasharray': index === 1 ? '6 3' : 'none', 'data-time-series': index }));
+    svg.append(element('circle', { cx: x(0), cy: y(series[0][metric] / 1000), r: 4, fill: COLORS[index], stroke: '#0b1019', 'stroke-width': 1.5, 'data-time-marker': index }));
+  });
+  svg.setAttribute('aria-label', `${metric === 'r' ? 'Distancia' : 'Rapidez'} en una vuelta. ${names.join('. ')}. Eje vertical desde cero.`);
+}
+
+export function moveTimeMarkers(svg, orbits, states, elapsed, metric) {
+  const max = Number(svg.dataset.maximum);
+  if (!max) return;
+  orbits.forEach((orbit, index) => {
+    const marker = svg.querySelector(`[data-time-marker="${index}"]`);
+    if (!marker || !orbit || !states[index]) return;
+    marker.setAttribute('cx', 64 + periodFraction(elapsed, orbit.period) * 472);
+    marker.setAttribute('cy', 200 - (states[index][metric] / 1000) / max * 176);
+  });
 }

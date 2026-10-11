@@ -4,7 +4,11 @@ import { kmToM, km3ToM3, mToKm, secondsToMinutes, number } from './units.js';
 import { percentageDifference } from './physics.js';
 import { ellipticOrbit } from './elliptic.js';
 import { loadConfigurations, saveConfigurations } from './storage.js';
-import { drawOrbit, moveSatellite, drawBars } from './visualization.js';
+import { drawOrbit, moveSatellite, drawBars, drawTimeChart, moveTimeMarkers } from './visualization.js';
+import { SCENARIOS } from './scenarios.js';
+import { sampleOrbit, exportOrbitCSV, assessPrediction, periodFraction } from './exploration.js';
+import { serializeConfigurations, parseConfigurations, MAX_IMPORT_BYTES } from './configuration.js';
+import { downloadFile } from './files.js';
 
 const $ = selector => document.querySelector(selector);
 const letters = ['a', 'b'];
@@ -14,6 +18,26 @@ let running = false;
 let elapsed = 0;
 let previousFrame = null;
 let frameId = null;
+let revision = 0;
+
+function selectStudy(id) {
+  const scenario = SCENARIOS.find(item => item.id === id);
+  $('#scenario-note').textContent = scenario?.description ?? 'Exploración propia: cambiaste o cargaste parámetros. Puedes regresar a un escenario para aislar una relación física.';
+  document.querySelectorAll('[data-scenario]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.scenario === id));
+  });
+}
+
+function applyConfigurations(configs, message, study = null) {
+  configurations = configs.map(config => ({ ...config }));
+  revision++;
+  pause();
+  elapsed = 0;
+  fillFields();
+  selectStudy(study);
+  update();
+  setStatus(message);
+}
 
 function setStatus(message, error = false) {
   $('#status').textContent = message;
@@ -84,6 +108,8 @@ function update() {
   const allValid = orbits.every(Boolean);
   $('#save').disabled = !allValid;
   $('#play').disabled = !allValid;
+  for (const id of ['export-json', 'export-csv', 'check-prediction', 'phase', 'reference', 'go-periapsis', 'go-apoapsis']) $(`#${id}`).disabled = !allValid;
+  $('#prediction-feedback').textContent = allValid ? 'Elige una magnitud y predice su relación. La respuesta se comprobará con tus parámetros actuales.' : 'Corrige ambas configuraciones para comprobar una predicción.';
   if (!allValid) pause();
   $('#result-message').textContent = allValid ? 'Modelo ideal de dos cuerpos. Velocidades extremas, no velocidad constante de una elipse. Porcentajes con A como referencia.' : 'Hay entradas inválidas. Los resultados afectados se ocultan; no se muestran valores anteriores.';
   const rows = [
@@ -116,6 +142,9 @@ function update() {
   }));
   drawBars($('#velocity-chart'), orbits.map(orbit => orbit ? mToKm(orbit.periapsisVelocity) : null), 'km/s');
   drawBars($('#period-chart'), orbits.map(orbit => orbit ? secondsToMinutes(orbit.period) : null), 'min');
+  const samples = orbits.map(orbit => orbit ? sampleOrbit(orbit) : null);
+  drawTimeChart($('#radius-history'), samples, 'r', 'km');
+  drawTimeChart($('#speed-history'), samples, 'speed', 'km/s');
   const sameMu = allValid && configurations[0].mu === configurations[1].mu;
   $('#interpretation').textContent = !allValid ? 'Corrige las entradas para interpretar la comparación.' : sameMu ? 'Para el mismo μ y periapsis, aumentar e eleva el apoapsis, el periodo y la velocidad en periapsis. En una elipse el satélite acelera al acercarse al cuerpo y frena al alejarse. Un porcentaje negativo en energía indica un valor menos negativo.' : 'Los cuerpos tienen distinto μ: compara también el periapsis y la excentricidad. La energía negativa representa una órbita ligada en el modelo ideal.';
   const maxRadius = Math.max(...orbits.filter(Boolean).map(orbit => orbit.apoapsis), 1);
@@ -128,11 +157,19 @@ function update() {
 }
 
 function refreshPositions() {
-  letters.forEach((letter, index) => {
+  const states = letters.map((letter, index) => {
     const state = moveSatellite($(`#orbit-${letter}`), orbits[index], elapsed);
     $(`#instant-${letter}`).textContent = state ? `r actual = ${number(mToKm(state.r))} km · v actual = ${number(mToKm(state.speed))} km/s` : 'Sin estado orbital: corrige las entradas.';
+    return state;
   });
   $('#elapsed').textContent = `${number(elapsed, 0)} s`;
+  const reference = orbits[Number($('#reference').value)];
+  const fraction = reference ? periodFraction(elapsed, reference.period) : 0;
+  $('#phase').value = fraction * 100;
+  $('#phase-value').textContent = `${number(fraction * 100, 1)} %`;
+  $('#phase').setAttribute('aria-valuetext', `${number(fraction * 100, 1)} por ciento del periodo de ${$('#reference').selectedOptions[0].textContent}`);
+  moveTimeMarkers($('#radius-history'), orbits, states, elapsed, 'r');
+  moveTimeMarkers($('#speed-history'), orbits, states, elapsed, 'speed');
 }
 
 function pause() {
@@ -152,6 +189,20 @@ function tick(timestamp) {
   frameId = requestAnimationFrame(tick);
 }
 
+$('#scenarios').replaceChildren(...SCENARIOS.map(scenario => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'scenario-card';
+  button.dataset.scenario = scenario.id;
+  const tag = document.createElement('span');
+  tag.textContent = scenario.tag;
+  const title = document.createElement('strong');
+  title.textContent = scenario.title;
+  button.append(tag, title);
+  button.addEventListener('click', () => applyConfigurations(scenario.configurations, `Escenario cargado: ${scenario.title}.`, scenario.id));
+  return button;
+}));
+selectStudy('altitude');
 createFields();
 fillFields();
 update();
@@ -169,6 +220,8 @@ $('#parameters').addEventListener('input', event => {
   }
   pause();
   elapsed = 0;
+  revision++;
+  selectStudy(null);
   update();
   setStatus(orbits.every(Boolean) ? 'Cálculos actualizados; tiempo reiniciado.' : 'Corrige los campos señalados.', !orbits.every(Boolean));
 });
@@ -183,6 +236,22 @@ $('#play').addEventListener('click', () => {
 });
 $('#speed').addEventListener('change', () => { previousFrame = null; });
 $('#restart-time').addEventListener('click', () => { elapsed = 0; previousFrame = null; refreshPositions(); });
+$('#phase').addEventListener('input', () => {
+  const reference = orbits[Number($('#reference').value)];
+  if (!reference) return;
+  pause();
+  elapsed = Number($('#phase').value) / 100 * reference.period;
+  refreshPositions();
+});
+$('#reference').addEventListener('change', refreshPositions);
+$('#go-periapsis').addEventListener('click', () => { pause(); elapsed = 0; refreshPositions(); });
+$('#go-apoapsis').addEventListener('click', () => {
+  const reference = orbits[Number($('#reference').value)];
+  if (!reference) return;
+  pause();
+  elapsed = reference.period / 2;
+  refreshPositions();
+});
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
 $('#save').addEventListener('click', () => {
   try {
@@ -194,19 +263,44 @@ $('#load').addEventListener('click', () => {
   try {
     const saved = loadConfigurations(window.localStorage);
     if (!saved) return setStatus('No hay configuraciones guardadas.');
-    configurations = saved;
-    pause();
-    elapsed = 0;
-    fillFields();
-    update();
-    setStatus('Configuraciones recuperadas.');
+    applyConfigurations(saved, 'Configuraciones recuperadas.');
   } catch (error) { setStatus(`No se pudo cargar: ${error.message}`, true); }
 });
 $('#reset').addEventListener('click', () => {
-  configurations = DEFAULTS.map(config => ({ ...config }));
-  pause();
-  elapsed = 0;
-  fillFields();
-  update();
-  setStatus('Parámetros iniciales restaurados. Tu guardado sigue disponible.');
+  applyConfigurations(DEFAULTS, 'Parámetros iniciales restaurados. Tu guardado sigue disponible.', 'altitude');
+});
+$('#export-json').addEventListener('click', () => {
+  try {
+    downloadFile(serializeConfigurations(configurations), 'aerolab-configuraciones.json', 'application/json');
+    setStatus('Archivo JSON generado con ambas configuraciones.');
+  } catch (error) { setStatus(`No se pudo exportar: ${error.message}`, true); }
+});
+$('#export-csv').addEventListener('click', () => {
+  try {
+    downloadFile(exportOrbitCSV(configurations), 'aerolab-orbitas.csv', 'text/csv;charset=utf-8');
+    setStatus('CSV generado: 241 estados por órbita, con segundos y unidades en las columnas.');
+  } catch (error) { setStatus(`No se pudo exportar: ${error.message}`, true); }
+});
+$('#import-json').addEventListener('click', () => $('#import-file').click());
+$('#import-file').addEventListener('change', async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const initialRevision = revision;
+  try {
+    if (file.size > MAX_IMPORT_BYTES) throw new Error('El archivo supera el máximo de 16 KiB.');
+    const configs = parseConfigurations(await file.text());
+    if (revision !== initialRevision) throw new Error('Cambiaste parámetros durante la lectura. Vuelve a seleccionar el archivo.');
+    applyConfigurations(configs, 'Configuraciones importadas. Pulsa Guardar si deseas conservarlas en este navegador.');
+  } catch (error) { setStatus(`No se pudo importar: ${error.message}`, true); }
+  finally { event.target.value = ''; }
+});
+function resetPrediction() { $('#prediction-feedback').textContent = 'Predicción cambiada. Pulsa Comprobar para verificarla con tus parámetros.'; }
+$('#prediction-metric').addEventListener('change', resetPrediction);
+$('#prediction-answer').addEventListener('change', resetPrediction);
+$('#check-prediction').addEventListener('click', () => {
+  try {
+    const result = assessPrediction(orbits, $('#prediction-metric').value, $('#prediction-answer').value);
+    const words = { higher: 'mayor', equal: 'igual', lower: 'menor' };
+    $('#prediction-feedback').textContent = `${result.correct ? 'Correcto.' : 'Revisa tu predicción.'} El valor de B es ${words[result.expected]} al de A; B/A = ${number(result.ratio, 4)}. La comparación usa el modelo de dos cuerpos con las entradas actuales, sin datos de una misión real.`;
+  } catch (error) { $('#prediction-feedback').textContent = error.message; }
 });

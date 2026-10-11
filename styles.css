@@ -766,6 +766,77 @@ footer>span:first-child {
 }
 
 .scroll-hint { display: none; }
+.study-panel { margin-bottom: 18px; }
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 18px 22px 0;
+}
+.scenario-card {
+  background: #0c1420;
+  border: 1px solid var(--line);
+  color: var(--text);
+  text-align: left;
+  padding: 15px;
+}
+.scenario-card span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.scenario-card strong { font-size: 12px; font-weight: 600; }
+.scenario-card[aria-pressed=true] {
+  border-color: var(--a);
+  background: #132a25;
+}
+.study-description {
+  padding: 16px 22px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.timeline {
+  margin: 16px 22px 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 12px;
+  background: #0c1420;
+}
+.timeline-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.timeline-heading label { font-size: 11px; color: var(--muted); }
+.timeline-heading output { color: var(--a); margin-left: 6px; font-variant-numeric: tabular-nums; }
+.timeline-heading select { width: auto; margin-left: 5px; font-size: 11px; padding: 6px; }
+input[type=range] { accent-color: var(--a); border: 0; padding: 0; margin: 10px 0 4px; min-height: 32px; }
+.phase-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.phase-actions button { font-size: 11px; padding: 7px 10px; }
+.timeline .helper { margin: 10px 0 0; }
+.file-actions { margin-top: 9px; }
+.file-actions button { font-size: 11px; }
+.analysis-panel, .prediction-panel { margin-top: 18px; }
+.time-chart-grid { display: grid; grid-template-columns: 1fr 1fr; padding: 20px 22px 0; gap: 24px; }
+.time-chart-grid figure { margin: 0; min-width: 0; }
+.time-chart-grid figcaption { font-size: 12px; font-weight: 600; }
+.time-chart-grid figcaption span { float: right; color: var(--muted); font-size: 10px; }
+.time-chart-grid svg { width: 100%; display: block; }
+.prediction-controls { display: flex; align-items: flex-end; flex-wrap: wrap; padding: 18px 22px 0; gap: 14px; }
+.prediction-controls label { flex: 1; min-width: 180px; color: var(--muted); font-size: 11px; }
+.prediction-controls select { margin-top: 5px; }
+@media (max-width: 1050px) { .scenario-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 760px) {
+  .time-chart-grid { grid-template-columns: 1fr; gap: 20px; }
+  .time-chart-grid svg text { font-size: 15px; }
+  .scenario-grid { padding: 16px 16px 0; }
+}
+@media (max-width: 430px) {
+  .scenario-card { padding: 11px; }
+  .scenario-card strong { font-size: 11px; }
+  .timeline { margin-left: 16px; margin-right: 16px; }
+  .prediction-controls { gap: 10px; }
+  .prediction-controls label { min-width: 100%; }
+}
 .instant-state {
   margin: 6px 8px 0;
   color: var(--muted);

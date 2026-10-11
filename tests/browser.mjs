@@ -1,6 +1,7 @@
 // Optional integration check. Playwright is a test tool, not an app dependency.
 import assert from 'node:assert/strict';
 import { pathToFileURL } from 'node:url';
+import { readFile } from 'node:fs/promises';
 
 const modulePath = process.env.PLAYWRIGHT_MODULE;
 const { chromium } = await import(modulePath ? pathToFileURL(modulePath).href : 'playwright');
@@ -116,6 +117,90 @@ try {
     await page.waitForFunction(previous => document.querySelector('#instant-a').textContent !== previous, before);
     await page.locator('#play').click();
     assert.match(await page.locator('#instant-a').innerText(), /km\/s/);
+    await page.locator('#reset').click();
+  });
+  await check('four studies load coherent configurations and show their scope', async () => {
+    assert.equal(await page.locator('[data-scenario]').count(), 4);
+    await page.locator('[data-scenario="kepler"]').click();
+    assert.equal(await page.locator('#a-eccentricity').inputValue(), '0.5');
+    assert.equal(await page.locator('#b-altitude').inputValue(), '4462.6');
+    assert.match(await page.locator('#scenario-note').innerText(), /mismo μ/);
+    const period = page.locator('#results tr').filter({ has: page.locator('th', { hasText: 'Periodo orbital' }) });
+    assert.equal(await period.locator('td:last-child').innerText(), '0,00 %');
+    await page.locator('[data-scenario="moon"]').click();
+    assert.equal(await page.locator('#b-body').inputValue(), 'moon');
+    await page.locator('#a-altitude').fill('200');
+    assert.match(await page.locator('#scenario-note').innerText(), /Exploración propia/);
+    await page.locator('#reset').click();
+  });
+  await check('timeline, apsis shortcuts, reference switching and curve markers', async () => {
+    await page.locator('[data-scenario="eccentricity"]').click();
+    await page.locator('#reference').selectOption('1');
+    await page.locator('#go-apoapsis').click();
+    assert.equal(await page.locator('#phase').inputValue(), '50');
+    assert.match(await page.locator('#instant-b').innerText(), /20\.313,00 km/);
+    const marker = Number(await page.locator('#radius-history [data-time-marker="1"]').getAttribute('cx'));
+    assert.ok(Math.abs(marker - 300) < 1e-8);
+    const time = await page.locator('#elapsed').innerText();
+    await page.locator('#reference').selectOption('0');
+    assert.equal(await page.locator('#elapsed').innerText(), time);
+    await page.locator('#phase').fill('25');
+    assert.equal(await page.locator('#play').getAttribute('aria-pressed'), 'false');
+    assert.equal(await page.locator('#phase').inputValue(), '25');
+    await page.locator('#phase').fill('100');
+    assert.equal(await page.locator('#phase').inputValue(), '100');
+    await page.locator('#go-periapsis').click();
+    assert.equal(await page.locator('#elapsed').innerText(), '0 s');
+    assert.equal(await page.locator('#radius-history [data-time-series]').count(), 2);
+    await page.locator('#reset').click();
+  });
+  await check('predictions respond to current values and clear when parameters change', async () => {
+    await page.locator('#prediction-answer').selectOption('lower');
+    await page.locator('#check-prediction').click();
+    assert.match(await page.locator('#prediction-feedback').innerText(), /Revisa/);
+    await page.locator('#prediction-answer').selectOption('higher');
+    await page.locator('#check-prediction').click();
+    assert.match(await page.locator('#prediction-feedback').innerText(), /Correcto/);
+    await page.locator('#b-altitude').fill('400');
+    assert.doesNotMatch(await page.locator('#prediction-feedback').innerText(), /Correcto/);
+    await page.locator('#prediction-answer').selectOption('equal');
+    await page.locator('#check-prediction').click();
+    assert.match(await page.locator('#prediction-feedback').innerText(), /Correcto/);
+    await page.locator('#reset').click();
+  });
+  await check('JSON and CSV download actual portable data', async () => {
+    const [jsonDownload] = await Promise.all([page.waitForEvent('download'), page.locator('#export-json').click()]);
+    assert.equal(jsonDownload.suggestedFilename(), 'aerolab-configuraciones.json');
+    const saved = JSON.parse(await readFile(await jsonDownload.path(), 'utf8'));
+    assert.equal(saved.version, 2);
+    assert.equal(saved.configurations[0].altitude, 400);
+    const [csvDownload] = await Promise.all([page.waitForEvent('download'), page.locator('#export-csv').click()]);
+    const csv = await readFile(await csvDownload.path(), 'utf8');
+    assert.equal(csv.trim().split('\n').length, 483);
+    assert.match(csv, /speed_km_s/);
+  });
+  await check('import button opens a chooser and imports validated JSON without saving', async () => {
+    const previousSave = await page.evaluate(() => localStorage.getItem('aerolab.space.circular.v1'));
+    const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.locator('#import-json').click()]);
+    await chooser.setFiles({ name: 'experiment.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({ version: 2, configurations: [
+      { body: 'earth', mu: 398600.435507, radius: 6371, altitude: 700, eccentricity: 0.3 },
+      { body: 'earth', mu: 398600.435507, radius: 6371, altitude: 900, eccentricity: 0.4 },
+    ] })) });
+    await page.waitForFunction(() => document.querySelector('#a-altitude').value === '700');
+    assert.equal(await page.locator('#b-eccentricity').inputValue(), '0.4');
+    assert.equal(await page.evaluate(() => localStorage.getItem('aerolab.space.circular.v1')), previousSave);
+  });
+  await check('bad and oversized imports preserve current configurations', async () => {
+    await page.locator('#import-file').setInputFiles({ name: 'broken.json', mimeType: 'application/json', buffer: Buffer.from('{broken') });
+    await page.waitForFunction(() => document.querySelector('#status').textContent.includes('No se pudo importar'));
+    assert.equal(await page.locator('#a-altitude').inputValue(), '700');
+    await page.locator('#import-file').setInputFiles({ name: 'large.json', mimeType: 'application/json', buffer: Buffer.alloc(17000) });
+    await page.waitForFunction(() => document.querySelector('#status').textContent.includes('16 KiB'));
+    assert.equal(await page.locator('#a-altitude').inputValue(), '700');
+    await page.locator('#reset').click();
+    await page.locator('#a-altitude').fill('');
+    for (const id of ['export-json', 'export-csv', 'phase', 'check-prediction']) assert.ok(await page.locator(`#${id}`).isDisabled());
+    assert.equal(await page.locator('#radius-history [data-time-series]').count(), 1);
     await page.locator('#reset').click();
   });
   await check('desktop and mobile widths, accessible controls, module availability', async () => {

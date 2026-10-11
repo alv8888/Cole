@@ -1,20 +1,22 @@
-# Pruebas y evidencia de la entrega 2 · Space Lab 0.2
+# Pruebas y evidencia de la entrega 3 · Space Lab 0.3
 
 ## Resultado observado
 
-- Node.js 24.19.0: **23 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
-- Chromium headless mediante Playwright: **11 comprobaciones de integración aprobadas**, sin errores JavaScript no capturados en la página principal.
+- Node.js 24.19.0: **30 pruebas unitarias aprobadas**, 0 fallos, 0 omitidas.
+- Chromium headless mediante Playwright: **17 comprobaciones de integración aprobadas**, sin errores JavaScript no capturados en la página principal.
 - Cálculo independiente con Python 3.12.14: valores terrestres a 400 km y a radio 42164 km concordantes con las referencias de las pruebas.
 - Página y módulos servidos por HTTP con Python; no se requiere instalación de paquetes de aplicación ni compilación.
 - Capturas de escritorio de 1440 px y móvil de 390 px inspeccionadas. Comprobación automática sin desbordamiento global a 1440, 768, 390 y 320 px. La tabla permite desplazamiento horizontal propio en móvil.
 
-Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 11 checks de navegador son grupos de aserciones, no 11 modelos científicos adicionales.
+Los resultados corresponden a esta entrega; ejecutar los comandos nuevamente produce evidencia para cualquier modificación posterior. Los 17 checks de navegador son grupos de aserciones, no 17 modelos científicos adicionales.
 
 ## Qué comprueban las pruebas unitarias
 
 Caso terrestre ideal de 400 km; periodo casi sidéreo a radio 42164 km; caso normalizado μ=1 y r=1; tercera ley de Kepler; escalamiento con radio y μ; equilibrio centrípeto; energía específica; radio constante y periodicidad; conversiones; signo del porcentaje de energía; entradas no físicas y desbordamiento; extremos de los límites admitidos; guardado/carga, versión incorrecta, JSON dañado, parámetros inválidos y almacenamiento indisponible.
 
 La ampliación verifica e=0 como regresión circular, caso normalizado elíptico, referencia terrestre independiente, periapsis/apoapsis, periodicidad, conservación de energía y momento angular, vis-viva, geometría en 120 fases para cuatro excentricidades, residuo de Kepler, segunda ley de áreas, e=0,9 y migración de guardados v1. Un cero con signo negativo de IEEE-754 se compara como valor numérico cero; no es una velocidad física distinta.
+
+La entrega 3 añade comprobaciones de formato JSON portable, límite de bytes y entradas incorrectas, propiedades ajenas descartadas, muestreo con extremos, filas CSV y tiempos/unidades, coherencia física de los cuatro escenarios, predicciones basadas en valores actuales y extremos del control temporal. Los archivos JSON se validan antes de aplicar ambos estados; una importación parcial no se acepta.
 
 Comando:
 
@@ -57,6 +59,8 @@ Comprobaciones: resultados iniciales; comparación e invalidez; presets y person
 
 También se comprueban geometría elíptica con el cuerpo en un foco, resultados de los extremos, entradas e≥1 rechazadas, lecturas de velocidad/distancia variables, persistencia de e y migración v1 sin sobrescribir datos hasta Guardar.
 
+Interacciones nuevas verificadas en Chromium: los cuatro escenarios; cargas y edición propia; control temporal, 100 %, accesos de apsis, cambio de referencia conservando segundos y marcadores de curvas; corrección de predicciones y limpieza de respuestas antiguas; descargas JSON/CSV leídas desde sus archivos reales; selector de archivo; importación válida sin guardar automáticamente; archivos corruptos y demasiado grandes que conservan el estado; funciones nuevas deshabilitadas con entradas inválidas. Se revisaron capturas de las curvas en escritorio y móvil.
+
 ## Pruebas manuales para el usuario
 
 1. Inicia el servidor y abre Space Lab. A debe mostrar aproximadamente 7,67 km/s y 92,41 min; B, 7,35 km/s y 104,97 min.
@@ -69,6 +73,11 @@ También se comprueban geometría elíptica con el cuerpo en un foco, resultados
 8. Navega con Tab, Shift+Tab y Enter; utiliza el enlace para saltar al laboratorio. Verifica foco visible, etiquetas y apertura del panel de ecuaciones.
 9. Prueba a 390 px y en escritorio. Confirma que puedes alcanzar todos los controles y deslizar la tabla en móvil.
 10. Con Tierra, hₚ=400 km y e=0,5: periapsis 6771 km, apoapsis 20313 km, velocidades 9,40 y 3,13 km/s, periodo 261,39 min. Reproduce: el cuerpo debe ocupar un foco y las lecturas actuales deben variar. e=0 vuelve al círculo; e=1 debe mostrar error.
+11. Carga «Distinta forma, mismo periodo». Compara T y a: deben coincidir, aunque e y los radios extremos difieran. Predice «Son iguales» para el periodo y compruébalo.
+12. Carga «Estirar una órbita», selecciona B como referencia y pulsa Ir a apoapsis. B debe mostrar aproximadamente r=20313 km y v=3,13 km/s. Cambia a A como referencia: los segundos no deben cambiar.
+13. Exporta JSON, cambia parámetros e importa ese archivo. Deben recuperarse ambos estados sin modificar el guardado local hasta pulsar Guardar. Un JSON malformado debe mostrar un error y conservar la configuración.
+14. Exporta CSV: comprueba el encabezado de unidades y 482 filas de datos. Los últimos tiempos de A y B pueden diferir: cada bloque describe una vuelta propia.
+15. Usa Tab y las flechas sobre el control temporal. La reproducción debe quedar pausada al moverlo; los puntos de las curvas y satélites deben actualizarse.
 
 ## No comprobado
 
