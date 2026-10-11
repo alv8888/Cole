@@ -74,3 +74,35 @@
 @media(max-width:760px){.home-hero{grid-template-columns:1fr;padding:18px 0 40px;gap:24px}.home-introduction h1{font-size:46px;margin:14px 0 18px}.home-lead{font-size:17px;margin:0}.home-actions{margin:22px 0 14px}.home-promise{margin:0}.home-orbit-layout{grid-template-columns:minmax(0,1fr) 100px}#home-orbit{max-height:240px}.home-demo-inputs{grid-template-columns:1fr 1fr}.home-section-heading{display:block}.home-section-heading>p{max-width:none}.home-catalog{padding-top:36px}.home-card-space,.home-card-structure{display:flex}.home-card-space svg,.home-card-structure svg{height:160px}.home-method{grid-template-columns:1fr;gap:24px;padding:34px 0}.home-method h2 br{display:none}.home-preview-metrics{grid-template-columns:1fr 1fr}.home-preview-metrics dd{font-size:20px}}
 @media(max-width:480px){.home-card-grid{grid-template-columns:1fr}.home-demo-inputs{gap:12px}.home-demo-inputs label{font-size:11px}.home-introduction h1{font-size:42px}.home-demo{padding:15px}.home-telemetry{gap:16px}.home-telemetry dd{font-size:18px}.home-orbit-layout{grid-template-columns:minmax(0,1fr) 86px;gap:3px}.home-card{padding:18px}.home-preview{padding:18px}.home-preview-metrics{grid-template-columns:1fr}.home-filters button{font-size:12px;padding:9px 12px}.home-lead{font-size:16px}.home-actions{gap:14px}.home-note{font-size:11px}.home-demo h2{font-size:22px}}
 @media(prefers-reduced-motion:reduce){.home-card{transition:none}}
+
+/* One-variable experiments reuse the existing scientific SVG chart component. */
+.home-experiment-question {
+  font-size: 20px;
+  line-height: 1.45;
+  color: var(--text);
+  max-width: 48rem;
+}
+.home-experiment-controls {
+  display: flex;
+  align-items: end;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 20px 0;
+  border-block: 1px solid var(--line);
+}
+.home-experiment-controls label { display: grid; gap: 8px; font-size: 14px; }
+.home-experiment-controls input { width: 180px; max-width: 100%; }
+.home-experiment-controls p { max-width: 22rem; margin: 0; }
+.home-experiment-controls button { margin-left: auto; }
+.home-experiment-figure { margin: 12px 0 24px; min-width: 0; }
+.home-experiment-figure .chart-scroll { overflow-x: auto; max-width: 850px; }
+#home-experiment-chart { display: block; width: 100%; min-width: 560px; }
+.home-experiment-figure figcaption { color: var(--muted); font-size: 12px; margin-top: 12px; }
+.home-preview [hidden] { display: none; }
+#home-experiment-error { margin: 12px 0 0; }
+@media (max-width: 480px) {
+  .home-experiment-controls { align-items: start; gap: 14px; }
+  .home-experiment-controls label { width: 100%; }
+  .home-experiment-controls input { width: 100%; }
+  .home-experiment-controls button { margin-left: 0; }
+}

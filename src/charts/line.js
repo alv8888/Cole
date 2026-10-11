@@ -18,7 +18,7 @@ export function createLineChart(svg, readout) {
     const p = data[index];
     cursor.setAttribute('cx', project(p.x, xDomain, left, right));
     cursor.setAttribute('cy', project(p.y, yDomain, bottom, top));
-    readout.textContent = `Nodo ${index + 1}/${data.length} · ${labels.x}: ${format(p.x)} ${labels.xUnit} · ${labels.y}: ${format(p.y)} ${labels.yUnit}`;
+    readout.textContent = `${labels.sampleLabel ?? 'Nodo'} ${index + 1}/${data.length} · ${labels.x}: ${format(p.x)} ${labels.xUnit} · ${labels.y}: ${format(p.y)} ${labels.yUnit}`;
   }
   svg.addEventListener('pointerdown', event => {
     if (!data.length) return;
@@ -41,7 +41,7 @@ export function createLineChart(svg, readout) {
       }
       xDomain = axis(data.map(p => p.x)); yDomain = axis(data.map(p => p.y));
       svg.setAttribute('tabindex', '0'); svg.setAttribute('aria-describedby', readout.id);
-      svg.setAttribute('aria-label', `${labels.y} (${labels.yUnit}) frente a ${labels.x} (${labels.xUnit}). Flechas inspeccionan nodos; Inicio/Fin seleccionan extremos.`);
+      svg.setAttribute('aria-label', `${labels.y} (${labels.yUnit}) frente a ${labels.x} (${labels.xUnit}). Flechas inspeccionan ${labels.sampleLabel ? 'muestras' : 'nodos'}; Inicio/Fin seleccionan extremos.`);
       for (const x of xDomain.ticks) {
         const px = project(x, xDomain, left, right);
         node('line', {x1: px, x2: px, y1: top, y2: bottom, class: 'chart-grid'});

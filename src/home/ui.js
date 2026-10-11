@@ -1,11 +1,16 @@
 import { CATALOG, selectCatalog } from './catalog.js';
-import { demoOrbit, previewModel } from './models.js';
+import { createLineChart } from '../charts/line.js';
+import { EXPERIMENTS, experimentValue, experimentLink } from './experiments.js';
+import { demoOrbit, previewModel, experimentCurve } from './models.js';
 import { drawOrbit, moveSatellite } from '../visualization.js';
 import { number } from '../units.js';
 import { createAnimationLoop } from '../rendering/clock.js';
 
 const $ = id => document.getElementById(id);
 const e = $('home-e'), time = $('home-time'), svg = $('home-orbit');
+const curveCache = new Map();
+const chart = createLineChart($('home-experiment-chart'), $('home-experiment-readout'));
+let activeExperiment = null, experimentResult = null;
 let current, fraction = Number(time.value) / 100, previous = null, previewRevision = 0, previewTrigger = null;
 function position() {
   const state = moveSatellite(svg, current.orbit, current.orbit.period * fraction);
@@ -74,7 +79,7 @@ function makeCard(item) {
 }
 $('home-cards').append(...CATALOG.map(makeCard));
 function closePreview(returnFocus = false) {
-  previewRevision++;
+  previewRevision++; activeExperiment = null; experimentResult = null;
   $('home-preview').hidden = true;
   document.querySelectorAll('[data-home-preview]').forEach(button => button.setAttribute('aria-expanded', 'false'));
   if (returnFocus && previewTrigger && !previewTrigger.closest('article').hidden) previewTrigger.focus();
@@ -88,29 +93,82 @@ document.querySelectorAll('[data-home-filter]').forEach(button => button.addEven
   document.querySelectorAll('[data-home-filter]').forEach(control => control.setAttribute('aria-pressed', String(control === button)));
   $('home-catalog-status').textContent = `${visible.length} laboratorios disponibles para este tema. Esquemas ilustrativos; ejemplos calculados al seleccionarlos.`;
 }));
-$('home-cards').addEventListener('click', async event => {
-  const button = event.target.closest('[data-home-preview]'); if (!button) return;
-  closePreview(); previewTrigger = button;
-  const revision = ++previewRevision, item = CATALOG.find(entry => entry.id === button.dataset.homePreview);
-  const panel = $('home-preview'); panel.hidden = false; panel.setAttribute('aria-busy', 'true');
-  button.setAttribute('aria-expanded', 'true');
-  $('home-preview-title').textContent = item.title;
+function clearExample() {
+  experimentResult = null;
   $('home-preview-inputs').textContent = ''; $('home-preview-metrics').replaceChildren();
+  $('home-preview-open').hidden = true; $('home-experiment-figure').hidden = true;
+  chart.render([], {}); $('home-experiment-readout').textContent = '';
+}
+async function calculateExample() {
+  const item = activeExperiment; if (!item) return;
+  const definition = EXPERIMENTS[item.id], revision = ++previewRevision;
+  clearExample(); $('home-experiment-error').textContent = '';
+  try { experimentValue(item.id, $('home-experiment-value').valueAsNumber); }
+  catch (error) {
+    $('home-experiment-value').setAttribute('aria-invalid', 'true');
+    $('home-experiment-error').textContent = error.message;
+    $('home-preview-note').textContent = 'Corrige el parámetro para calcular y continuar. No quedan resultados anteriores vigentes.';
+    $('home-preview').setAttribute('aria-busy', 'false'); return;
+  }
+  $('home-experiment-value').setAttribute('aria-invalid', 'false');
+  $('home-preview').setAttribute('aria-busy', 'true');
   $('home-preview-note').textContent = 'Calculando con el modelo del laboratorio…';
-  $('home-preview-open').href = item.href;
-  panel.scrollIntoView({ block: 'nearest', behavior: motion.matches ? 'instant' : 'smooth' });
   try {
-    const result = await previewModel(item.id);
+    if (!curveCache.has(item.id)) curveCache.set(item.id, experimentCurve(item.id).catch(error => { curveCache.delete(item.id); throw error; }));
+    const [result, curve] = await Promise.all([previewModel(item.id, $('home-experiment-value').valueAsNumber), curveCache.get(item.id)]);
+    const link = item.id === 'space' ? '#lab' : await experimentLink(item.id, result, location.href);
     if (revision !== previewRevision) return;
+    experimentResult = result;
     $('home-preview-inputs').textContent = result.inputs;
     for (const [label, value, unit] of result.metrics) {
       const group = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd');
       dt.textContent = label; dd.textContent = `${number(value)} ${unit}`; group.append(dt, dd); $('home-preview-metrics').append(group);
     }
+    chart.render(curve, { x: definition.label, xUnit: definition.unit, y: definition.y, yUnit: definition.yUnit, sampleLabel: 'Caso' });
+    $('home-experiment-figure').hidden = false;
     $('home-preview-note').textContent = result.note;
+    $('home-preview-open').href = link;
+    $('home-preview-open').textContent = item.id === 'space' ? 'Aplicar a A y abrir Space Lab →' : 'Continuar este ejemplo →';
+    $('home-preview-open').hidden = item.id === 'space' && document.documentElement.dataset.spaceReady !== 'true';
+    $('home-experiment-transfer').textContent = item.id === 'space'
+      ? 'Aplicación explícita a A; B y guardados se conservan. Tiempo reiniciado.'
+      : 'El enlace carga este escenario, sin sobrescribir guardados. Los paneles complementarios y referencias comienzan con sus valores iniciales.';
   } catch {
-    if (revision === previewRevision) $('home-preview-note').textContent = 'No se pudo cargar el ejemplo. Abre el laboratorio o recarga la página para reintentar.';
-  } finally { if (revision === previewRevision) panel.setAttribute('aria-busy', 'false'); }
+    if (revision === previewRevision) {
+      $('home-preview-note').textContent = 'No se pudo cargar el ejemplo. Abre el laboratorio o recarga la página para reintentar.';
+      $('home-preview-open').href = item.href; $('home-preview-open').textContent = 'Abrir laboratorio sin ejemplo →'; $('home-preview-open').hidden = false;
+      $('home-experiment-transfer').textContent = 'No se transferirá ningún ejemplo.';
+    }
+  } finally { if (revision === previewRevision) $('home-preview').setAttribute('aria-busy', 'false'); }
+}
+$('home-cards').addEventListener('click', event => {
+  const button = event.target.closest('[data-home-preview]'); if (!button) return;
+  closePreview(); previewTrigger = button;
+  activeExperiment = CATALOG.find(entry => entry.id === button.dataset.homePreview);
+  const definition = EXPERIMENTS[activeExperiment.id];
+  $('home-preview').hidden = false; button.setAttribute('aria-expanded', 'true');
+  $('home-preview-title').textContent = activeExperiment.title;
+  $('home-preview-question').textContent = definition.question;
+  $('home-experiment-label').textContent = `${definition.label} (${definition.unit})`;
+  const input = $('home-experiment-value'); input.min = definition.min; input.max = definition.max; input.value = definition.value;
+  $('home-experiment-limits').textContent = `${definition.min}–${definition.max} ${definition.unit}. Los demás parámetros permanecen fijos.`;
+  $('home-experiment-controls').hidden = false;
+  calculateExample();
+  input.focus({ preventScroll: true });
+  $('home-preview').scrollIntoView({ block: 'start', behavior: motion.matches ? 'instant' : 'smooth' });
+});
+$('home-experiment-value').addEventListener('input', calculateExample);
+$('home-experiment-reset').addEventListener('click', () => {
+  if (!activeExperiment) return;
+  $('home-experiment-value').value = EXPERIMENTS[activeExperiment.id].value; calculateExample();
+});
+$('home-preview-open').addEventListener('click', event => {
+  if (activeExperiment?.id !== 'space' || !experimentResult) return;
+  event.preventDefault();
+  document.dispatchEvent(new CustomEvent('aerolab:home-orbit', { detail: { configuration: { ...experimentResult.configuration } } }));
+});
+document.addEventListener('aerolab:space-ready', () => {
+  if (activeExperiment?.id === 'space' && experimentResult) $('home-preview-open').hidden = false;
 });
 update(); $('home-play').disabled = false;
 $('home-feedback').textContent = 'Demostración pausada. Cambia la forma o recorre una vuelta.';

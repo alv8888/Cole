@@ -203,3 +203,18 @@ PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run
 El entorno usa Chromium instalado en `/usr/bin/chromium` y Playwright fuera del checkout. El runner crea y cierra su servidor propio, verifica HTTP y propaga fallos. La nueva suite se incorpora automáticamente al job CI existente. Ejemplos de referencia: a e=0, velocidad 7,6725985878 km/s y periodo 5544,85513975 s; a e=0,5 el periodo aumenta por 2^(3/2). Aircraft: 14700 N de sustentación y 11767,98 N de peso. Rocket: 1200 ln(3) = 1318,3347464 m/s de Δv ideal. Los valores se calculan con los mismos modelos del laboratorio, sin sustituir datos de una misión real.
 
 Durante las pruebas se detectó y corrigió una congelación de la reproducción al acumular tiempo a través del slider redondeado y una pausa tardía al quedar solo un borde de la demo visible. El reloj ahora mantiene precisión completa y pausa al quedar menos del 15 % de la demo en el viewport. La suite de inicio se repitió tras las correcciones. Capturas `/tmp/aerolab-015-home-{desktop,mobile}.png` y `/tmp/aerolab-015-catalog-{desktop,mobile}.png` inspeccionadas. No se afirma validación con Safari/Firefox, hardware móvil real, Lighthouse ni auditoría WCAG completa.
+
+## Entrega 16 · Experimentos del catálogo (0.16)
+
+108 pruebas unitarias aprobadas, 0 fallos y 0 omitidas: 104 anteriores y 4 nuevas. Estas verifican la ley de escala orbital, L proporcional a V² con peso constante, ve y Tsiolkovsky con propelente variable/flujo derivado, conversión mm/m y relación rigidez/masa sin mutar los datos originales, extremos y 21 casos finitos de cada curva y los contratos completos de las URL de continuación.
+
+```sh
+node --test --test-isolation=none tests/*.test.js
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser
+```
+
+13 suites Chromium aprobadas, 0 fallos; 109 grupos de comprobaciones (104 previos más 5 nuevos). La nueva suite comprueba edición/restablecimiento, valor independiente de sustentación, ejes/unidades/cursor por teclado, foco al abrir, entradas inválidas y limpieza de resultados, ediciones rápidas y enlace vigente, continuación en Aircraft/Rocket/Structure, aplicación exclusiva a A en Space, guardados reales distintos del experimento y recuperación mediante Cargar, alcance correcto de los paneles complementarios, ausencia de errores JavaScript, reflujo 320–1440 px y zoom CSS 200 %. Las suites anteriores conservan modelos, exportaciones, enlaces, escenarios, 3D, datos compartidos y fallos de WebGL/almacenamiento.
+
+Al comprobar persistencia se distinguen los guardados explícitos de las tres instantáneas de intercambio existentes: `aerolab.bridge.snapshot.aircraft.v1`, `.calculator.v1` y `.launch.v1`. Los destinos ya actualizaban estas claves al cambiar el caso activo; esta entrega conserva ese comportamiento. Las demás claves se comparan íntegramente y se verifica además la carga de configuraciones previamente guardadas. No se modificó el puente para ocultar esta actualización.
+
+Capturas finales `/tmp/aerolab-016-experiment-desktop.png` y `/tmp/aerolab-016-experiment-mobile.png` inspeccionadas. Los modelos matemáticos originales no cambiaron; las curvas son casos independientes y no añaden validación experimental ni una simulación de motor fijo. No se afirma comprobación en Firefox/Safari, hardware físico, Lighthouse ni conformidad WCAG completa.

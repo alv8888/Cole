@@ -1,8 +1,10 @@
-# AEROLAB 0.15 · Space, Aircraft, Rocket y Structure Lab
+# AEROLAB 0.16 · Space, Aircraft, Rocket y Structure Lab
 
 Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y visores reales de vehículos con Three.js/WebGL. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab incorpora voladizos rectangulares y compresión tubular, con propiedades declaradas y coeficientes frente a referencias resistentes. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md), [ENGINEERING.md](docs/ENGINEERING.md) y [STRUCTURE.md](docs/STRUCTURE.md).
 
-La entrada incorpora una demostración orbital calculada y un catálogo temático con ejemplos de los cuatro laboratorios. Los visores y controles internos se conservan. Consulta [la entrega de inicio y exploración](docs/HOME.md) para el diagnóstico, archivos, límites y pruebas manuales.
+La entrada incorpora una demostración orbital calculada y un catálogo temático con experimentos de una variable, curvas calculadas y continuidad hacia los cuatro laboratorios. Los visores y controles internos se conservan. Consulta [la entrega de inicio y exploración](docs/HOME.md) para el diagnóstico, archivos, límites y pruebas manuales.
+
+La ampliación de experimentos se documenta en [EXPERIMENTS.md](docs/EXPERIMENTS.md): rangos, hipótesis, enlaces y pruebas manuales.
 
 ## Ejecutar
 

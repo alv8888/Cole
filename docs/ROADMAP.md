@@ -128,3 +128,9 @@ Validación: 101 pruebas unitarias y 96 grupos Chromium. Problemas resueltos ant
 ## Entrega 15 · Inicio y exploración (0.15)
 
 Diagnóstico presentado antes de editar: checkout limpio y cuatro módulos disponibles, portada débil y carga orbital 3D prematura. Se implementa hero orbital calculado con el modelo existente, catálogo por datos con filtros temáticos y ejemplos numéricos a demanda, regreso desde los laboratorios y carga orbital WebGL al acercarse al visor. La aplicación de la demo modifica A explícitamente, conservando B y guardados. No se reescriben páginas internas ni se agregan dependencias. HOME.md registra las fases, estructura, ejecución, pruebas manuales y pendientes de validación externa.
+
+## Entrega 16 · Experimentos y continuidad (0.16)
+
+Se amplían los ejemplos del catálogo con una variable por módulo, unidades/límites, cálculos vigentes, curva de 21 casos, cursor accesible, restablecimiento y continuidad del caso en el laboratorio completo. Los enlaces reutilizan la validación versionada y las configuraciones guardadas se conservan; Space cambia solo A. Rocket diferencia el experimento ideal del panel radial, que empieza sin trayectoria calculada. Ningún modelo físico anterior se reescribe y no se agrega una dependencia. EXPERIMENTS.md documenta las ecuaciones, condiciones fijas, archivos y pruebas manuales.
+
+Validación: 108 pruebas unitarias y 109 grupos Chromium en 13 suites, sin fallos. Se comprueban guardados reales y las instantáneas de intercambio se distinguen explícitamente de ellos. Pendientes: validación con usuarios, navegadores/dispositivos adicionales, accesibilidad completa y benchmark. Las curvas no predicen incertidumbre, CFD ni FEM 3D.
