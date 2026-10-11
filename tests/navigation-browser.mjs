@@ -15,7 +15,7 @@ try {
   await page.keyboard.press('End');assert.ok(await page.locator('#panel-theory').isVisible());
   await page.keyboard.press('Home');assert.equal(await page.locator(input).inputValue(),value);
   if(lab==='aircraft'){await page.locator('#capture-reference').click();await page.locator('#eng-area').fill('26');}
-  if(lab==='rocket'){await page.locator('#eng-dryMass').fill('135');await page.locator('#launch-run').click();await page.locator('#launch-timeline').fill('42');}
+  if(lab==='rocket'){await page.locator('#eng-thrustPercent').fill('70');await page.locator('#eng-dryMass').fill('135');await page.locator('#launch-run').click();await page.locator('#launch-timeline').fill('42');}
   if(lab==='space'){await page.locator('#phase').fill('42');await page.locator('#globe-configuration').selectOption('1');}
   const snapshot=lab==='rocket'?await page.locator('#launch-state').textContent():null;
   await page.locator('#share-simulation').click();await page.waitForFunction(()=>document.querySelector('#share-status').textContent.includes('copiado'));
@@ -24,7 +24,7 @@ try {
   const storage=await page.evaluate(()=>JSON.stringify(localStorage));await page.goto(link);await page.waitForFunction(()=>document.querySelector('#share-status').textContent.includes('recuperada'));
   assert.equal(await page.locator(input).inputValue(),lab==='aircraft'?'26':value);
   assert.equal(await page.evaluate(()=>JSON.stringify(localStorage)),storage);
-  if(lab==='rocket'){assert.equal(await page.locator('#launch-state').textContent(),snapshot);assert.equal(await page.locator('#launch-play').textContent(),'Reproducir');assert.equal(await page.locator('#eng-dryMass').inputValue(),'135');}
+  if(lab==='rocket'){assert.equal(await page.locator('#launch-state').textContent(),snapshot);assert.equal(await page.locator('#launch-play').textContent(),'Reproducir');assert.equal(await page.locator('#eng-dryMass').inputValue(),'135');assert.equal(await page.locator('#eng-thrustPercent').inputValue(),'70');}
   if(lab==='space'){assert.equal(await page.locator('#phase').inputValue(),'42');assert.equal(await page.locator('#play').textContent(),'Reproducir');}
   if(lab==='aircraft'){await page.locator('#tab-analysis').click();assert.match(await page.locator('#engineering-results').innerText(),/22\.050,000/);}
   await page.locator('.method-link').click();assert.ok(await page.locator('#panel-theory').isVisible());

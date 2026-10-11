@@ -962,3 +962,9 @@ body[data-lab=aircraft] .engineering-visual { position: static; }
   .lab-toolbar [role="tab"] { flex: 1 1 100%; text-align: left; }
   #share-simulation { width: 100%; }
 }
+
+/* Native perspective vehicle viewers, matching the spatial dark palette. */
+#engineering-canvas { display:block; width:100%; height:420px; touch-action:none; background:#080f1c; border:1px solid #274052; border-radius:12px; }
+.vehicle-toolbar { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.vehicle-toolbar button { font-size:12px; }
+.vehicle-legend { border-left:2px solid #8edfcc; padding-left:12px; }

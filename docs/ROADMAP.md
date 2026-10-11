@@ -97,3 +97,7 @@ Fases 5/6 pendientes: trayectoria no radial validada, pruebas en otros navegador
 ## Entrega 9 · Navegación y enlaces (0.9)
 
 Fases 1–4 completadas: tres pestañas por laboratorio, teclado y anclas, pausa al ocultar simulaciones, URL versionada con parámetros/referencias/tiempo y recuperación conjunta validada antes de aplicar. No cambia la física ni agrega dependencias. 61 pruebas unitarias y 56 grupos Chromium pasaron. Problemas tratados: conservar nodos/listeners, evitar restauraciones parciales y gestionar el portapapeles bloqueado. Pendientes: otros navegadores, accesibilidad completa y hosting HTTPS. Véase NAVIGATION.md.
+
+## Entrega 10 · Vehículos WebGL (0.10)
+
+Fases 1–4 completadas: sustitución de proyección manual por Three.js, OrbitControls, zoom/pan y teclado; flechas desde CG con componentes válidos; porcentaje de empuje real en calculadora ideal y pluma ilustrativa controlada. Reutiliza dependencia local. 65 pruebas unitarias y 64 grupos Chromium; giro, imagen, rueda/pan, vectores, animación, persistencia/enlaces, móviles y fallo/restauración de WebGL. Problemas resueltos: sin direcciones inventadas con viento lateral, porcentaje diferente del consumo y compatibilidad de guardados. Pendiente hardware, otros navegadores, accesibilidad completa y hosting. Detalles: VEHICLE-VIEWS.md.

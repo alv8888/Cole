@@ -19,7 +19,7 @@ export const AIRCRAFT_RANGES = Object.freeze({
 });
 export const ROCKET_RANGES = Object.freeze({
   dryMass: [1, 100000], propellant: [1, 1000000], thrust: [1, 10000000], burnTime: [1, 1000],
-  gravity: [0, 20], burnPercent: [0, 100], diameter: [0.2, 10], length: [1, 80],
+  thrustPercent: [1, 100], gravity: [0, 20], burnPercent: [0, 100], diameter: [0.2, 10], length: [1, 80],
 });
 
 export function aircraft(config) {
@@ -57,19 +57,20 @@ export function aircraft(config) {
 }
 
 export function rocket(config) {
-  requireRanges(config, ROCKET_RANGES);
-  const c = config;
+  const c = {...config, thrustPercent:config.thrustPercent===undefined?100:config.thrustPercent};
+  requireRanges(c, ROCKET_RANGES);
+  const appliedThrust=c.thrust*c.thrustPercent/100;
   const initialMass = c.dryMass + c.propellant;
   const massFlow = c.propellant / c.burnTime;
-  const exhaustVelocity = c.thrust / massFlow;
+  const exhaustVelocity = appliedThrust / massFlow;
   const deltaV = exhaustVelocity * Math.log1p(c.propellant / c.dryMass);
   const time = c.burnTime * c.burnPercent / 100;
   const consumed = c.propellant * c.burnPercent / 100;
   const currentMass = initialMass - consumed;
   const currentDeltaV = exhaustVelocity * Math.log(initialMass / currentMass);
-  return Object.freeze({ initialMass, finalMass: c.dryMass, massFlow, exhaustVelocity,
+  return Object.freeze({ appliedThrust, initialMass, finalMass: c.dryMass, massFlow, exhaustVelocity,
     specificImpulse: exhaustVelocity / G0, deltaV, time, consumed, currentMass, currentDeltaV,
-    thrustWeight: c.gravity === 0 ? null : c.thrust / (initialMass * c.gravity),
-    acceleration: c.thrust / currentMass - c.gravity,
+    thrustWeight: c.gravity === 0 ? null : appliedThrust / (initialMass * c.gravity),
+    acceleration: appliedThrust / currentMass - c.gravity,
     gravityPenalty: c.gravity * time, verticalDeltaV: currentDeltaV - c.gravity * time });
 }

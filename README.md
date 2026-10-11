@@ -1,6 +1,6 @@
-# AEROLAB 0.9 · Space, Aircraft y Rocket Lab
+# AEROLAB 0.10 · Space, Aircraft y Rocket Lab
 
-Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y geometría 3D con proyección en Canvas 2D. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
+Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y visores reales de vehículos con Three.js/WebGL. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
 
 ## Ejecutar
 
@@ -56,7 +56,7 @@ Cole/
 │   ├── engineering/
 │   │   ├── models.js          # Modelos puros Aircraft/Rocket y validación SI
 │   │   ├── profiles.js        # Parámetros, unidades, supuestos y advertencias
-│   │   ├── view3d.js          # Geometría, proyección ortográfica y cámara
+│   │   ├── view3d.js          # Adaptador del visor WebGL de vehículos
 │   │   └── ui.js              # Interfaz, gráficas, comparación y guardado separado
 │   ├── app.js                 # Eventos, estado, comparación y reloj de animación
 │   ├── data.js                # Presets declarados y valores iniciales
@@ -119,7 +119,7 @@ Arquitectura añadida: `src/rocket/{model,storage,visualization,ui}.js`, `tests/
 
 ## Aircraft y calculadora anterior de Rocket
 
-Abre Aircraft Lab o Rocket Lab desde el selector, o visita `/aircraft.html` y `/rocket.html`. Modifica los parámetros: cada campo muestra unidades y límites. Gira la geometría arrastrando el Canvas o con los controles de cámara, accesibles por teclado. La visualización usa vértices 3D con proyección ortográfica; no hace CFD ni certifica un diseño.
+Abre Aircraft Lab o Rocket Lab desde el selector, o visita `/aircraft.html` y `/rocket.html`. Modifica los parámetros: cada campo muestra unidades y límites. Gira la geometría arrastrando el Canvas o con los controles de cámara, accesibles por teclado. La visualización usa Three.js/WebGL y cámara perspectiva; no hace CFD ni certifica un diseño.
 
 - Aircraft calcula velocidad relativa al aire con tres componentes de viento uniforme, sustentación y resistencia con coeficientes impuestos, geometría trapezoidal, flexión de una viga alar ideal y potencia/emisiones según un factor hipotético elegido. El CG solo mueve un marcador, sin calcular estabilidad. La gráfica muestra sustentación frente a velocidad con coeficientes fijos.
 - Rocket calcula balance de masa, flujo constante, velocidad efectiva de escape y Δv de Tsiolkovski. El porcentaje de funcionamiento permite inspeccionar estados; no es una trayectoria de lanzamiento. La corrección vertical por gravedad supone vuelo libre ya iniciado, vacío y gravedad constante. Diámetro y longitud solo modifican el dibujo.
@@ -160,3 +160,7 @@ Para actualizar modelos, conserva pruebas de regresión y migra o cambia la vers
 ## Pestañas y simulaciones compartibles · versión 0.9
 
 Cada laboratorio separa configuración, análisis y teoría mediante pestañas con teclado. **Copiar enlace de simulación** guarda parámetros, referencias e instante en la URL; el enlace se abre pausado sin sobrescribir guardados. Si el navegador bloquea el portapapeles, muestra copia manual. Alcance, archivos y pruebas: [NAVIGATION.md](docs/NAVIGATION.md).
+
+## Visores de vehículos · versión 0.10
+
+Aircraft y la calculadora de una etapa de Rocket utilizan Three.js con cámara orbital 360°, rueda/pinza para zoom, desplazamiento y controles de teclado. Aircraft muestra vectores de fuerzas desde el CG; con viento lateral oculta las direcciones no calculadas. Rocket añade porcentaje de empuje aplicado (1–100 %) y una pluma ilustrativa animada que se apaga al agotarse el propelente. Se reutiliza Three.js local, sin nuevas dependencias. Detalles, ecuaciones y pruebas: [VEHICLE-VIEWS.md](docs/VEHICLE-VIEWS.md).

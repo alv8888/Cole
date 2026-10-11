@@ -4,7 +4,7 @@
 
 Aircraft y Rocket son módulos nuevos, con páginas y guardados separados de Space Lab. Los escenarios iniciales son hipotéticos, no reproducciones de vehículos reales. Se distinguen cálculos físicos simplificados y geometría tridimensional ilustrativa. Ningún módulo constituye CFD, certificación estructural, validación de estabilidad, una herramienta profesional de lanzamiento o un análisis completo de ciclo de vida.
 
-La arquitectura mantiene modelos puros en `src/engineering/models.js`, campos y supuestos en `profiles.js`, interfaz en `ui.js` y geometría/proyección en `view3d.js`. Los modelos se prueban sin DOM o Canvas. No se añadieron bibliotecas: Canvas 2D puede proyectar y ordenar los polígonos 3D de estas geometrías pequeñas. No hay integrador numérico de vuelo ni trayectoria.
+La arquitectura mantiene modelos puros en `src/engineering/models.js`, campos y supuestos en `profiles.js` e interfaz en `ui.js`. Desde 0.10, `view3d.js` carga un visor Three.js/WebGL independiente; `vehicle-geometry.js` separa CG y vectores calculados, y `vehicle-viewer.js` contiene escena, cámara y pluma. Se reutiliza Three.js local. Los modelos se prueban sin DOM ni WebGL. La calculadora de una etapa no integra una trayectoria; el lanzamiento multietapa tiene su propio integrador y parámetros.
 
 ## Aircraft Lab
 
@@ -50,7 +50,7 @@ Caso inicial: mseca=100 kg, mprop=200 kg, T=6000 N, tfunc=40 s. m₀=300 kg, ṁ
 
 ## 3D, reglas y precisión
 
-Se construyen vértices en tres coordenadas, se rotan y se proyectan ortográficamente con ordenado de profundidad por polígonos. Es una visualización geométrica auténticamente tridimensional en un lienzo 2D, sin motor WebGL. Las caras, colores y encuadre son ilustrativos. Rotar no altera el estado físico. Se puede arrastrar o usar los rangos de cámara con teclado. No hay iluminación físicamente basada, detección de colisiones ni deformación 3D.
+Desde 0.10 se renderizan mallas, iluminación, flechas y etiquetas con Three.js/WebGL y cámara perspectiva. OrbitControls permite giro, zoom y desplazamiento; hay controles de teclado. Las fuerzas se trasladan visualmente al CG sin calcular momentos. El dibujo no es CFD ni CAD certificado. El porcentaje de empuje de la calculadora de una etapa modifica T=Tnominal·porcentaje/100 manteniendo el flujo impuesto; la pluma es ilustrativa y se apaga al terminar el funcionamiento. Ver [VEHICLE-VIEWS.md](VEHICLE-VIEWS.md) para alcance, compatibilidad y pruebas.
 
 Los avisos son reglas de validez del modelo, no normativa de aeronavegabilidad, permiso de vuelo ni aprobación de seguridad. Se requiere normativa de una jurisdicción y análisis especializado para tales objetivos. Los cálculos usan doble precisión y las tablas presentan tres decimales; ese formato no es una garantía de exactitud física.
 

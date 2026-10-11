@@ -140,3 +140,7 @@ GPU física, restauración de contexto, Safari, Firefox, dispositivos físicos, 
 ## Entrega 9 · Pestañas y URL
 
 61 pruebas unitarias y 56 grupos Chromium pasaron. Nuevas pruebas: `tests/navigation.test.js` (4) y `tests/navigation-browser.mjs` (5). Validan teclado, panel activo único, cambios conservados, enlaces a teoría, URL con referencias/tiempo, portapapeles real, copia manual y rechazo atómico sin sobrescribir localStorage. Se repitieron las seis suites de navegador, incluyendo modelos previos y Three.js. Los selectores de controles utilizan la pestaña apropiada; esperar tablas ocultas usa estado attached. Ver [NAVIGATION.md](NAVIGATION.md) para comandos y pruebas manuales.
+
+## Entrega 10 · Visores de vehículos
+
+65 pruebas unitarias y 64 grupos Chromium pasaron. Nuevos archivos: `tests/vehicle-geometry.test.js` (4 pruebas) y `tests/vehicle-browser.mjs` (8 grupos). Se comprobó render WebGL real, cambios de imagen al girar/animar, rueda, pan con botón derecho, cámara por teclado, vectores/CG, viento lateral y entradas inválidas, empuje porcentual, apagado, guardado, enlaces y móviles. La pérdida de contexto deshabilita cámara y conserva cálculos; restaurarlo recupera el visor. Sin WebGL, las tablas y SVG siguen operativos. Todas las suites de regresión se ejecutaron. Capturas `/tmp/aerolab-vehicle-{aircraft,rocket}-{desktop,mobile}.png` inspeccionadas. Comandos y pruebas manuales en VEHICLE-VIEWS.md.

@@ -18,7 +18,7 @@ $('engineering-equations').textContent=profile.equations;
 $('engineering-limits').textContent=profile.limits;
 const view=createView3D($('engineering-canvas'),$('view-yaw'),$('view-pitch'),kind);
 const forces=kind==='aircraft'?createAircraftForces($('aircraft-side'),$('aircraft-forces'),$('aircraft-balance'),$('aircraft-flow-toggle')):null;
-function fill(config){profile.fields.forEach(field=>$(`eng-${field.key}`).value=config[field.key]);if(kind==='aircraft')$('aircraft-drag-mode').value=config.dragMode;}
+function fill(config){profile.fields.forEach(field=>$(`eng-${field.key}`).value=config[field.key]??(field.key==='thrustPercent'?100:''));if(kind==='aircraft')$('aircraft-drag-mode').value=config.dragMode;}
 
 function read(){return {...Object.fromEntries(profile.fields.map(field=>[field.key,$(`eng-${field.key}`).valueAsNumber])),...(kind==='aircraft'?{dragMode:$('aircraft-drag-mode').value}:{})};}
 function status(message){$('engineering-status').textContent=message;}
@@ -89,19 +89,19 @@ $('capture-reference').addEventListener('click',()=>{reference={...current};upda
 $('clear-reference').addEventListener('click',()=>{reference=null;update();});
 $('engineering-reset').addEventListener('click',()=>{fill(defaults());update();status('Parámetros iniciales restaurados. La referencia se conserva.');});
 const storageKey=`aerolab.${kind}.v1`;
-$('engineering-save').addEventListener('click',()=>{try{localStorage.setItem(storageKey,JSON.stringify({version:kind==='aircraft'?2:1,module:kind,configuration:current}));status('Configuración guardada en este navegador.');}catch(error){status(`No se pudo guardar: ${error.message}`);}});
+$('engineering-save').addEventListener('click',()=>{try{localStorage.setItem(storageKey,JSON.stringify({version:2,module:kind,configuration:current}));status('Configuración guardada en este navegador.');}catch(error){status(`No se pudo guardar: ${error.message}`);}});
 $('engineering-load').addEventListener('click',()=>{
-  try{const raw=localStorage.getItem(storageKey);if(!raw)return status('No hay guardado para este módulo.');const saved=JSON.parse(raw);let loaded=saved.configuration,migrated=false;if(kind==='aircraft'){const decoded=decodeAircraftRecord(saved,profile.compute);loaded=decoded.configuration;migrated=decoded.migrated;}else{if(saved.version!==1||saved.module!==kind)throw new Error('Formato incompatible.');profile.compute(loaded);}fill(loaded);update();status(migrated?'Guardado anterior cargado: empuje hipotético de 1200 N y polar original; se conserva el guardado anterior hasta pulsar Guardar.':'Configuración cargada.');}
+  try{const raw=localStorage.getItem(storageKey);if(!raw)return status('No hay guardado para este módulo.');const saved=JSON.parse(raw);let loaded=saved.configuration,migrated=false;if(kind==='aircraft'){const decoded=decodeAircraftRecord(saved,profile.compute);loaded=decoded.configuration;migrated=decoded.migrated;}else{if(![1,2].includes(saved.version)||saved.module!==kind)throw new Error('Formato incompatible.');if(saved.version===2&&loaded?.thrustPercent===undefined)throw new Error('Falta el porcentaje de empuje.');profile.compute(loaded);}fill(loaded);update();status(migrated?'Guardado anterior cargado: empuje hipotético de 1200 N y polar original; se conserva el guardado anterior hasta pulsar Guardar.':'Configuración cargada.');}
   catch(error){status(`No se pudo cargar: ${error.message}`);}
 });
-$('engineering-export').addEventListener('click',()=>{try{downloadFile(JSON.stringify({version:kind==='aircraft'?2:1,module:kind,configuration:current},null,2),`aerolab-${kind}.json`,'application/json');status('JSON generado con parámetros y módulo identificados.');}catch(error){status(error.message);}});
+$('engineering-export').addEventListener('click',()=>{try{downloadFile(JSON.stringify({version:2,module:kind,configuration:current},null,2),`aerolab-${kind}.json`,'application/json');status('JSON generado con parámetros y módulo identificados.');}catch(error){status(error.message);}});
 
 registerSharePart(kind==='aircraft'?'aircraft':'calculator', {
   get: () => ({ configuration:read(), reference, yaw:$('view-yaw').valueAsNumber, pitch:$('view-pitch').valueAsNumber }),
   validate(state) {
     const validateConfig = config => {
       if (!config || typeof config !== 'object') throw new Error('Configuración incompleta.');
-      profile.fields.forEach(field=>numberIn(config[field.key],...profile.ranges[field.key]));
+      profile.fields.forEach(field=>numberIn(config[field.key]===undefined&&field.key==='thrustPercent'?100:config[field.key],...profile.ranges[field.key]));
       if(kind==='aircraft')choice(config.dragMode,['polar','direct']);
       profile.compute(config);
     };
