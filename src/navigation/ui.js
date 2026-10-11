@@ -27,6 +27,8 @@ if (lab === 'space') {
   move('.results-panel, .sensitivity-panel, .analysis-panel, .prediction-panel', 1);
   move('#model', 2);
   root.remove();
+} else if (lab === 'structure') {
+  ['simulation','analysis','theory'].forEach((name,index)=>move(`[data-structure-panel="${name}"]`,index));
 } else {
   move('#launch-lab, #rocket-globe, .legacy-rocket-title, .legacy-rocket-title + .helper, .engineering-layout', 0);
   move('.results-panel', 1);
@@ -64,7 +66,11 @@ function revealHash() {
 window.addEventListener('hashchange', revealHash);
 document.addEventListener('click', event => {
   const anchor = event.target.closest('a[href^="#"]');
-  if (anchor && anchor.hash === location.hash) revealHash();
+  if (!anchor) return;
+  const target = document.getElementById(anchor.hash.slice(1));
+  const index = panels.findIndex(panel => target && panel.contains(target));
+  if (index >= 0) { select(index); if(target.tagName==='DETAILS')target.open=true; }
+  if (anchor.hash === location.hash) revealHash();
 });
 select(0); revealHash();
 const status = message => { document.getElementById('share-status').textContent = message; };
@@ -76,7 +82,7 @@ document.getElementById('share-simulation').addEventListener('click', async () =
     const link = encodeLink(location.href, lab, state);
     history.replaceState(null, '', link);
     document.getElementById('share-url').value = link;
-    try { await navigator.clipboard.writeText(link); status('Enlace copiado. Se abrirá con los parámetros actuales y la reproducción pausada.'); }
+    try { await navigator.clipboard.writeText(link); status(lab==='structure'?'Enlace copiado. Incluye parámetros, referencia y escala del diagrama.':'Enlace copiado. Se abrirá con los parámetros actuales y la reproducción pausada.'); }
     catch { document.getElementById('share-manual').hidden = false; document.getElementById('share-url').select(); status('Enlace generado. El navegador no permitió copiarlo: selecciona el enlace y cópialo manualmente.'); }
   } catch (error) { status(`No se pudo compartir: ${error.message}`); }
 });
@@ -90,6 +96,6 @@ export function registerSharePart(key, adapter) {
     // Validate every independent configuration before applying any of them.
     expected.forEach(name => parts.get(name).validate(state[name]));
     expected.forEach(name => parts.get(name).apply(state[name]));
-    status('Simulación recuperada del enlace. Reproducción pausada; guardados locales conservados.');
+    status(lab==='structure'?'Configuración estructural recuperada del enlace. Guardados locales conservados.':'Simulación recuperada del enlace. Reproducción pausada; guardados locales conservados.');
   } catch (error) { status(`Enlace rechazado; se conservan los valores iniciales: ${error.message}`); }
 }

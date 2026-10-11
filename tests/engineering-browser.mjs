@@ -62,7 +62,7 @@ try{
         await page.setViewportSize({width,height:900});
         assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${kind} overflow ${width}`);
         assert.equal(await page.locator('input:not([aria-describedby])').count(),0);
-        assert.equal(await page.locator('nav.modules a').count(),3);
+        assert.equal(await page.locator('nav.modules a').count(),4);
       }
       await page.setViewportSize({width:1440,height:1000});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:`/tmp/aerolab-${kind}-desktop.png`,fullPage:true});
       await page.setViewportSize({width:390,height:844});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:`/tmp/aerolab-${kind}-mobile.png`,fullPage:true});

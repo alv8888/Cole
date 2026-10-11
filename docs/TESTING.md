@@ -144,3 +144,7 @@ GPU física, restauración de contexto, Safari, Firefox, dispositivos físicos, 
 ## Entrega 10 · Visores de vehículos
 
 65 pruebas unitarias y 64 grupos Chromium pasaron. Nuevos archivos: `tests/vehicle-geometry.test.js` (4 pruebas) y `tests/vehicle-browser.mjs` (8 grupos). Se comprobó render WebGL real, cambios de imagen al girar/animar, rueda, pan con botón derecho, cámara por teclado, vectores/CG, viento lateral y entradas inválidas, empuje porcentual, apagado, guardado, enlaces y móviles. La pérdida de contexto deshabilita cámara y conserva cálculos; restaurarlo recupera el visor. Sin WebGL, las tablas y SVG siguen operativos. Todas las suites de regresión se ejecutaron. Capturas `/tmp/aerolab-vehicle-{aircraft,rocket}-{desktop,mobile}.png` inspeccionadas. Comandos y pruebas manuales en VEHICLE-VIEWS.md.
+
+## Entrega 11 · Structure Lab
+
+73 pruebas unitarias y 72 grupos Chromium pasaron: ocho pruebas nuevas de estructura y ocho grupos nuevos de navegador, más todas las suites anteriores. Referencias Python independientes para voladizo puntual/uniforme y tubo comprimido; comprobación dimensional, escalas, carga nula, casos inválidos/extremos, aplicación de Euler y almacenamiento exclusivo. Navegador verifica formularios, materiales/propiedades, apoyo, dibujos, comparación, exportaciones reales, URL, menús y móvil 320–1440 px. Capturas `/tmp/aerolab-structure-desktop.png` y `/tmp/aerolab-structure-mobile.png` inspeccionadas. No hay validación experimental ni certificación de materiales/estructuras. Instrucciones: STRUCTURE.md.

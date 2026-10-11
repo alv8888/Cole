@@ -1,6 +1,6 @@
-# AEROLAB 0.10 · Space, Aircraft y Rocket Lab
+# AEROLAB 0.11 · Space, Aircraft, Rocket y Structure Lab
 
-Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y visores reales de vehículos con Three.js/WebGL. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab independiente permanece pendiente. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md) y [ENGINEERING.md](docs/ENGINEERING.md).
+Plataforma educativa con Space Lab (órbitas de dos cuerpos), Aircraft Lab (perfil lateral, balance de fuerzas y viga alar simplificada) y Rocket Lab (balance de masa, Δv ideal y lanzamiento radial multietapa). HTML semántico, CSS, JavaScript modular, SVG y visores reales de vehículos con Three.js/WebGL. Three.js 0.180.0 se distribuye localmente para las nuevas vistas WebGL. Sin API, base de datos, compilación ni cuentas; no hace falta instalar paquetes para ejecutar. Structure Lab incorpora voladizos rectangulares y compresión tubular, con propiedades declaradas y coeficientes frente a referencias resistentes. Los modelos y sus límites se documentan en [MODEL.md](docs/MODEL.md), [ENGINEERING.md](docs/ENGINEERING.md) y [STRUCTURE.md](docs/STRUCTURE.md).
 
 ## Ejecutar
 
@@ -164,3 +164,7 @@ Cada laboratorio separa configuración, análisis y teoría mediante pestañas c
 ## Visores de vehículos · versión 0.10
 
 Aircraft y la calculadora de una etapa de Rocket utilizan Three.js con cámara orbital 360°, rueda/pinza para zoom, desplazamiento y controles de teclado. Aircraft muestra vectores de fuerzas desde el CG; con viento lateral oculta las direcciones no calculadas. Rocket añade porcentaje de empuje aplicado (1–100 %) y una pluma ilustrativa animada que se apaga al agotarse el propelente. Se reutiliza Three.js local, sin nuevas dependencias. Detalles, ecuaciones y pruebas: [VEHICLE-VIEWS.md](docs/VEHICLE-VIEWS.md).
+
+## Structure Lab · versión 0.11
+
+Abre `structure.html` desde cualquiera de los cuatro menús. Selecciona material y carga, configura geometría/propiedades y consulta esfuerzo, coeficiente material, deflexión de voladizo o acortamiento axial. Hay diagramas SVG, filtro de aplicabilidad de Euler, comparación, guardado exclusivo, exportación JSON/CSV y enlaces compartibles. Carbono utiliza un laminado hipotético con resistencias supuestas, sin afirmar un límite elástico. Archivos, casos conocidos, pruebas y límites: [STRUCTURE.md](docs/STRUCTURE.md).

@@ -968,3 +968,13 @@ body[data-lab=aircraft] .engineering-visual { position: static; }
 .vehicle-toolbar { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
 .vehicle-toolbar button { font-size:12px; }
 .vehicle-legend { border-left:2px solid #8edfcc; padding-left:12px; }
+
+/* Structure Lab keeps the shared technical dark theme and independent panels. */
+#structure-diagram, #structure-displacement, #structure-moment { width:100%; height:auto; display:block; margin:16px 0; }
+.structure-workspace > .panel { padding:20px; }
+.structure-scale { display:flex; align-items:center; gap:10px; }
+.structure-scale input { width:auto; }
+#structure-fields { margin-top:20px; }
+#structure-summary { border-left:2px solid var(--a); padding-left:12px; }
+
+.structure-workspace .action-row + .action-row { margin-top:12px; }

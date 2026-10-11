@@ -331,7 +331,7 @@ try {
       await page.setViewportSize({ width, height: 900 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `overflow at ${width}`);
       assert.ok(await page.locator('#save').isVisible());
-      assert.equal(await page.locator('nav.modules a').count(), 3);
+      assert.equal(await page.locator('nav.modules a').count(), 4);
       assert.equal(await page.locator('input:not([aria-describedby])').count(), 0);
     }
     await page.setViewportSize({ width: 1440, height: 1100 });
