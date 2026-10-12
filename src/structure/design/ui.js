@@ -1,3 +1,4 @@
+import { createConvergenceStudy } from './convergence-ui.js';
 import { createDesignComparison } from './comparison-ui.js';
 import { groupInspector } from '../../navigation/inspector.js';
 import { createCalculationState } from '../../navigation/calculation-state.js';
@@ -29,6 +30,7 @@ let draft = clone(DEFAULT),
   viewer = null,
   playing = false;
 let calculationError = null, visualError = null;
+const convergence=createConvergenceStudy(()=>({result,documentError}));
 const designComparison=createDesignComparison(()=>({result,documentError,object:draft.object}));
 function reviewTarget() {
   const invalid = [...document.querySelectorAll('#design-form [aria-invalid="true"],#design-load-form [aria-invalid="true"],#design-magnification[aria-invalid="true"],#design-fraction[aria-invalid="true"]')];
@@ -413,6 +415,7 @@ function render() {
   );
   exportPreview();
   designComparison.render();
+  convergence.invalidate();
 }
 function update() {
   read();

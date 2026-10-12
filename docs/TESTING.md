@@ -273,3 +273,19 @@ PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run
 La suite nueva captura un diseño real, cambia fuerza 14700→29400 N, verifica masa constante y esfuerzo +100 %, descarga/lee/parsea CSV de 11 columnas y tres métricas, comprueba JSON completos y ausencia de escrituras en localStorage. Restablecer conserva referencia (esfuerzo −50 %), entradas inválidas limpian tabla/CSV y conservan la identificación de referencia. Hay referencias aisladas por objeto, diferencias incompatibles explícitas, borrador inactivo bloqueando captura/CSV sin ocultar resultados activos y vista inválida que no afecta comparación ni revisión FEM. Se comprueban esfera UD sin magnitudes ficticias, eliminación/recarga de referencias, teclado, reflujo 320–1440 px, zoom CSS 200 % y ausencia de errores JavaScript.
 
 Capturas finales `/tmp/aerolab-020-comparison-desktop.png` y `/tmp/aerolab-020-comparison-mobile.png` inspeccionadas. Tabla con desplazamiento local, criterios explícitos y sin desbordamiento global. Se conservan regresiones anteriores de datos, enlaces, guardados, puente de masa y WebGL. Pendientes lectores de pantalla reales, Firefox/Safari, hardware y rendimiento medido; estos casos no demuestran validación experimental ni seguridad.
+
+## Entrega 21 · Refinamiento FEM (0.21)
+
+120 pruebas unitarias aprobadas, 0 fallos/omitidas: 116 anteriores y 4 nuevas. Se comprueba conservación de entradas, objetivos 4/8/16/32/48, reducción de diferencias en el ala variable conocida, sección constante, carga cero y porcentajes indefinidos contra cero, conteo real de secciones de cohete, rechazo de esfera/borradores inválidos y CSV con cinco configuraciones completas. La primera comprobación de cero se ajustó para reconocer −0 IEEE-754 como cero matemático, sin cambiar el modelo.
+
+Las 16 suites Chromium anteriores pasaron (124 grupos). La nueva suite pasó después de corregir su comparación de texto visible: innerText cambia al mostrar una pestaña, aun si los resultados no cambian; se compara textContent y la revisión física. Resultado agregado: 17 suites y 127 grupos aprobados. Tras refinar formato científico y tamaño de gráfica se repitió la nueva suite, tres grupos aprobados. La ejecución completa inicial informó la discrepancia de prueba; no se presenta como una ejecución completa sin fallos.
+
+```sh
+node --test --test-isolation=none tests/*.test.js
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser
+PLAYWRIGHT_MODULE=/tmp/aerolab-browser/node_modules/playwright/index.mjs npm run test:browser -- convergence-browser.mjs
+```
+
+Comprobaciones nuevas: cálculo explícito de cinco soluciones, elementos/resultados/revisión del caso activo intactos, gráfica por teclado con unidades y selección de magnitud, descarga real con cabecera SI/configuraciones, opciones visuales que conservan estudio, cambios físicos que limpian datos/CSV, exclusión de esfera, cohete objetivo 4→real 5, advertencias, residuo en notación científica, disclosure por teclado, reflujo 320–1440 px, zoom CSS 200 % y ausencia de errores JavaScript. Las suites anteriores mantienen guardados, referencias comparativas, enlaces, puentes, modelos y visores.
+
+Capturas finales `/tmp/aerolab-021-convergence-desktop.png` y `/tmp/aerolab-021-convergence-mobile.png` inspeccionadas. No se demuestra convergencia para todos los casos, error exacto, validación física ni pandeo; límites en CONVERGENCE.md. Pendientes navegadores/hardware adicionales, lectores de pantalla y rendimiento medido.

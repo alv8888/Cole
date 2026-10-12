@@ -107,3 +107,10 @@
 .design-comparison thead th:last-child { width: 32%; }
 .design-comparison tbody th { font-size: 13px; text-transform: none; letter-spacing: 0; }
 .design-comparison caption { text-align: left; padding: 12px 0; }
+
+.design-convergence > summary { cursor: pointer; font-size: 16px; font-weight: 600; }
+.design-convergence table { min-width: 800px; }
+#design-convergence-chart { min-width: 560px; width: 100%; }
+
+.design-convergence .chart-scroll { max-width: 900px; margin-inline: auto; }
+.design-convergence caption { text-align: left; padding: 12px 0; }
